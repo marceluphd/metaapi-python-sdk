@@ -5,13 +5,12 @@ class ApiException(Exception):
         status_code: HTTP status code
     """
 
-    def __init__(self, message, status):
+    def __init__(self, message: str, status: int):
         """Inits ApiException
 
-        :param message: exception message
-        :type message: str
-        :param status: HTTP status
-        :type status: int
+        Args:
+            message: Exception message.
+            status: HTTP status.
         """
         super().__init__(message)
         self.status_code = status
@@ -20,7 +19,8 @@ class ApiException(Exception):
     def code(self):
         """Returns exception code used for i18n
 
-        :returns: exception code
+        Returns:
+            Exception code.
         """
         return self._code
 
@@ -28,7 +28,8 @@ class ApiException(Exception):
     def code(self, code):
         """Sets error code, used for i18n
 
-        :param code: error code for i18n
+        Args:
+            code: Error code for i18n.
         """
         self._code = code
 
@@ -36,7 +37,8 @@ class ApiException(Exception):
     def arguments(self):
         """Returns message arguments for i18n
 
-        :returns: message arguments for i18n
+        Returns:
+            Message arguments for i18n.
         """
         return self.args
 
@@ -44,8 +46,8 @@ class ApiException(Exception):
     def arguments(self, args):
         """Set message arguments for i18n
 
-        :param args: arguments for i18n
-        :type args: list
+        Args:
+            args: Arguments for i18n.
         """
         self.args = args
 
@@ -53,11 +55,11 @@ class ApiException(Exception):
 class NotFoundException(ApiException):
     """Throwing this exception results in 404 (Not Found) HTTP response code."""
 
-    def __init__(self, message):
+    def __init__(self, message: str):
         """Inits not found exception.
 
-        :param message: exception message
-        :type message: str
+        Args:
+            message: exception message
         """
         super().__init__(message, 404)
 
@@ -65,11 +67,11 @@ class NotFoundException(ApiException):
 class ForbiddenException(ApiException):
     """Throwing this exception results in 403 (Forbidden) HTTP response code."""
 
-    def __init__(self, message):
+    def __init__(self, message: str):
         """Inits forbidden exception.
 
-        :param message: exception message
-        :type message: str
+        Args:
+            message: exception message
         """
         super().__init__(message, 403)
 
@@ -77,11 +79,11 @@ class ForbiddenException(ApiException):
 class UnauthorizedException(ApiException):
     """Throwing this exception results in 401 (Unauthorized) HTTP response code."""
 
-    def __init__(self, message):
+    def __init__(self, message: str):
         """Inits unauthorized exception.
 
-        :param message: exception message
-        :type message: str
+        Args:
+            message: exception message
         """
         super().__init__(message, 401)
 
@@ -93,13 +95,12 @@ class ValidationException(ApiException):
         _details: Validation exception details
     """
 
-    def __init__(self, message, details):
+    def __init__(self, message: str, details: dict):
         """Inits validation error.
 
-        :param message: exception message
-        :type message: str
-        :param details: exception data
-        :type details: dict
+        Args:
+            message: exception message
+            details: exception data
         """
         super().__init__(message, 400)
         self._details = details
@@ -108,11 +109,11 @@ class ValidationException(ApiException):
 class InternalException(ApiException):
     """Represents unexpected exception. Throwing this error results in 500 (Internal Error) HTTP response code."""
 
-    def __init__(self, message):
+    def __init__(self, message: str):
         """Inits unexpected exception.
 
-        :param message: exception message
-        :type message: str
+        Args:
+            message: exception message
         """
         super().__init__(message, 500)
 
@@ -120,10 +121,10 @@ class InternalException(ApiException):
 class ConflictException(ApiException):
     """Represents conflict exception. Throwing this exception results in 409 (Conflict) HTTP response code."""
 
-    def __init__(self, message):
+    def __init__(self, message: str):
         """Inits conflict exception.
 
-        :param message: exception message
-        :type message: str
+        Args:
+            message: exception message
         """
         super().__init__(message, 409)
