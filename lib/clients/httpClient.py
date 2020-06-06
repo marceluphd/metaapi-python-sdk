@@ -1,24 +1,40 @@
 from lib.clients.errorHandler import UnauthorizedException, ForbiddenException, ApiException, ConflictException, \
     ValidationException, InternalException, NotFoundException
 import requests
+import json
+from typing import TypedDict, Optional
+
+
+class RequestOptions(TypedDict):
+    """Options for HttpClient requests."""
+    method: Optional[str]
+    url: str
+    headers: Optional[dict]
+    params: Optional[dict]
+    body: Optional[dict]
+    files: Optional[dict]
 
 
 class HttpClient:
     """HTTP client library based on requests module."""
 
-    async def request(self, options):
+    async def request(self, options: RequestOptions) -> requests.Response:
         """Performs a request. Response errors are returned as ApiError or subclasses.
 
-        :param options: request options
-        :returns: promise returning request results"""
+        Args:
+            options: Request options.
+
+        Returns:
+            A request response.
+        """
         response = await self._make_request(options)
         try:
             response.raise_for_status()
-        except Exception as err:
+        except requests.HTTPError as err:
             response = self._convert_error(err)
         return response
 
-    async def _make_request(self, options):
+    async def _make_request(self, options) -> requests.Response:
         if 'method' not in options:
             options['method'] = 'GET'
         if 'headers' not in options:
@@ -35,10 +51,10 @@ class HttpClient:
         prepped.headers = options['headers']
         return s.send(prepped)
 
-    def _convert_error(self, err):
+    def _convert_error(self, err: requests.HTTPError) -> ApiException:
         status = err.response.status_code
         if status == 400:
-            return ValidationException(err.response.reason, err.details)
+            return ValidationException(err.response.reason, json.loads(err.response.text)['details'])
         elif status == 401:
             return UnauthorizedException(err.response.reason)
         elif status == 403:
