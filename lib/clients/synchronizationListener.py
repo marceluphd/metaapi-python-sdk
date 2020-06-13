@@ -1,8 +1,9 @@
-from lib.clients.metaApiWebsocket_client import MetatraderPosition, MetatraderAccountInformation, MetatraderOrder, \
+from lib.models import MetatraderPosition, MetatraderAccountInformation, MetatraderOrder, \
     MetatraderDeal, MetatraderSymbolSpecification, MetatraderSymbolPrice
+from abc import ABC
 
 
-class SynchronizationListener:
+class SynchronizationListener(ABC):
     """Defines interface for a synchronization listener class."""
 
     async def on_connected(self):
