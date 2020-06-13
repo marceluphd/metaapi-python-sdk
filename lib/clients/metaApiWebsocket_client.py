@@ -3,12 +3,13 @@ from lib.clients.errorHandler import ValidationException, NotFoundException, Int
 from lib.clients.notSynchronizedException import NotSynchronizedException
 from lib.clients.notConnectedException import NotConnectedException
 from lib.clients.synchronizationListener import SynchronizationListener
+from lib.clients.reconnectListener import ReconnectListener
+from lib.models import MetatraderHistoryOrders, MetatraderDeals
 import socketio
 import asyncio
 import math
 import re
 import time
-from typing import List
 from datetime import datetime
 import random
 import string
@@ -19,235 +20,6 @@ def format_date(date: datetime) -> str:
     """Converts date to format compatible with JS"""
 
     return date.isoformat(timespec='milliseconds') + 'Z'
-
-
-class MetatraderAccountInformation:
-    """MetaTrader account information (see https://metaapi.cloud/docs/client/models/metatraderAccountInformation/)"""
-
-    broker: str
-    """Broker name."""
-    currency: str
-    """Account base currency ISO code."""
-    server: str
-    """Broker server name."""
-    balance: float
-    """Account balance."""
-    equity: float
-    """Account liquidation value."""
-    margin: float
-    """Used margin."""
-    freeMargin: float
-    """Free margin."""
-    leverage: float
-    """Account leverage coefficient."""
-    marginLevel: float
-    """Margin level calculated as % of freeMargin/margin."""
-
-
-class MetatraderPosition:
-    """MetaTrader position"""
-
-    id: int
-    """Position id (ticket number)."""
-    type: str
-    """Position type (one of POSITION_TYPE_BUY, POSITION_TYPE_SELL)."""
-    symbol: str
-    """Position symbol."""
-    magic: int
-    """Position magic number, identifies the EA which opened the position."""
-    time: datetime
-    """Time position was opened at."""
-    updateTime: datetime
-    """Last position modification time."""
-    openPrice: float
-    """Position open price."""
-    currentPrice: float
-    """Current price."""
-    currentTickValue: float
-    """Current tick value."""
-    stopLoss: float
-    """Optional position stop loss price."""
-    takeProfit: float
-    """Optional position take profit price."""
-    volume: float
-    """Position volume."""
-    swap: float
-    """Position cumulative swap."""
-    profit: float
-    """Position cumulative profit."""
-    comment: str
-    """Optional position comment. The sum of the line lengths of the comment and the clientId
-    must be less than or equal to 27. For more information see https://metaapi.cloud/docs/client/clientIdUsage/"""
-    clientId: str
-    """Optional client-assigned id. The id value can be assigned when submitting a trade and
-    will be present on position, history orders and history deals related to the trade. You can use this field to bind
-    your trades to objects in your application and then track trade progress. The sum of the line lengths of the
-    comment and the clientId must be less than or equal to 27. For more information see
-    https://metaapi.cloud/docs/client/clientIdUsage/"""
-    unrealizedProfit: float
-    """Profit of the part of the position which is not yet closed, including swap."""
-    realizedProfit: float
-    """Profit of the already closed part, including commissions and swap."""
-    commission: float
-    """Optional position commission."""
-
-
-class MetatraderOrder:
-    """MetaTrader order"""
-
-    id: int
-    """Order id (ticket number)."""
-    type: str
-    """Order type (one of ORDER_TYPE_SELL, ORDER_TYPE_BUY, ORDER_TYPE_BUY_LIMIT,
-    ORDER_TYPE_SELL_LIMIT, ORDER_TYPE_BUY_STOP, ORDER_TYPE_SELL_STOP). See
-    https://www.mql5.com/en/docs/constants/tradingconstants/orderproperties#enum_order_type"""
-    state: str
-    """Order state one of (ORDER_STATE_STARTED, ORDER_STATE_PLACED, ORDER_STATE_CANCELED,
-    ORDER_STATE_PARTIAL, ORDER_STATE_FILLED, ORDER_STATE_REJECTED, ORDER_STATE_EXPIRED, ORDER_STATE_REQUEST_ADD,
-    ORDER_STATE_REQUEST_MODIFY, ORDER_STATE_REQUEST_CANCEL). See
-    https://www.mql5.com/en/docs/constants/tradingconstants/orderproperties#enum_order_state"""
-    magic: int
-    """Order magic number, identifies the EA which created the order."""
-    time: datetime
-    """Time order was created at."""
-    doneTime: datetime
-    """optional time order was executed or canceled at. Will be specified for completed orders only"""
-    symbol: str
-    """Order symbol."""
-    openPrice: float
-    """Order open price (market price for market orders, limit price for limit orders or stop price for stop orders)."""
-    currentPrice: float
-    """Current price."""
-    stopLoss: float
-    """Optional order stop loss price."""
-    takeProfit: float
-    """Optional order take profit price."""
-    volume: float
-    """Order requested quantity."""
-    currentVolume: float
-    """Order remaining quantity, i.e. requested quantity - filled quantity."""
-    positionId: str
-    """Order position id. Present only if the order has a position attached to it."""
-    comment: str
-    """Optional order comment. The sum of the line lengths of the comment and the clientId
-    must be less than or equal to 27. For more information see https://metaapi.cloud/docs/client/clientIdUsage/"""
-    originalComment: str
-    """Optional order original comment (present if possible to restore original comment from history)"""
-    clientId: str
-    """Optional client-assigned id. The id value can be assigned when submitting a trade and
-    will be present on position, history orders and history deals related to the trade. You can use this field to bind
-    your trades to objects in your application and then track trade progress. The sum of the line lengths of the
-    comment and the clientId must be less than or equal to 27. For more information see
-    https://metaapi.cloud/docs/client/clientIdUsage/"""
-    platform: str
-    """Platform id (mt4 or mt5)."""
-    updatePending: bool
-    """Optional flag indicating that order client id and original comment was not
-    identified yet and will be updated in a future synchronization packet."""
-
-
-class MetatraderHistoryOrders:
-    """MetaTrader history orders search query response."""
-
-    historyOrders: List[MetatraderOrder]
-    """Array of history orders returned."""
-    synchronizing: bool
-    """Flag indicating that history order initial synchronization is still in progress 
-    and thus search results may be incomplete"""
-
-
-class MetatraderDeal:
-    """MetaTrader deal"""
-
-    id: str
-    """Deal id (ticket number)"""
-    type: str
-    """deal type (one of DEAL_TYPE_BUY, DEAL_TYPE_SELL, DEAL_TYPE_BALANCE, DEAL_TYPE_CREDIT,
-    DEAL_TYPE_CHARGE, DEAL_TYPE_CORRECTION, DEAL_TYPE_BONUS, DEAL_TYPE_COMMISSION, DEAL_TYPE_COMMISSION_DAILY,
-    DEAL_TYPE_COMMISSION_MONTHLY, DEAL_TYPE_COMMISSION_AGENT_DAILY, DEAL_TYPE_COMMISSION_AGENT_MONTHLY,
-    DEAL_TYPE_INTEREST, DEAL_TYPE_BUY_CANCELED, DEAL_TYPE_SELL_CANCELED, DEAL_DIVIDEND, DEAL_DIVIDEND_FRANKED,
-    DEAL_TAX). See https://www.mql5.com/en/docs/constants/tradingconstants/dealproperties#enum_deal_type"""
-    entryType: str
-    """Deal entry type (one of DEAL_ENTRY_IN, DEAL_ENTRY_OUT, DEAL_ENTRY_INOUT,
-    DEAL_ENTRY_OUT_BY). See https://www.mql5.com/en/docs/constants/tradingconstants/dealproperties#enum_deal_entry"""
-    symbol: str
-    """Optional symbol deal relates to."""
-    magic: int
-    """Optional deal magic number, identifies the EA which initiated the deal."""
-    time: datetime
-    """Time the deal was conducted at."""
-    volume: float
-    """Optional deal volume."""
-    price: float
-    """Optional, the price the deal was conducted at."""
-    commission: float
-    """Optional deal commission."""
-    swap: float
-    """Optional deal swap."""
-    profit: float
-    """Deal profit."""
-    positionId: str
-    """Optional id of position the deal relates to."""
-    orderId: str
-    """Optional id of order the deal relates to."""
-    comment: str
-    """Optional deal comment. The sum of the line lengths of the comment and the clientId
-    must be less than or equal to 27. For more information see https://metaapi.cloud/docs/client/clientIdUsage/"""
-    originalComment: str
-    """Optional deal original comment (present if possible to restore original comment from history)."""
-    clientId: str
-    """Optional client-assigned id. The id value can be assigned when submitting a trade and will be present on 
-    position, history orders and history deals related to the trade. You can use this field to bind your trades 
-    to objects in your application and then track trade progress. The sum of the line lengths of the comment and 
-    the clientId must be less than or equal to 27. For more information see 
-    https://metaapi.cloud/docs/client/clientIdUsage/"""
-    platform: str
-    """Platform id (mt4 or mt5)."""
-    updatePending: bool
-    """optional flag indicating that deal client id and original comment was not
-    identified yet and will be updated in a future synchronization packet"""
-
-
-class MetatraderDeals:
-    """MetaTrader history deals search query response"""
-
-    deals: List[MetatraderDeal]
-    """Array of history deals returned."""
-    synchronizing: bool
-    """Flag indicating that deal initial synchronization is still in progress
-    and thus search results may be incomplete."""
-
-
-class MetatraderSymbolSpecification:
-    """MetaTrader symbol specification. Contains symbol specification (see
-    https://metaapi.cloud/docs/client/models/metatraderSymbolSpecification/)"""
-
-    symbol: str
-    """Symbol (e.g. a currency pair or an index)."""
-    tickSize: float
-    """Tick size"""
-    minVolume: float
-    """Minimum order volume for the symbol."""
-    maxVolume: float
-    """Maximum order volume for the symbol."""
-    volumeStep: float
-    """Order volume step for the symbol."""
-
-
-class MetatraderSymbolPrice:
-    """MetaTrader symbol price. Contains current price for a symbol (see
-    https://metaapi.cloud/docs/client/models/metatraderSymbolPrice/)"""
-
-    symbol: str
-    """Symbol (e.g. a currency pair or an index)."""
-    bid: float
-    """Bid price."""
-    ask: float
-    """Ask price."""
-    profitTickValue: float
-    """Tick value for a profitable position."""
-    lossTickValue: float
-    """Tick value for a loosing position."""
 
 
 class MetaApiWebsocketClient:
@@ -298,7 +70,7 @@ class MetaApiWebsocketClient:
                 print(f'[{datetime.now().isoformat()}] MetaApi websocket client connected to the MetaApi server')
                 if not self._resolved:
                     self._resolved = True
-                    result.set_result()
+                    result.set_result(None)
                 else:
                     await self._fire_reconnected()
 
@@ -437,7 +209,7 @@ class MetaApiWebsocketClient:
         response = await self._rpc_request(account_id, {'type': 'getOrder', 'orderId': order_id})
         return response['order']
 
-    async def get_history_orders_by_ticket(self, account_id: str, ticket: str) -> dict:
+    async def get_history_orders_by_ticket(self, account_id: str, ticket: str) -> MetatraderHistoryOrders:
         """Returns the history of completed orders for a specific ticket number
         (see https://metaapi.cloud/docs/client/websocket/api/retrieveHistoricalData/readHistoryOrdersByTicket/).
 
@@ -454,7 +226,7 @@ class MetaApiWebsocketClient:
             'synchronizing': response['synchronizing']
         }
 
-    async def get_history_orders_by_position(self, account_id: str, position_id: str) -> dict:
+    async def get_history_orders_by_position(self, account_id: str, position_id: str) -> MetatraderHistoryOrders:
         """Returns the history of completed orders for a specific position id
         (see https://metaapi.cloud/docs/client/websocket/api/retrieveHistoricalData/readHistoryOrdersByPosition/)
 
@@ -473,7 +245,7 @@ class MetaApiWebsocketClient:
         }
 
     async def get_history_orders_by_time_range(self, account_id: str, start_time: datetime, end_time: datetime,
-                                               offset=0, limit=1000) -> dict:
+                                               offset=0, limit=1000) -> MetatraderHistoryOrders:
         """Returns the history of completed orders for a specific time range
         (see https://metaapi.cloud/docs/client/websocket/api/retrieveHistoricalData/readHistoryOrdersByTimeRange/)
 
@@ -496,7 +268,7 @@ class MetaApiWebsocketClient:
             'synchronizing': response['synchronizing']
         }
 
-    async def get_deals_by_ticket(self, account_id: str, ticket: str):
+    async def get_deals_by_ticket(self, account_id: str, ticket: str) -> MetatraderDeals:
         """Returns history deals with a specific ticket number
         (see https://metaapi.cloud/docs/client/websocket/api/retrieveHistoricalData/readDealsByTicket/).
 
@@ -513,7 +285,7 @@ class MetaApiWebsocketClient:
             'synchronizing': response['synchronizing']
         }
 
-    async def get_deals_by_position(self, account_id: str, position_id: str):
+    async def get_deals_by_position(self, account_id: str, position_id: str) -> MetatraderDeals:
         """Returns history deals for a specific position id
         (see https://metaapi.cloud/docs/client/websocket/api/retrieveHistoricalData/readDealsByPosition/).
 
@@ -531,7 +303,7 @@ class MetaApiWebsocketClient:
         }
 
     async def get_deals_by_time_range(self, account_id: str, start_time: datetime, end_time: datetime, offset: int = 0,
-                                      limit: int = 1000):
+                                      limit: int = 1000) -> MetatraderDeals:
         """Returns history deals with for a specific time range
         (see https://metaapi.cloud/docs/client/websocket/api/retrieveHistoricalData/readDealsByTimeRange/).
 
@@ -691,7 +463,7 @@ class MetaApiWebsocketClient:
             listeners.remove(listener)
         self._synchronizationListeners[account_id] = listeners
 
-    def add_reconnect_listener(self, listener):
+    def add_reconnect_listener(self, listener: ReconnectListener):
         """Adds reconnect listener.
 
         Args:
@@ -700,7 +472,7 @@ class MetaApiWebsocketClient:
 
         self._reconnectListeners.append(listener)
 
-    def remove_reconnect_listener(self, listener):
+    def remove_reconnect_listener(self, listener: ReconnectListener):
         """Removes reconnect listener.
 
         Args:

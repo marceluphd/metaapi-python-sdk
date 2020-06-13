@@ -1,6 +1,7 @@
 venv
 .idea
 lib/clients/__pycache__
+lib/__pycache__
 source
 build
 docs
