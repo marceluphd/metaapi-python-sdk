@@ -11,32 +11,64 @@ class MetatraderAccountIdDto(TypedDict):
 
 
 class MetatraderAccountDto(TypedDict):
+    """MetaTrader account model"""
+
+    _id: str
+    """Account unique identifier."""
+    name: str
+    """MetaTrader account human-readable name in the MetaApi app."""
+    type: str
+    """Account type, can be cloud or self-hosted."""
+    login: str
+    """MetaTrader account number."""
+    server: str
+    """MetaTrader server which hosts the account."""
+    synchronizationMode: str
+    """Synchronization mode, can be automatic or user. See
+    https://metaapi.cloud/docs/client/websocket/synchronizationMode/ for more details."""
+    provisioningProfileId: str
+    """Id of the account's provisioning profile."""
+    timeConverter: str
+    """Algorithm used to parse your broker timezone. Supported values are icmarkets for America/New_York DST switch 
+    and roboforex for EET DST switch (the values will be changed soon)"""
+    application: str
+    """Application name to connect the account to. Currently allowed values are MetaApi and AgiliumTrade"""
+    magic: int
+    """MetaTrader magic to place trades using."""
+    state: str
+    """Account deployment state. One of CREATED, DEPLOYING, DEPLOYED, UNDEPLOYING, UNDEPLOYED, DELETING"""
+    connectionStatus: str
+    """Terminal & broker connection status, one of CONNECTED, DISCONNECTED, DISCONNECTED_FROM_BROKER"""
+    accessToken: str
+    """Authorization token to be used for accessing single account data. Intended to be used in browser API."""
+
+
+class NewMetatraderAccountDto(TypedDict):
     """New MetaTrader account model"""
 
     name: str
-    """MetaTrader account human-readable name in the MetaApi app"""
+    """MetaTrader account human-readable name in the MetaApi app."""
     type: str
-    """Account type, can be cloud or self-hosted"""
+    """Account type, can be cloud or self-hosted."""
     login: str
-    """MetaTrader account number"""
+    """MetaTrader account number."""
     password: str
-    """MetaTrader account password. The password can be either investor password for read-only
-        access or master password to enable trading features. Required for cloud account"""
+    """MetaTrader account password. The password can be either investor password for read-only access or master 
+    password to enable trading features. Required for cloud account."""
     server: str
-    """MetaTrader server which hosts the account"""
+    """MetaTrader server which hosts the account."""
     synchronizationMode: str
     """Synchronization mode, can be automatic or user. See
-        https://metaapi.cloud/docs/client/websocket/synchronizationMode/ for more details."""
+    https://metaapi.cloud/docs/client/websocket/synchronizationMode/ for more details."""
     provisioningProfileId: str
-    """Id of the account's provisioning profile"""
+    """Id of the account's provisioning profile."""
     timeConverter: str
-    """Algorithm used to parse your broker timezone. Supported values are icmarkets for
-        America/New_York DST switch and roboforex for EET DST switch (the values will be changed soon)"""
+    """Algorithm used to parse your broker timezone. Supported values are icmarkets for America/New_York DST switch 
+    and roboforex for EET DST switch (the values will be changed soon)."""
     application: str
-    """Application name to connect the account to. Currently allowed values are MetaApi and
-        AgiliumTrade"""
+    """Application name to connect the account to. Currently allowed values are MetaApi and AgiliumTrade."""
     magic: int
-    """MetaTrader magic to place trades using"""
+    """MetaTrader magic to place trades using."""
 
 
 class MetatraderAccountClient:
