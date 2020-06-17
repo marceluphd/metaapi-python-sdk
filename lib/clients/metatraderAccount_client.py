@@ -134,7 +134,7 @@ class MetatraderAccountClient:
         }
         return await self._httpClient.request(opts)
 
-    async def create_account(self, account: MetatraderAccountDto) -> Response:
+    async def create_account(self, account: NewMetatraderAccountDto) -> Response:
         """Starts cloud API server for a MetaTrader account using specified provisioning profile
         (see https://metaapi.cloud/docs/provisioning/api/account/createAccount/).
         It takes some time to launch the terminal and connect the terminal to the broker, you can use the

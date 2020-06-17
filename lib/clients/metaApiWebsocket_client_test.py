@@ -1,16 +1,15 @@
 from lib.clients.metaApiWebsocket_client import MetaApiWebsocketClient
 from socketio import AsyncServer
 from aiohttp import web
-import datetime
+from lib.models import date
 import asyncio
 import pytest
 import copy
 from urllib.parse import parse_qs
-from mock import MagicMock
+from mock import MagicMock, AsyncMock
 from threading import Thread
-
-DATE_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
 sio = None
+client = None
 
 
 class ServerThread(Thread):
@@ -54,12 +53,6 @@ async def run_around_tests():
 
 init_socket()
 
-# MagicMock is patched with await function to assert that listeners are called
-async def async_magic():
-    pass
-
-MagicMock.__await__ = lambda x: async_magic().__await__()
-
 
 # This method closes the client once the required socket event has been called
 async def async_magic_close():
@@ -69,6 +62,7 @@ async def async_magic_close():
 class FinalMock(MagicMock):
     def __init__(self, *args, **kwargs):
         super(MagicMock, self).__init__(*args, **kwargs)
+
 
 FinalMock.__await__ = lambda x: async_magic_close().__await__()
 
@@ -312,11 +306,8 @@ class TestMetaApiWebsocketClient:
                                             'requestId': data['requestId'], 'historyOrders': history_orders,
                                             'synchronizing': False})
 
-        actual = await client.get_history_orders_by_time_range('accountId',
-                                                               datetime.datetime.strptime(
-                                                                '2020-04-15T02:45:00.000Z', DATE_FORMAT),
-                                                               datetime.datetime.strptime(
-                                                                '2020-04-15T02:46:00.000Z', DATE_FORMAT), 1, 100)
+        actual = await client.get_history_orders_by_time_range('accountId', date('2020-04-15T02:45:00.000Z'),
+                                                               date('2020-04-15T02:46:00.000Z'), 1, 100)
         assert actual == {'historyOrders': history_orders, 'synchronizing': False}
 
     @pytest.mark.asyncio
@@ -416,10 +407,8 @@ class TestMetaApiWebsocketClient:
                                             'requestId': data['requestId'], 'deals': deals,
                                             'synchronizing': False})
 
-        actual = await client.get_deals_by_time_range('accountId', datetime.datetime.strptime(
-                                                      '2020-04-15T02:45:00.000Z', DATE_FORMAT),
-                                                      datetime.datetime.strptime(
-                                                        '2020-04-15T02:46:00.000Z', DATE_FORMAT), 1, 100)
+        actual = await client.get_deals_by_time_range('accountId', date('2020-04-15T02:45:00.000Z'),
+                                                      date('2020-04-15T02:46:00.000Z'), 1, 100)
         assert actual == {'deals': deals, 'synchronizing': False}
 
     @pytest.mark.asyncio
@@ -676,8 +665,7 @@ class TestMetaApiWebsocketClient:
                 await sio.emit('response', {'type': 'response', 'accountId': data['accountId'],
                                             'requestId': data['requestId']})
 
-        await client.synchronize('accountId', datetime.datetime.strptime('2020-01-01T00:00:00.000Z', DATE_FORMAT),
-                                 datetime.datetime.strptime('2020-01-02T00:00:00.000Z', DATE_FORMAT))
+        await client.synchronize('accountId', date('2020-01-01T00:00:00.000Z'), date('2020-01-02T00:00:00.000Z'))
         assert request_received
 
     @pytest.mark.asyncio
@@ -903,12 +891,12 @@ class TestMetaApiWebsocketClient:
             }]
         }
         listener = {
-            'onAccountInformationUpdated': MagicMock(),
-            'onPositionUpdated': MagicMock(),
-            'onPositionRemoved': MagicMock(),
-            'onOrderUpdated': MagicMock(),
-            'onOrderCompleted': MagicMock(),
-            'onHistoryOrderAdded': MagicMock(),
+            'onAccountInformationUpdated': AsyncMock(),
+            'onPositionUpdated': AsyncMock(),
+            'onPositionRemoved': AsyncMock(),
+            'onOrderUpdated': AsyncMock(),
+            'onOrderCompleted': AsyncMock(),
+            'onHistoryOrderAdded': AsyncMock(),
             'onDealAdded': FinalMock()
         }
         client.add_synchronization_listener('accountId', listener)

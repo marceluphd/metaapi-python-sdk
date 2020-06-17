@@ -2,6 +2,7 @@ from lib.models import MetatraderDeal, MetatraderOrder
 from typing import List
 from lib.historyStorage import HistoryStorage
 from datetime import datetime
+import pytz
 
 
 class MemoryHistoryStorage(HistoryStorage):
@@ -37,25 +38,27 @@ class MemoryHistoryStorage(HistoryStorage):
         """
         return self._historyOrders
 
-    def last_history_order_time(self) -> datetime:
+    async def last_history_order_time(self) -> datetime:
         """Returns the time of the last history order record stored in the history storage.
 
         Returns:
             The time of the last history order record stored in the history storage
         """
         filtered_orders = list(filter(lambda order: 'doneTime' in order, self._historyOrders))
-        return max(order['doneTime'] for order in (filtered_orders + [{'doneTime': datetime.min}]))
+        return max(order['doneTime'] for order in (filtered_orders +
+                                                   [{'doneTime': datetime.min.replace(tzinfo=pytz.UTC)}]))
 
-    def last_deal_time(self) -> datetime:
+    async def last_deal_time(self) -> datetime:
         """Returns the time of the last history deal record stored in the history storage.
 
         Returns:
             The time of the last history deal record stored in the history storage.
         """
         filtered_deals = list(filter(lambda order: 'time' in order, self._deals))
-        return max(order['time'] for order in (filtered_deals + [{'time': datetime.min}]))
+        return max(order['time'] for order in (filtered_deals +
+                   [{'time': datetime.min.replace(tzinfo=pytz.UTC)}]))
 
-    def on_history_order_added(self, history_order: MetatraderOrder):
+    async def on_history_order_added(self, history_order: MetatraderOrder):
         """Invoked when a new MetaTrader history order is added.
 
         Args:
@@ -65,7 +68,8 @@ class MemoryHistoryStorage(HistoryStorage):
         replacement_index = -1
 
         def get_done_time(order):
-            return order['doneTime'] if ('doneTime' in order) else datetime.min
+            return order['doneTime'].timestamp() if ('doneTime' in order) else \
+                datetime.min.replace(tzinfo=pytz.UTC).timestamp()
 
         for i in range(len(self._historyOrders)):
             order = self._historyOrders[i]
@@ -80,7 +84,7 @@ class MemoryHistoryStorage(HistoryStorage):
         else:
             self._historyOrders.insert(insert_index, history_order)
 
-    def on_deal_added(self, new_deal: MetatraderDeal):
+    async def on_deal_added(self, new_deal: MetatraderDeal):
         """Invoked when a new MetaTrader history deal is added.
 
         Args:
@@ -90,7 +94,7 @@ class MemoryHistoryStorage(HistoryStorage):
         replacement_index = -1
 
         def get_time(deal):
-            return deal['time'] if ('time' in deal) else datetime.min
+            return deal['time'].timestamp() if ('time' in deal) else datetime.min.replace(tzinfo=pytz.UTC).timestamp()
 
         for i in range(len(self._deals)):
             deal = self._deals[i]
