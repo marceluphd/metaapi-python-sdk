@@ -11,15 +11,17 @@ import math
 import re
 import time
 from datetime import datetime
+from typing import Coroutine
+import lib.models as models
 import random
 import string
-DATE_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
+import pytz
 
 
 def format_date(date: datetime) -> str:
     """Converts date to format compatible with JS"""
 
-    return date.isoformat(timespec='milliseconds') + 'Z'
+    return date.astimezone(pytz.utc).isoformat(timespec='milliseconds').replace('+00:00', 'Z')
 
 
 class MetaApiWebsocketClient:
@@ -326,7 +328,7 @@ class MetaApiWebsocketClient:
             'synchronizing': response['synchronizing']
         }
 
-    def remove_history(self, account_id: str):
+    def remove_history(self, account_id: str) -> Coroutine:
         """Clears the order and transaction history of a specified account so that it can be synchronized from scratch
         (see https://metaapi.cloud/docs/client/websocket/api/removeHistory/).
 
@@ -364,7 +366,7 @@ class MetaApiWebsocketClient:
         """
         return self._rpc_request(account_id, {'type': 'subscribe'})
 
-    def reconnect(self, account_id: str):
+    def reconnect(self, account_id: str) -> Coroutine:
         """Reconnects to the Metatrader terminal (see https://metaapi.cloud/docs/client/websocket/api/reconnect/).
 
         Args:
@@ -375,7 +377,8 @@ class MetaApiWebsocketClient:
         """
         return self._rpc_request(account_id, {'type': 'reconnect'})
 
-    def synchronize(self, account_id: str, starting_history_order_time: datetime, starting_deal_time: datetime):
+    def synchronize(self, account_id: str, starting_history_order_time: datetime, starting_deal_time: datetime) \
+            -> Coroutine:
         """Requests the terminal to start synchronization process. Use it if user synchronization mode is set to user
         for the account (see https://metaapi.cloud/docs/client/websocket/synchronizing/synchronize/).
 
@@ -393,7 +396,7 @@ class MetaApiWebsocketClient:
                                               'startingHistoryOrderTime': format_date(starting_history_order_time),
                                               'startingDealTime': format_date(starting_deal_time)})
 
-    def subscribe_to_market_data(self, account_id: str, symbol: str):
+    def subscribe_to_market_data(self, account_id: str, symbol: str) -> Coroutine:
         """Subscribes on market data of specified symbol
         (see https://metaapi.cloud/docs/client/websocket/marketDataStreaming/subscribeToMarketData/).
 
@@ -493,7 +496,7 @@ class MetaApiWebsocketClient:
             time.sleep(1)
             await self._socket.connect()
 
-    async def _rpc_request(self, account_id: str, request: dict):
+    async def _rpc_request(self, account_id: str, request: dict) -> Coroutine:
         if not self._connected:
             await self.connect()
 
@@ -525,7 +528,7 @@ class MetaApiWebsocketClient:
             for field in packet:
                 value = packet[field]
                 if isinstance(value, str) and re.search('time | Time', field):
-                    packet[field] = datetime.strptime(value, DATE_FORMAT)
+                    packet[field] = models.date(value)
                 if isinstance(value, list):
                     for item in value:
                         self._convert_iso_time_to_date(item)

@@ -1,6 +1,10 @@
 from datetime import datetime
 from typing import List, TypedDict, Optional
-DATE_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
+from dateutil.parser import parse
+
+
+def date(date_time: str) -> datetime:
+    return parse(date_time)
 
 
 class MetatraderAccountInformation(TypedDict):
