@@ -1,10 +1,10 @@
 from datetime import datetime
 from typing import List, TypedDict, Optional
-from dateutil.parser import parse
+import iso8601
 
 
 def date(date_time: str) -> datetime:
-    return parse(date_time)
+    return iso8601.parse_date(date_time)
 
 
 class MetatraderAccountInformation(TypedDict):

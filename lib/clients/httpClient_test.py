@@ -21,5 +21,8 @@ class TestHttpClient:
         opts = {
             'url': 'http://example.com/not-found'
         }
-        response = await httpClient.request(opts)
-        assert response.__class__.__name__ == 'NotFoundException'
+        try:
+            await httpClient.request(opts)
+            raise Exception('NotFoundException is expected')
+        except Exception as err:
+            assert err.__class__.__name__ == 'NotFoundException'

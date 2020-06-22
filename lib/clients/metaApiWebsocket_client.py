@@ -540,20 +540,20 @@ class MetaApiWebsocketClient:
             if data['type'] == 'authenticated' and (data['accountId'] in self._synchronizationListeners):
                 for listener in self._synchronizationListeners[data['accountId']]:
                     try:
-                        await listener['onConnected']()
+                        await listener.on_connected()
                     except Exception as err:
                         print('Failed to notify listener about connected event', err)
             elif data['type'] == 'disconnected' and (data['accountId'] in self._synchronizationListeners):
                 for listener in self._synchronizationListeners[data['accountId']]:
                     try:
-                        await listener['onDisconnected']()
+                        await listener.on_disconnected()
                     except Exception as err:
                         print('Failed to notify listener about disconnected event', err)
             elif data['type'] == 'accountInformation':
                 if data['accountInformation'] and (data['accountId'] in self._synchronizationListeners):
                     for listener in self._synchronizationListeners[data['accountId']]:
                         try:
-                            await listener['onAccountInformationUpdated'](data['accountInformation'])
+                            await listener.on_account_information_updated(data['accountInformation'])
                         except Exception as err:
                             print('Failed to notify listener about accountInformation event', err)
             elif data['type'] == 'deals' and ('deals' in data):
@@ -561,7 +561,7 @@ class MetaApiWebsocketClient:
                     if data['accountId'] in self._synchronizationListeners:
                         for listener in self._synchronizationListeners[data['accountId']]:
                             try:
-                                await listener['onDealAdded'](deal)
+                                await listener.on_deal_added(deal)
                             except Exception as err:
                                 print('Failed to notify listener about deals event', err)
             elif data['type'] == 'orders' and ('orders' in data):
@@ -569,7 +569,7 @@ class MetaApiWebsocketClient:
                     if data['accountId'] in self._synchronizationListeners:
                         for listener in self._synchronizationListeners[data['accountId']]:
                             try:
-                                await listener['onOrderUpdated'](order)
+                                await listener.on_order_updated(order)
                             except Exception as err:
                                 print('Failed to notify listener about orders event', err)
             elif data['type'] == 'historyOrders' and ('historyOrders' in data):
@@ -577,7 +577,7 @@ class MetaApiWebsocketClient:
                     if data['accountId'] in self._synchronizationListeners:
                         for listener in self._synchronizationListeners[data['accountId']]:
                             try:
-                                await listener['onHistoryOrderAdded'](historyOrder)
+                                await listener.on_history_order_added(historyOrder)
                             except Exception as err:
                                 print('Failed to notify listener about historyOrders event', err)
             elif data['type'] == 'positions' and ('positions' in data):
@@ -585,14 +585,14 @@ class MetaApiWebsocketClient:
                     if data['accountId'] in self._synchronizationListeners:
                         for listener in self._synchronizationListeners[data['accountId']]:
                             try:
-                                await listener['onPositionUpdated'](position)
+                                await listener.on_position_updated(position)
                             except Exception as err:
                                 print('Failed to notify listener about positions event', err)
             elif data['type'] == 'update':
                 if 'accountInformation' in data and (data['accountId'] in self._synchronizationListeners):
                     for listener in self._synchronizationListeners[data['accountId']]:
                         try:
-                            await listener['onAccountInformationUpdated'](data['accountInformation'])
+                            await listener.on_account_information_updated(data['accountInformation'])
                         except Exception as err:
                             print('Failed to notify listener about update event', err)
                 if 'updatedPositions' in data:
@@ -600,7 +600,7 @@ class MetaApiWebsocketClient:
                         if data['accountId'] in self._synchronizationListeners:
                             for listener in self._synchronizationListeners[data['accountId']]:
                                 try:
-                                    await listener['onPositionUpdated'](position)
+                                    await listener.on_position_updated(position)
                                 except Exception as err:
                                     print('Failed to notify listener about update event', err)
                 if 'removedPositionIds' in data:
@@ -608,7 +608,7 @@ class MetaApiWebsocketClient:
                         if data['accountId'] in self._synchronizationListeners:
                             for listener in self._synchronizationListeners[data['accountId']]:
                                 try:
-                                    await listener['onPositionRemoved'](positionId)
+                                    await listener.on_position_removed(positionId)
                                 except Exception as err:
                                     print('Failed to notify listener about update event', err)
                 if 'updatedOrders' in data:
@@ -616,7 +616,7 @@ class MetaApiWebsocketClient:
                         if data['accountId'] in self._synchronizationListeners:
                             for listener in self._synchronizationListeners[data['accountId']]:
                                 try:
-                                    await listener['onOrderUpdated'](order)
+                                    await listener.on_order_updated(order)
                                 except Exception as err:
                                     print('Failed to notify listener about update event', err)
                 if 'completedOrderIds' in data:
@@ -624,7 +624,7 @@ class MetaApiWebsocketClient:
                         if data['accountId'] in self._synchronizationListeners:
                             for listener in self._synchronizationListeners[data['accountId']]:
                                 try:
-                                    await listener['onOrderCompleted'](orderId)
+                                    await listener.on_order_completed(orderId)
                                 except Exception as err:
                                     print('Failed to notify listener about update event', err)
                 if 'historyOrders' in data:
@@ -632,7 +632,7 @@ class MetaApiWebsocketClient:
                         if data['accountId'] in self._synchronizationListeners:
                             for listener in self._synchronizationListeners[data['accountId']]:
                                 try:
-                                    await listener['onHistoryOrderAdded'](historyOrder)
+                                    await listener.on_history_order_added(historyOrder)
                                 except Exception as err:
                                     print('Failed to notify listener about update event', err)
                 if 'deals' in data:
@@ -640,28 +640,28 @@ class MetaApiWebsocketClient:
                         if data['accountId'] in self._synchronizationListeners:
                             for listener in self._synchronizationListeners[data['accountId']]:
                                 try:
-                                    await listener['onDealAdded'](deal)
+                                    await listener.on_deal_added(deal)
                                 except Exception as err:
                                     print('Failed to notify listener about update event', err)
             elif data['type'] == 'dealSynchronizationFinished':
                 if data['accountId'] in self._synchronizationListeners:
                     for listener in self._synchronizationListeners[data['accountId']]:
                         try:
-                            await listener['onDealSynchronizationFinished']()
+                            await listener.on_deal_synchronization_finished()
                         except Exception as err:
                             print('Failed to notify listener about dealSynchronizationFinished event', err)
             elif data['type'] == 'orderSynchronizationFinished':
                 if data['accountId'] in self._synchronizationListeners:
                     for listener in self._synchronizationListeners[data['accountId']]:
                         try:
-                            await listener['onOrderSynchronizationFinished']()
+                            await listener.on_order_synchronization_finished()
                         except Exception as err:
                             print('Failed to notify listener about orderSynchronizationFinished event', err)
             elif data['type'] == 'status':
                 if data['accountId'] in self._synchronizationListeners:
                     for listener in self._synchronizationListeners[data['accountId']]:
                         try:
-                            await listener['onBrokerConnectionStatusChanged'](bool(data['connected']))
+                            await listener.on_broker_connection_status_changed(bool(data['connected']))
                         except Exception as err:
                             print('Failed to notify listener about brokerConnectionStatusChanged event', err)
             elif data['type'] == 'specifications' and ('specifications' in data):
@@ -669,7 +669,7 @@ class MetaApiWebsocketClient:
                     if data['accountId'] in self._synchronizationListeners:
                         for listener in self._synchronizationListeners[data['accountId']]:
                             try:
-                                await listener['onSymbolSpecificationUpdated'](specification)
+                                await listener.on_symbol_specification_updated(specification)
                             except Exception as err:
                                 print('Failed to notify listener about specifications event', err)
             elif data['type'] == 'prices' and ('prices' in data):
@@ -677,7 +677,7 @@ class MetaApiWebsocketClient:
                     if data['accountId'] in self._synchronizationListeners:
                         for listener in self._synchronizationListeners[data['accountId']]:
                             try:
-                                await listener['onSymbolPriceUpdated'](price)
+                                await listener.on_symbol_price_updated(price)
                             except Exception as err:
                                 print('Failed to notify listener about prices event', err)
         except Exception as err:
@@ -686,6 +686,6 @@ class MetaApiWebsocketClient:
     async def _fire_reconnected(self):
         for listener in self._reconnectListeners:
             try:
-                await listener.onReconnected()
+                await listener.on_reconnected()
             except Exception as err:
                 print(f'[{datetime.now().isoformat()}] Failed to notify reconnect listener', err)

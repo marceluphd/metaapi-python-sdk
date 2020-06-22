@@ -28,7 +28,7 @@ class TestProvisioningProfileClient:
             assert rsps.calls[0].request.url == \
                 f'{PROVISIONING_API_URL}/users/current/provisioning-profiles?version=5&status=active'
             assert rsps.calls[0].request.headers['auth-token'] == 'token'
-            assert profiles.json() == expected
+            assert profiles == expected
 
     @pytest.mark.asyncio
     async def test_retrieve_one(self):
@@ -47,7 +47,7 @@ class TestProvisioningProfileClient:
             assert rsps.calls[0].request.url == \
                 f'{PROVISIONING_API_URL}/users/current/provisioning-profiles/id'
             assert rsps.calls[0].request.headers['auth-token'] == 'token'
-            assert profile.json() == expected
+            assert profile == expected
 
     @pytest.mark.asyncio
     async def test_create(self):
@@ -64,12 +64,12 @@ class TestProvisioningProfileClient:
         }
         with responses.RequestsMock() as rsps:
             rsps.add(responses.POST, f'{PROVISIONING_API_URL}/users/current/provisioning-profiles',
-                     json=json.dumps(expected), status=200)
+                     json=expected, status=200)
             id = await provisioningClient.create_provisioning_profile(profile)
             assert rsps.calls[0].request.url == f'{PROVISIONING_API_URL}/users/current/provisioning-profiles'
             assert rsps.calls[0].request.headers['auth-token'] == 'token'
-            assert rsps.calls[0].request.body == profile
-            assert json.loads(id.json()) == expected
+            assert rsps.calls[0].request.body == json.dumps(profile).encode('utf-8')
+            assert id == expected
 
     @pytest.mark.asyncio
     async def test_upload(self):
@@ -94,3 +94,15 @@ class TestProvisioningProfileClient:
             assert rsps.calls[0].request.url == \
                 f'{PROVISIONING_API_URL}/users/current/provisioning-profiles/id'
             assert rsps.calls[0].request.headers['auth-token'] == 'token'
+
+    @pytest.mark.asyncio
+    async def test_update(self):
+        """Should update provisioning profile via API."""
+        with responses.RequestsMock() as rsps:
+            rsps.add(responses.PUT, f'{PROVISIONING_API_URL}/users/current/provisioning-profiles/id',
+                     status=204)
+            await provisioningClient.update_provisioning_profile('id', {'name': 'new name'})
+            assert rsps.calls[0].request.url == \
+                   f'{PROVISIONING_API_URL}/users/current/provisioning-profiles/id'
+            assert rsps.calls[0].request.headers['auth-token'] == 'token'
+            assert rsps.calls[0].request.body == json.dumps({'name': 'new name'}).encode('utf-8')

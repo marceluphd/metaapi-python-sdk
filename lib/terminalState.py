@@ -98,7 +98,7 @@ class TerminalState(SynchronizationListener):
         """
         return self._pricesBySymbol[symbol] if (symbol in self._pricesBySymbol) else None
 
-    def on_connected(self):
+    async def on_connected(self):
         """Invoked when connection to MetaTrader terminal established."""
         self._connected = True
         self._accountInformation = None
@@ -108,12 +108,12 @@ class TerminalState(SynchronizationListener):
         self._specificationsBySymbol = {}
         self._pricesBySymbol = {}
 
-    def on_disconnected(self):
+    async def on_disconnected(self):
         """Invoked when connection to MetaTrader terminal terminated."""
         self._connected = False
         self._connectedToBroker = False
 
-    def on_broker_connection_status_changed(self, connected: bool):
+    async def on_broker_connection_status_changed(self, connected: bool):
         """Invoked when broker connection satus have changed.
 
         Args:
@@ -121,7 +121,7 @@ class TerminalState(SynchronizationListener):
         """
         self._connectedToBroker = connected
 
-    def on_account_information_updated(self, account_information: MetatraderAccountInformation):
+    async def on_account_information_updated(self, account_information: MetatraderAccountInformation):
         """Invoked when MetaTrader account information is updated.
 
         Args:
@@ -129,7 +129,7 @@ class TerminalState(SynchronizationListener):
         """
         self._accountInformation = account_information
 
-    def on_position_updated(self, position: MetatraderPosition):
+    async def on_position_updated(self, position: MetatraderPosition):
         """Invoked when MetaTrader position is updated.
 
         Args:
@@ -142,7 +142,7 @@ class TerminalState(SynchronizationListener):
         else:
             self._positions.append(position)
 
-    def on_position_removed(self, position_id: str):
+    async def on_position_removed(self, position_id: str):
         """Invoked when MetaTrader position is removed.
 
         Args:
@@ -150,7 +150,7 @@ class TerminalState(SynchronizationListener):
         """
         self._positions = list(filter(lambda position: position['id'] != position_id, self._positions))
 
-    def on_order_updated(self, order: MetatraderOrder):
+    async def on_order_updated(self, order: MetatraderOrder):
         """Invoked when MetaTrader order is updated
 
         Args:
@@ -163,7 +163,7 @@ class TerminalState(SynchronizationListener):
         else:
             self._orders.append(order)
 
-    def on_order_completed(self, order_id: str):
+    async def on_order_completed(self, order_id: str):
         """Invoked when MetaTrader order is completed (executed or canceled).
 
         Args:
@@ -171,7 +171,7 @@ class TerminalState(SynchronizationListener):
         """
         self._orders = list(filter(lambda order: order['id'] != order_id, self._orders))
 
-    def on_symbol_specification_updated(self, specification: MetatraderSymbolSpecification):
+    async def on_symbol_specification_updated(self, specification: MetatraderSymbolSpecification):
         """Invoked when a symbol specification was updated.
 
         Args:
@@ -185,7 +185,7 @@ class TerminalState(SynchronizationListener):
             self._specifications.append(specification)
         self._specificationsBySymbol[specification['symbol']] = specification
 
-    def on_symbol_price_updated(self, price: MetatraderSymbolPrice):
+    async def on_symbol_price_updated(self, price: MetatraderSymbolPrice):
         """Invoked when a symbol price was updated.
 
         Args:
@@ -193,6 +193,7 @@ class TerminalState(SynchronizationListener):
         """
         self._pricesBySymbol[price['symbol']] = price
         positions = list(filter(lambda p: p['symbol'] == price['symbol'], self._positions))
+        orders = list(filter(lambda o: o['symbol'] == price['symbol'], self._orders))
         specification = self.specification(price['symbol'])
         if specification:
             for position in positions:
@@ -217,7 +218,12 @@ class TerminalState(SynchronizationListener):
                     self._accountInformation['equity'] += increment
                     self._accountInformation['updateCount'] = (self._accountInformation['updateCount'] if
                                                                ('updateCount' in self._accountInformation) else 0) + 1
-            if 'updateCount' in self._accountInformation and self._accountInformation['updateCount'] > 100:
+            for order in orders:
+                order['currentPrice'] = price['ask'] if (order['type'] == 'ORDER_TYPE_BUY_LIMIT' or
+                                                         order['type'] == 'ORDER_TYPE_BUY_STOP' or
+                                                         order['type'] == 'ORDER_TYPE_BUY_STOP_LIMIT') else price['bid']
+            if self._accountInformation and 'updateCount' in self._accountInformation and \
+                    self._accountInformation['updateCount'] > 100:
                 self._accountInformation['equity'] = self._accountInformation['balance'] + \
                                                      functools.reduce(lambda a, b: a + b['profit'], self._positions, 0)
                 self._accountInformation['updateCount'] = 0

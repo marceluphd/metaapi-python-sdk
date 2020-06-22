@@ -94,7 +94,7 @@ class HistoryStorage(SynchronizationListener, ABC):
         """
         self._orderSynchronizationFinished = True
 
-    def on_connected(self):
+    async def on_connected(self):
         """Invoked when connection to MetaTrader terminal established."""
         self._orderSynchronizationFinished = False
         self._dealSynchronizationFinished = False

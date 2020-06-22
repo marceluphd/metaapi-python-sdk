@@ -30,15 +30,6 @@ class ProvisioningProfile:
             Profile name.
         """
         return self._data['name']
-
-    @property
-    def type(self) -> str:
-        """Returns profile type. Possible values are standard and advanced.
-
-        Returns:
-            Profile type.
-        """
-        return self._data['type']
     
     @property
     def version(self) -> int:
@@ -64,8 +55,7 @@ class ProvisioningProfile:
         Returns:
             A coroutine resolving when provisioning profile is updated.
         """
-        data = await self._provisioningProfileClient.get_provisioning_profile(self.id)
-        self._data = data
+        self._data = await self._provisioningProfileClient.get_provisioning_profile(self.id)
 
     async def remove(self):
         """Removes provisioning profile. The current object instance should be discarded after returned promise
@@ -76,15 +66,27 @@ class ProvisioningProfile:
         """
         return await self._provisioningProfileClient.delete_provisioning_profile(self.id)
 
-    async def upload_file(self, file_name, file):
+    async def upload_file(self, file_name: str, file: str or memoryview):
         """Uploads a file to provisioning profile.
 
         Args:
             file_name: Name of the file to upload. Allowed values are servers.dat for MT5 profile, broker.srv for
-            MT4 profile, profile.zip for advanced profile.
+            MT4 profile.
             file: Path to a file to upload or buffer containing file contents.
 
         Returns:
             A coroutine which resolves when the file is uploaded.
         """
         return await self._provisioningProfileClient.upload_provisioning_profile_file(self.id, file_name, file)
+
+    async def update(self, profile):
+        """Updates provisioning profile.
+
+        Args:
+            profile: Provisioning profile update.
+
+        Returns:
+            A coroutine resolving when provisioning profile is updated.
+        """
+        await self._provisioningProfileClient.update_provisioning_profile(self.id, profile)
+        await self.reload()

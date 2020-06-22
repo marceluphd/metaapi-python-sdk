@@ -8,6 +8,7 @@ from lib.historyStorage import HistoryStorage
 from lib.clients.timeoutException import TimeoutException
 from datetime import datetime, timedelta
 from typing import Optional, Coroutine
+import asyncio
 import time
 
 
@@ -15,7 +16,7 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
     """Exposes MetaApi MetaTrader API connection to consumers."""
 
     def __init__(self, websocket_client: MetaApiWebsocketClient, account: MetatraderAccountModel,
-                 history_storage: Optional[HistoryStorage] = None):
+                 history_storage: HistoryStorage = None):
         """Constructs MetaApi MetaTrader Api connection.
 
         Args:
@@ -604,11 +605,11 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
         """
         await self.synchronize()
 
-    def on_disconnected(self):
+    async def on_disconnected(self):
         """Invoked when connection to MetaTrader terminal terminated"""
         self._synchronized = False
 
-    def on_deal_synchronization_finished(self):
+    async def on_deal_synchronization_finished(self):
         """Invoked when a synchronization of history deals on a MetaTrader account have finished"""
         self._synchronized = True
 
@@ -648,7 +649,7 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
         start_time = datetime.now()
         while not(await self.is_synchronized()) and (start_time + timedelta(seconds=timeout_in_seconds) >
                                                      datetime.now()):
-            time.sleep(interval_in_milliseconds / 1000)
+            await asyncio.sleep(interval_in_milliseconds / 1000)
         if not(await self.is_synchronized()):
             raise TimeoutException('Timed out waiting for MetaApi to synchronize to MetaTrader account ' +
                                    self._account.id)
