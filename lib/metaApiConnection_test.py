@@ -705,7 +705,7 @@ class TestMetaApiConnection:
             raise Exception('TimeoutError is expected')
         except Exception as err:
             assert err.__class__.__name__ == 'TimeoutException'
-        api.on_deal_synchronization_finished()
+        await api.on_deal_synchronization_finished()
         promise = api.wait_synchronized(1, 10)
         start_time = datetime.now()
         await promise

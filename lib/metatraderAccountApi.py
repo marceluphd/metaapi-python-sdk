@@ -19,7 +19,7 @@ class MetatraderAccountApi:
         self._metatraderAccountClient = metatrader_account_client
         self._metaApiWebsocketClient = meta_api_websocket_client
 
-    async def get_accounts(self, provisioning_profile_id: str) -> List[MetatraderAccount]:
+    async def get_accounts(self, provisioning_profile_id: str = None) -> List[MetatraderAccount]:
         """Retrieves MetaTrader accounts.
 
         Args:

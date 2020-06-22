@@ -2,6 +2,7 @@ import responses
 import pytest
 from lib.clients.httpClient import HttpClient
 from lib.clients.metatraderAccount_client import MetatraderAccountClient
+import json
 
 PROVISIONING_API_URL = 'https://mt-provisioning-api-v1.agiliumtrade.agiliumtrade.ai'
 httpClient = HttpClient()
@@ -37,7 +38,7 @@ class TestMetatraderAccountClient:
                 '?provisioningProfileId=f9ce1f12-e720-4b9a-9477-c2d4cb25f076'
             assert rsps.calls[0].request.method == 'GET'
             assert rsps.calls[0].request.headers['auth-token'] == 'token'
-            assert accounts.json() == expected
+            assert accounts == expected
 
     @responses.activate
     @pytest.mark.asyncio
@@ -66,7 +67,7 @@ class TestMetatraderAccountClient:
             assert rsps.calls[0].request.url == f'{PROVISIONING_API_URL}/users/current/accounts/id'
             assert rsps.calls[0].request.method == 'GET'
             assert rsps.calls[0].request.headers['auth-token'] == 'token'
-            assert accounts.json() == expected
+            assert accounts == expected
 
     @responses.activate
     @pytest.mark.asyncio
@@ -95,7 +96,7 @@ class TestMetatraderAccountClient:
             assert rsps.calls[0].request.url == f'{PROVISIONING_API_URL}/users/current/accounts'
             assert rsps.calls[0].request.method == 'POST'
             assert rsps.calls[0].request.headers['auth-token'] == 'token'
-            assert accounts.json() == expected
+            assert accounts == expected
 
     @responses.activate
     @pytest.mark.asyncio
@@ -144,3 +145,22 @@ class TestMetatraderAccountClient:
             assert rsps.calls[0].request.url == f'{PROVISIONING_API_URL}/users/current/accounts/id'
             assert rsps.calls[0].request.method == 'DELETE'
             assert rsps.calls[0].request.headers['auth-token'] == 'token'
+
+    @responses.activate
+    @pytest.mark.asyncio
+    async def test_update(self):
+        """Should update MetaTrader account via API."""
+        update_account = {
+              'name': 'new account name',
+              'password': 'new_password007',
+              'server': 'ICMarketsSC2-Demo',
+              'synchronizationMode': 'user'
+            }
+        with responses.RequestsMock() as rsps:
+            rsps.add(responses.PUT, f'{PROVISIONING_API_URL}/users/current/accounts/id', status=204)
+
+            await provisioningClient.update_account('id', update_account)
+            assert rsps.calls[0].request.url == f'{PROVISIONING_API_URL}/users/current/accounts/id'
+            assert rsps.calls[0].request.method == 'PUT'
+            assert rsps.calls[0].request.headers['auth-token'] == 'token'
+            assert rsps.calls[0].request.body == json.dumps(update_account).encode('utf-8')

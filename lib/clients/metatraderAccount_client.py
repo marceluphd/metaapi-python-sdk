@@ -71,6 +71,21 @@ class NewMetatraderAccountDto(TypedDict):
     """MetaTrader magic to place trades using."""
 
 
+class MetatraderAccountUpdateDto(TypedDict):
+    """Updated MetaTrader account data"""
+
+    name: str
+    """MetaTrader account human-readable name in the MetaApi app."""
+    password: str
+    """MetaTrader account password. The password can be either investor password for read-only
+    access or master password to enable trading features. Required for cloud account"""
+    server: str
+    """MetaTrader server which hosts the account"""
+    synchronizationMode: str
+    """Synchronization mode, can be automatic or user. See 
+    https://metaapi.cloud/docs/client/websocket/synchronizationMode/ for more details."""
+
+
 class MetatraderAccountClient:
     """metaapi.cloud MetaTrader account API client (see https://metaapi.cloud/docs/provisioning/)
 
@@ -92,7 +107,7 @@ class MetatraderAccountClient:
         self._host = f'https://mt-provisioning-api-v1.{domain}'
         self._token = token
 
-    async def get_accounts(self, provisioning_profile_id: Optional[str]) -> Response:
+    async def get_accounts(self, provisioning_profile_id: str = None) -> Response:
         """Retrieves MetaTrader accounts owned by user
         (see https://metaapi.cloud/docs/provisioning/api/account/readAccounts/)
 
@@ -171,8 +186,7 @@ class MetatraderAccountClient:
             'method': 'POST',
             'headers': {
                 'auth-token': self._token
-            },
-            'json': True
+            }
         }
         return await self._httpClient.request(opts)
 
@@ -231,5 +245,26 @@ class MetatraderAccountClient:
             'headers': {
                 'auth-token': self._token
             }
+        }
+        return await self._httpClient.request(opts)
+
+    async def update_account(self, id: str, account: MetatraderAccountUpdateDto) -> Response:
+        """Updates existing metatrader account data (see
+        https://metaapi.cloud/docs/provisioning/api/account/updateAccount/)
+
+        Args:
+            id: MetaTrader account id.
+            account: Updated MetaTrader account.
+
+        Returns:
+            A coroutine resolving when MetaTrader account is updated.
+        """
+        opts = {
+            'url': f'{self._host}/users/current/accounts/{id}',
+            'method': 'PUT',
+            'headers': {
+                'auth-token': self._token
+            },
+            'body': account
         }
         return await self._httpClient.request(opts)

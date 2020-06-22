@@ -2,6 +2,7 @@ from lib.models import MetatraderDeal, MetatraderOrder
 from typing import List
 from lib.historyStorage import HistoryStorage
 from datetime import datetime
+from lib.models import date
 import pytz
 
 
@@ -46,7 +47,7 @@ class MemoryHistoryStorage(HistoryStorage):
         """
         filtered_orders = list(filter(lambda order: 'doneTime' in order, self._historyOrders))
         return max(order['doneTime'] for order in (filtered_orders +
-                                                   [{'doneTime': datetime.min.replace(tzinfo=pytz.UTC)}]))
+                                                   [{'doneTime': datetime.fromtimestamp(0).replace(tzinfo=pytz.UTC)}]))
 
     async def last_deal_time(self) -> datetime:
         """Returns the time of the last history deal record stored in the history storage.
@@ -56,7 +57,7 @@ class MemoryHistoryStorage(HistoryStorage):
         """
         filtered_deals = list(filter(lambda order: 'time' in order, self._deals))
         return max(order['time'] for order in (filtered_deals +
-                   [{'time': datetime.min.replace(tzinfo=pytz.UTC)}]))
+                   [{'time': datetime.fromtimestamp(0).replace(tzinfo=pytz.UTC)}]))
 
     async def on_history_order_added(self, history_order: MetatraderOrder):
         """Invoked when a new MetaTrader history order is added.
@@ -68,14 +69,21 @@ class MemoryHistoryStorage(HistoryStorage):
         replacement_index = -1
 
         def get_done_time(order):
-            return order['doneTime'].timestamp() if ('doneTime' in order) else \
-                datetime.min.replace(tzinfo=pytz.UTC).timestamp()
+            if 'doneTime' in order:
+                return order['doneTime'].timestamp() if (isinstance(order['doneTime'], datetime)) \
+                    else date(order['doneTime']).timestamp()
+            else:
+                return 0
+
+        history_order_time = get_done_time(history_order)
 
         for i in range(len(self._historyOrders)):
             order = self._historyOrders[i]
-            if (get_done_time(order) < get_done_time(history_order)) or \
-                    (get_done_time(order) == get_done_time(history_order) and order['id'] <= history_order['id']):
-                if (get_done_time(order) == get_done_time(history_order) and order['id'] == history_order['id'] and
+            order_time = get_done_time(order)
+
+            if (order_time < history_order_time) or \
+                    (order_time == history_order_time and order['id'] <= history_order['id']):
+                if (order_time == history_order_time and order['id'] == history_order['id'] and
                    order['type'] == history_order['type']):
                     replacement_index = i
                 insert_index = i + 1
@@ -94,13 +102,19 @@ class MemoryHistoryStorage(HistoryStorage):
         replacement_index = -1
 
         def get_time(deal):
-            return deal['time'].timestamp() if ('time' in deal) else datetime.min.replace(tzinfo=pytz.UTC).timestamp()
+            if 'time' in deal:
+                return deal['time'].timestamp() if (isinstance(deal['time'], datetime)) \
+                    else date(deal['time']).timestamp()
+            else:
+                return 0
 
+        new_deal_time = get_time(new_deal)
         for i in range(len(self._deals)):
             deal = self._deals[i]
-            if (get_time(deal) < get_time(new_deal)) or \
-                    (get_time(deal) == get_time(new_deal) and deal['id'] <= new_deal['id']):
-                if (get_time(deal) == get_time(new_deal) and deal['id'] == new_deal['id'] and
+            deal_time = get_time(deal)
+            if (deal_time < new_deal_time) or \
+                    (deal_time == new_deal_time and deal['id'] <= new_deal['id']):
+                if (deal_time == new_deal_time and deal['id'] == new_deal['id'] and
                         deal['type'] == new_deal['type']):
                     replacement_index = i
                 insert_index = i + 1

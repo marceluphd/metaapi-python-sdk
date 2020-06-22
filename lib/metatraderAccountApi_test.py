@@ -609,3 +609,53 @@ class TestMetatraderAccountApi:
         assert connection.history_storage == storage
         websocket_client.add_synchronization_listener.assert_called_with('id', storage)
         websocket_client.subscribe.assert_called_with('id')
+
+    @pytest.mark.asyncio
+    async def test_update_mt_account(self):
+        """Should update MT account."""
+        client.get_account = AsyncMock(side_effect=[{
+            '_id': 'id',
+            'login': '50194988',
+            'name': 'mt5a',
+            'server': 'ICMarketsSC-Demo',
+            'provisioningProfileId': 'f9ce1f12-e720-4b9a-9477-c2d4cb25f076',
+            'magic': 123456,
+            'timeConverter': 'icmarkets',
+            'application': 'MetaApi',
+            'connectionStatus': 'CONNECTED',
+            'state': 'DEPLOYED',
+            'synchronizationMode': 'automatic',
+            'type': 'cloud'
+          }, {
+            '_id': 'id',
+            'login': '50194988',
+            'name': 'mt5a__',
+            'server': 'OtherMarkets-Demo',
+            'provisioningProfileId': 'f9ce1f12-e720-4b9a-9477-c2d4cb25f076',
+            'magic': 123456,
+            'timeConverter': 'icmarkets',
+            'application': 'MetaApi',
+            'connectionStatus': 'CONNECTED',
+            'state': 'DEPLOYED',
+            'synchronizationMode': 'user',
+            'type': 'cloud'
+          }])
+        client.update_account = AsyncMock()
+        account = await api.get_account('id')
+        await account.update({
+          'name': 'mt5a__',
+          'password': 'moreSecurePass',
+          'server': 'OtherMarkets-Demo',
+          'synchronizationMode': 'user'
+        })
+        assert account.name == 'mt5a__'
+        assert account.server == 'OtherMarkets-Demo'
+        assert account.synchronization_mode == 'user'
+        client.update_account.assert_called_with('id', {
+          'name': 'mt5a__',
+          'password': 'moreSecurePass',
+          'server': 'OtherMarkets-Demo',
+          'synchronizationMode': 'user'
+        })
+        client.get_account.assert_called_with('id')
+        assert client.get_account.call_count == 2

@@ -7,6 +7,7 @@ from lib.historyStorage import HistoryStorage
 from datetime import datetime, timedelta
 from typing import Optional
 import time
+import asyncio
 
 
 class MetatraderAccount(MetatraderAccountModel):
@@ -151,8 +152,7 @@ class MetatraderAccount(MetatraderAccountModel):
         Returns:
             A coroutine resolving when MetaTrader account is updated.
         """
-        data = await self._metatraderAccountClient.get_account(self.id)
-        self._data = data
+        self._data = await self._metatraderAccountClient.get_account(self.id)
 
     async def remove(self):
         """Removes MetaTrader account. Cloud account transitions to DELETING state.
@@ -285,7 +285,7 @@ class MetatraderAccount(MetatraderAccountModel):
         if self.connection_status != 'CONNECTED':
             raise TimeoutException('Timed out waiting for account ' + self.id + ' to connect to the broker')
 
-    async def connect(self, history_storage: Optional[HistoryStorage]):
+    async def connect(self, history_storage: HistoryStorage = None):
         """Connects to MetaApi.
 
         Args:
@@ -298,5 +298,17 @@ class MetatraderAccount(MetatraderAccountModel):
         await connection.subscribe()
         return connection
 
+    async def update(self, account):
+        """Updates MetaTrader account data.
+
+        Args:
+            account: MetaTrader account update.
+
+        Returns:
+            A coroutine resolving when account is updated.
+        """
+        await self._metatraderAccountClient.update_account(self.id, account)
+        await self.reload()
+
     async def _delay(self, timeout_in_milliseconds):
-        time.sleep(timeout_in_milliseconds / 1000)
+        await asyncio.sleep(timeout_in_milliseconds / 1000)

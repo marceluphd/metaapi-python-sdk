@@ -1,5 +1,6 @@
 from lib.provisioningProfile import ProvisioningProfile
-from lib.clients.provisioningProfile_client import ProvisioningProfileClient, ProvisioningProfileDto
+from lib.clients.provisioningProfile_client import ProvisioningProfileClient, ProvisioningProfileDto, \
+    NewProvisioningProfileDto
 from typing import List
 from copy import deepcopy
 
@@ -15,7 +16,7 @@ class ProvisioningProfileApi:
         """
         self._provisioningProfileClient = provisioning_profile_client
 
-    async def get_provisioning_profiles(self, version: int, status: str) -> List[ProvisioningProfile]:
+    async def get_provisioning_profiles(self, version: int = None, status: str = None) -> List[ProvisioningProfile]:
         """Retrieves provisioning profiles
 
         Args:
@@ -41,7 +42,7 @@ class ProvisioningProfileApi:
         profile = await self._provisioningProfileClient.get_provisioning_profile(provisioning_profile_id)
         return ProvisioningProfile(profile, self._provisioningProfileClient)
 
-    async def create_provisioning_profile(self, profile: ProvisioningProfileDto) -> ProvisioningProfile:
+    async def create_provisioning_profile(self, profile: NewProvisioningProfileDto) -> ProvisioningProfile:
         """Creates a provisioning profile.
 
         Args:

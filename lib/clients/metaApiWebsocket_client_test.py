@@ -616,38 +616,35 @@ class TestMetaApiWebsocketClient:
     @pytest.mark.asyncio
     async def test_process_auth_sync_event(self):
         """Should process authenticated synchronization event."""
+        listener = MagicMock()
+        listener.on_connected = FinalMock()
 
-        listener = {
-            'onConnected': FinalMock()
-        }
         client.add_synchronization_listener('accountId', listener)
         await sio.emit('synchronization', {'type': 'authenticated', 'accountId': 'accountId'})
         await client._socket.wait()
-        listener['onConnected'].assert_called_with()
+        listener.on_connected.assert_called_with()
 
     @pytest.mark.asyncio
     async def test_process_broker_connection_status_event(self):
         """Should process broker connection status event."""
+        listener = MagicMock()
+        listener.on_broker_connection_status_changed = FinalMock()
 
-        listener = {
-            'onBrokerConnectionStatusChanged': FinalMock()
-        }
         client.add_synchronization_listener('accountId', listener)
         await sio.emit('synchronization', {'type': 'status', 'accountId': 'accountId', 'connected': True})
         await client._socket.wait()
-        listener['onBrokerConnectionStatusChanged'].assert_called_with(True)
+        listener.on_broker_connection_status_changed.assert_called_with(True)
 
     @pytest.mark.asyncio
     async def test_process_disconnected_synchronization_event(self):
         """Should process disconnected synchronization event."""
+        listener = MagicMock()
+        listener.on_disconnected = FinalMock()
 
-        listener = {
-            'onDisconnected': FinalMock()
-        }
         client.add_synchronization_listener('accountId', listener)
         await sio.emit('synchronization', {'type': 'disconnected', 'accountId': 'accountId'})
         await client._socket.wait()
-        listener['onDisconnected'].assert_called_with()
+        listener.on_disconnected.assert_called_with()
 
     @pytest.mark.asyncio
     async def test_synchronize_with_metatrader_terminal(self):
@@ -683,14 +680,14 @@ class TestMetaApiWebsocketClient:
             'leverage': 100,
             'marginLevel': 3967.58283542
         }
-        listener = {
-            'onAccountInformationUpdated': FinalMock()
-        }
+        listener = MagicMock()
+        listener.on_account_information_updated = FinalMock()
+
         client.add_synchronization_listener('accountId', listener)
         await sio.emit('synchronization', {'type': 'accountInformation', 'accountId': 'accountId',
                                            'accountInformation': account_information})
         await client._socket.wait()
-        listener['onAccountInformationUpdated'].assert_called_with(account_information)
+        listener.on_account_information_updated.assert_called_with(account_information)
 
     @pytest.mark.asyncio
     async def test_synchronize_positions(self):
@@ -715,13 +712,13 @@ class TestMetaApiWebsocketClient:
             'unrealizedProfit': -85.25999999999901,
             'realizedProfit': -6.536993168992922e-13
         }]
-        listener = {
-            'onPositionUpdated': FinalMock()
-        }
+        listener = MagicMock()
+        listener.on_position_updated = FinalMock()
+
         client.add_synchronization_listener('accountId', listener)
         await sio.emit('synchronization', {'type': 'positions', 'accountId': 'accountId', 'positions': positions})
         await client._socket.wait()
-        listener['onPositionUpdated'].assert_called_with(positions[0])
+        listener.on_position_updated.assert_called_with(positions[0])
 
     @pytest.mark.asyncio
     async def test_synchronize_orders(self):
@@ -741,13 +738,13 @@ class TestMetaApiWebsocketClient:
             'currentVolume': 0.01,
             'comment': 'COMMENT2'
         }]
-        listener = {
-            'onOrderUpdated': FinalMock()
-        }
+        listener = MagicMock()
+        listener.on_order_updated = FinalMock()
+
         client.add_synchronization_listener('accountId', listener)
         await sio.emit('synchronization', {'type': 'orders', 'accountId': 'accountId', 'orders': orders})
         await client._socket.wait()
-        listener['onOrderUpdated'].assert_called_with(orders[0])
+        listener.on_order_updated.assert_called_with(orders[0])
 
     @pytest.mark.asyncio
     async def test_synchronize_history_orders(self):
@@ -768,14 +765,13 @@ class TestMetaApiWebsocketClient:
             'type': 'ORDER_TYPE_BUY',
             'volume': 0.07
         }]
-        listener = {
-            'onHistoryOrderAdded': FinalMock()
-        }
+        listener = MagicMock()
+        listener.on_history_order_added = FinalMock()
         client.add_synchronization_listener('accountId', listener)
         await sio.emit('synchronization', {'type': 'historyOrders', 'accountId': 'accountId',
                                            'historyOrders': history_orders})
         await client._socket.wait()
-        listener['onHistoryOrderAdded'].assert_called_with(history_orders[0])
+        listener.on_history_order_added.assert_called_with(history_orders[0])
 
     @pytest.mark.asyncio
     async def test_synchronize_deals(self):
@@ -798,13 +794,12 @@ class TestMetaApiWebsocketClient:
             'type': 'DEAL_TYPE_BUY',
             'volume': 0.07
         }]
-        listener = {
-            'onDealAdded': FinalMock()
-        }
+        listener = MagicMock()
+        listener.on_deal_added = FinalMock()
         client.add_synchronization_listener('accountId', listener)
         await sio.emit('synchronization', {'type': 'deals', 'accountId': 'accountId', 'deals': deals})
         await client._socket.wait()
-        listener['onDealAdded'].assert_called_with(deals[0])
+        listener.on_deal_added.assert_called_with(deals[0])
 
     @pytest.mark.asyncio
     async def test_process_synchronization_updates(self):
@@ -890,28 +885,27 @@ class TestMetaApiWebsocketClient:
                 'volume': 0.07
             }]
         }
-        listener = {
-            'onAccountInformationUpdated': AsyncMock(),
-            'onPositionUpdated': AsyncMock(),
-            'onPositionRemoved': AsyncMock(),
-            'onOrderUpdated': AsyncMock(),
-            'onOrderCompleted': AsyncMock(),
-            'onHistoryOrderAdded': AsyncMock(),
-            'onDealAdded': FinalMock()
-        }
+        listener = MagicMock()
+        listener.on_account_information_updated = AsyncMock()
+        listener.on_position_updated = AsyncMock()
+        listener.on_position_removed = AsyncMock()
+        listener.on_order_updated = AsyncMock()
+        listener.on_order_completed = AsyncMock()
+        listener.on_history_order_added = AsyncMock()
+        listener.on_deal_added = FinalMock()
         client.add_synchronization_listener('accountId', listener)
         emit = copy.deepcopy(update)
         emit['type'] = 'update'
         emit['accountId'] = 'accountId'
         await sio.emit('synchronization', emit)
         await client._socket.wait()
-        listener['onAccountInformationUpdated'].assert_called_with(update['accountInformation'])
-        listener['onPositionUpdated'].assert_called_with(update['updatedPositions'][0])
-        listener['onPositionRemoved'].assert_called_with(update['removedPositionIds'][0])
-        listener['onOrderUpdated'].assert_called_with(update['updatedOrders'][0])
-        listener['onOrderCompleted'].assert_called_with(update['completedOrderIds'][0])
-        listener['onHistoryOrderAdded'].assert_called_with(update['historyOrders'][0])
-        listener['onDealAdded'].assert_called_with(update['deals'][0])
+        listener.on_account_information_updated.assert_called_with(update['accountInformation'])
+        listener.on_position_updated.assert_called_with(update['updatedPositions'][0])
+        listener.on_position_removed.assert_called_with(update['removedPositionIds'][0])
+        listener.on_order_updated.assert_called_with(update['updatedOrders'][0])
+        listener.on_order_completed.assert_called_with(update['completedOrderIds'][0])
+        listener.on_history_order_added.assert_called_with(update['historyOrders'][0])
+        listener.on_deal_added.assert_called_with(update['deals'][0])
 
     @pytest.mark.asyncio
     async def test_subscribe_to_market_data_with_mt_terminal(self):
@@ -942,14 +936,13 @@ class TestMetaApiWebsocketClient:
             'maxVolume': 200,
             'volumeStep': 0.01
         }]
-        listener = {
-            'onSymbolSpecificationUpdated': FinalMock()
-        }
+        listener = MagicMock()
+        listener.on_symbol_specification_updated = FinalMock()
         client.add_synchronization_listener('accountId', listener)
         await sio.emit('synchronization', {'type': 'specifications', 'accountId': 'accountId',
                                            'specifications': specifications})
         await client._socket.wait()
-        listener['onSymbolSpecificationUpdated'].assert_called_with(specifications[0])
+        listener.on_symbol_specification_updated.assert_called_with(specifications[0])
 
     @pytest.mark.asyncio
     async def test_synchronize_symbol_prices(self):
@@ -962,10 +955,9 @@ class TestMetaApiWebsocketClient:
             'profitTickValue': 0.602,
             'lossTickValue': 0.60203
         }]
-        listener = {
-            'onSymbolPriceUpdated': FinalMock()
-        }
+        listener = MagicMock()
+        listener.on_symbol_price_updated = FinalMock()
         client.add_synchronization_listener('accountId', listener)
         await sio.emit('synchronization', {'type': 'prices', 'accountId': 'accountId', 'prices': prices})
         await client._socket.wait()
-        listener['onSymbolPriceUpdated'].assert_called_with(prices[0])
+        listener.on_symbol_price_updated.assert_called_with(prices[0])

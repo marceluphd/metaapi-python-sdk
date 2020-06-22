@@ -10,12 +10,33 @@ class ProvisioningProfileDto(TypedDict):
     """Provisioning profile unique identifier"""
     name: str
     """Provisioning profile name"""
-    type: str
-    """Provisioning profile type (allowed values are standard and advanced)"""
     version: int
     """MetaTrader version (allowed values are 4 and 5)"""
     status: str
     """Provisioning profile status (allowed values are new and active)"""
+
+
+class NewProvisioningProfileDto(TypedDict):
+    """New provisioning profile model."""
+
+    name: str
+    """Provisioning profile name."""
+    version: int
+    """MetaTrader version (allowed values are 4 and 5)."""
+
+
+class ProvisioningProfileIdDto(TypedDict):
+    """Provisioning profile id model."""
+
+    id: str
+    """Provisioning profile unique identifier."""
+
+
+class ProvisioningProfileUpdateDto(TypedDict):
+    """Updated provisioning profile data."""
+
+    name: str
+    """Provisioning profile name."""
 
 
 class ProvisioningProfileClient:
@@ -80,7 +101,7 @@ class ProvisioningProfileClient:
         }
         return await self._httpClient.request(opts)
 
-    async def create_provisioning_profile(self, provisioning_profile: ProvisioningProfileDto) -> Response:
+    async def create_provisioning_profile(self, provisioning_profile: NewProvisioningProfileDto) -> Response:
         """Creates a new provisioning profile (see
         https://metaapi.cloud/docs/provisioning/api/provisioningProfile/createNewProvisioningProfile/). After creating
         a provisioning profile you are required to upload extra files in order to activate the profile for further use.
@@ -107,16 +128,16 @@ class ProvisioningProfileClient:
         https://metaapi.cloud/docs/provisioning/api/provisioningProfile/uploadFilesToProvisioningProfile/).
 
         Args:
-            provisioning_profile_id: provisioning profile id to upload file to
-            file_name: name of the file to upload. Allowed values are servers.dat for MT5 profile, broker.srv for
-            MT4 profile, profile.zip for advanced profile
-            file: path to a file to upload or buffer containing file contents
+            provisioning_profile_id: Provisioning profile id to upload file to.
+            file_name: Name of the file to upload. Allowed values are servers.dat for MT5 profile, broker.srv for
+            MT4 profile.
+            file: Path to a file to upload or buffer containing file contents.
 
         Returns:
             A coroutine resolving when file upload is completed.
         """
-        if type(file) == 'string':
-            file = open(file, 'r').read()
+        if type(file) == str:
+            file = open(file, 'rb').read()
         opts = {
             'method': 'PUT',
             'url': f'{self._host}/users/current/provisioning-profiles/{provisioning_profile_id}/{file_name}',
@@ -146,5 +167,26 @@ class ProvisioningProfileClient:
             'headers': {
                 'auth-token': self._token
             }
+        }
+        return await self._httpClient.request(opts)
+
+    async def update_provisioning_profile(self, id: str, provisioning_profile: ProvisioningProfileUpdateDto):
+        """Updates existing provisioning profile data (see
+        https://metaapi.cloud/docs/provisioning/api/provisioningProfile/updateProvisioningProfile/).
+
+        Args:
+            id: Provisioning profile id.
+            provisioning_profile: Updated provisioning profile.
+
+        Returns:
+            A coroutine resolving when provisioning profile is updated.
+        """
+        opts = {
+            'url': f'{self._host}/users/current/provisioning-profiles/{id}',
+            'method': 'PUT',
+            'headers': {
+                'auth-token': self._token
+            },
+            'body': provisioning_profile
         }
         return await self._httpClient.request(opts)
