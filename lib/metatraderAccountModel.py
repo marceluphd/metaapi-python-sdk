@@ -115,7 +115,6 @@ class MetatraderAccountModel(ABC):
         Returns:
             Terminal & broker connection status.
         """
-        pass
 
     @property
     @abstractmethod

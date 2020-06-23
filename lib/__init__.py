@@ -13,7 +13,7 @@ class MetaApi:
     """MetaApi MetaTrader API SDK"""
 
     def __init__(self, token: str, domain: str = 'agiliumtrade.agiliumtrade.ai'):
-        """Constructs MetaApi class instance.
+        """Inits MetaApi class instance.
 
         Args:
             token: Authorization token.

@@ -1,3 +1,6 @@
+from typing import Tuple
+
+
 class ApiException(Exception):
     """Base class for API exceptions. Contains indication of HTTP status.
 
@@ -16,7 +19,7 @@ class ApiException(Exception):
         self.status_code = status
 
     @property
-    def code(self):
+    def code(self) -> str:
         """Returns exception code used for i18n
 
         Returns:
@@ -25,7 +28,7 @@ class ApiException(Exception):
         return self._code
 
     @code.setter
-    def code(self, code):
+    def code(self, code: str):
         """Sets error code, used for i18n
 
         Args:
@@ -34,7 +37,7 @@ class ApiException(Exception):
         self._code = code
 
     @property
-    def arguments(self):
+    def arguments(self) -> Tuple:
         """Returns message arguments for i18n
 
         Returns:
@@ -43,7 +46,7 @@ class ApiException(Exception):
         return self.args
 
     @arguments.setter
-    def arguments(self, args):
+    def arguments(self, args: Tuple):
         """Set message arguments for i18n
 
         Args:
@@ -59,7 +62,7 @@ class NotFoundException(ApiException):
         """Inits not found exception.
 
         Args:
-            message: exception message
+            message: Exception message.
         """
         super().__init__(message, 404)
 
@@ -71,7 +74,7 @@ class ForbiddenException(ApiException):
         """Inits forbidden exception.
 
         Args:
-            message: exception message
+            message: Exception message.
         """
         super().__init__(message, 403)
 
@@ -83,7 +86,7 @@ class UnauthorizedException(ApiException):
         """Inits unauthorized exception.
 
         Args:
-            message: exception message
+            message: Exception message.
         """
         super().__init__(message, 401)
 
@@ -95,12 +98,12 @@ class ValidationException(ApiException):
         _details: Validation exception details
     """
 
-    def __init__(self, message: str, details: dict):
+    def __init__(self, message: str, details: str):
         """Inits validation error.
 
         Args:
-            message: exception message
-            details: exception data
+            message: Exception message.
+            details: Exception data.
         """
         super().__init__(message, 400)
         self._details = details
@@ -113,7 +116,7 @@ class InternalException(ApiException):
         """Inits unexpected exception.
 
         Args:
-            message: exception message
+            message: Exception message.
         """
         super().__init__(message, 500)
 
@@ -125,6 +128,6 @@ class ConflictException(ApiException):
         """Inits conflict exception.
 
         Args:
-            message: exception message
+            message: Exception message.
         """
         super().__init__(message, 409)

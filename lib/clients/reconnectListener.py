@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 
 class ReconnectListener(ABC):
-    """Defines interface for a websocket reconnect listener class"""
+    """Defines interface for a websocket reconnect listener class."""
 
     @abstractmethod
     async def on_reconnected(self):

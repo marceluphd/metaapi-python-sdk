@@ -56,7 +56,6 @@ class HttpClient:
 
     def _convert_error(self, err: requests.HTTPError):
         status = err.response.status_code
-        print('Response', err.response)
         if status == 400:
             raise ValidationException(err.response.reason, err.response.text['message'])
         elif status == 401:

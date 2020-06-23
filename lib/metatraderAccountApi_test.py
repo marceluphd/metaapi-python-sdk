@@ -10,12 +10,11 @@ from mock import AsyncMock, MagicMock
 from requests import Response
 from datetime import datetime
 from lib.models import date
-from typing import Optional
 import pytest
 
 
 class MockClient(MetatraderAccountClient):
-    def get_accounts(self, provisioning_profile_id: Optional[str]) -> Response:
+    def get_accounts(self, provisioning_profile_id: str = None) -> Response:
         pass
 
     def get_account(self, id: str) -> Response:
@@ -67,7 +66,6 @@ class TestMetatraderAccountApi:
         """Should retrieve MT accounts."""
         client.get_accounts = AsyncMock(return_value=[{'_id': 'id'}])
         accounts = await api.get_accounts('profileId')
-        print('Accounts', accounts)
         assert list(map(lambda a: a.id, accounts)) == ['id']
         for account in accounts:
             assert isinstance(account, MetatraderAccount)

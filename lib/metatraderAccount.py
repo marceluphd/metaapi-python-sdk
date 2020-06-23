@@ -1,12 +1,11 @@
-from lib.clients.metatraderAccount_client import MetatraderAccountClient, MetatraderAccountDto
+from lib.clients.metatraderAccount_client import MetatraderAccountClient, MetatraderAccountDto, \
+    MetatraderAccountUpdateDto
 from lib.clients.metaApiWebsocket_client import MetaApiWebsocketClient
 from lib.clients.timeoutException import TimeoutException
 from lib.metaApiConnection import MetaApiConnection
 from lib.metatraderAccountModel import MetatraderAccountModel
 from lib.historyStorage import HistoryStorage
 from datetime import datetime, timedelta
-from typing import Optional
-import time
 import asyncio
 
 
@@ -15,7 +14,7 @@ class MetatraderAccount(MetatraderAccountModel):
 
     def __init__(self, data: MetatraderAccountDto, metatrader_account_client: MetatraderAccountClient,
                  meta_api_websocket_client: MetaApiWebsocketClient):
-        """Constructs a MetaTrader account entity.
+        """Inits a MetaTrader account entity.
 
         Args:
             data: MetaTrader account data.
@@ -72,7 +71,7 @@ class MetatraderAccount(MetatraderAccountModel):
         return self._data['server']
 
     @property
-    def synchronization_mode(self):
+    def synchronization_mode(self) -> str:
         """Returns synchronization mode, can be automatic or user. See
         https://metaapi.cloud/docs/client/websocket/synchronizationMode/ for more details.
 
@@ -82,7 +81,7 @@ class MetatraderAccount(MetatraderAccountModel):
         return self._data['synchronizationMode']
 
     @property
-    def provisioning_profile_id(self):
+    def provisioning_profile_id(self) -> str:
         """Returns id of the account's provisioning profile.
 
         Returns:
@@ -91,7 +90,7 @@ class MetatraderAccount(MetatraderAccountModel):
         return self._data['provisioningProfileId']
 
     @property
-    def time_converter(self):
+    def time_converter(self) -> str:
         """Returns algorithm used to parse your broker timezone. Supported values are icmarkets for
         America/New_York DST switch and roboforex for EET DST switch (the values will be changed soon)
 
@@ -101,7 +100,7 @@ class MetatraderAccount(MetatraderAccountModel):
         return self._data['timeConverter']
 
     @property
-    def application(self):
+    def application(self) -> str:
         """Returns application name to connect the account to. Currently allowed values are MetaApi and AgiliumTrade.
 
         Returns:
@@ -110,7 +109,7 @@ class MetatraderAccount(MetatraderAccountModel):
         return self._data['application']
 
     @property
-    def magic(self):
+    def magic(self) -> int:
         """Returns MetaTrader magic to place trades using.
 
         Returns:
@@ -119,7 +118,7 @@ class MetatraderAccount(MetatraderAccountModel):
         return self._data['magic']
 
     @property
-    def state(self):
+    def state(self) -> str:
         """Returns account deployment state. One of CREATED, DEPLOYING, DEPLOYED, UNDEPLOYING, UNDEPLOYED, DELETING
 
         Returns:
@@ -128,7 +127,7 @@ class MetatraderAccount(MetatraderAccountModel):
         return self._data['state']
 
     @property
-    def connection_status(self):
+    def connection_status(self) -> str:
         """Returns terminal & broker connection status, one of CONNECTED, DISCONNECTED, DISCONNECTED_FROM_BROKER
 
         Returns:
@@ -137,7 +136,7 @@ class MetatraderAccount(MetatraderAccountModel):
         return self._data['connectionStatus']
 
     @property
-    def access_token(self):
+    def access_token(self) -> str:
         """Returns authorization access token to be used for accessing single account data.
         Intended to be used in browser API.
 
@@ -285,7 +284,7 @@ class MetatraderAccount(MetatraderAccountModel):
         if self.connection_status != 'CONNECTED':
             raise TimeoutException('Timed out waiting for account ' + self.id + ' to connect to the broker')
 
-    async def connect(self, history_storage: HistoryStorage = None):
+    async def connect(self, history_storage: HistoryStorage = None) -> MetaApiConnection:
         """Connects to MetaApi.
 
         Args:
@@ -298,7 +297,7 @@ class MetatraderAccount(MetatraderAccountModel):
         await connection.subscribe()
         return connection
 
-    async def update(self, account):
+    async def update(self, account: MetatraderAccountUpdateDto):
         """Updates MetaTrader account data.
 
         Args:

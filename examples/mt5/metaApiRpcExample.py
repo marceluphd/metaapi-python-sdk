@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 import asyncio
-from lib import MetaApi
+from metaapi_cloud_sdk import MetaApi
 from datetime import datetime, timedelta
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 if os.path.exists(dotenv_path):
@@ -106,11 +106,5 @@ async def test_meta_api_synchronization():
     except Exception as err:
         print(err)
 
-
-async def main():
-    loop = asyncio.get_event_loop()
-    task = asyncio.ensure_future(test_meta_api_synchronization(), loop=loop)
-    await task
-
-asyncio.run(main())
+asyncio.run(test_meta_api_synchronization())
 

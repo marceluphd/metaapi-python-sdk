@@ -46,8 +46,8 @@ class MemoryHistoryStorage(HistoryStorage):
             The time of the last history order record stored in the history storage
         """
         filtered_orders = list(filter(lambda order: 'doneTime' in order, self._historyOrders))
-        return max(order['doneTime'] for order in (filtered_orders +
-                                                   [{'doneTime': datetime.fromtimestamp(0).replace(tzinfo=pytz.UTC)}]))
+        return max(order['doneTime'] if isinstance(order['doneTime'], datetime) else date(order['doneTime']) for order
+                   in (filtered_orders + [{'doneTime': datetime.fromtimestamp(0).replace(tzinfo=pytz.UTC)}]))
 
     async def last_deal_time(self) -> datetime:
         """Returns the time of the last history deal record stored in the history storage.
@@ -56,8 +56,8 @@ class MemoryHistoryStorage(HistoryStorage):
             The time of the last history deal record stored in the history storage.
         """
         filtered_deals = list(filter(lambda order: 'time' in order, self._deals))
-        return max(order['time'] for order in (filtered_deals +
-                   [{'time': datetime.fromtimestamp(0).replace(tzinfo=pytz.UTC)}]))
+        return max(deal['time'] if isinstance(deal['time'], datetime) else date(deal['time']) for deal in
+                   (filtered_deals + [{'time': datetime.fromtimestamp(0).replace(tzinfo=pytz.UTC)}]))
 
     async def on_history_order_added(self, history_order: MetatraderOrder):
         """Invoked when a new MetaTrader history order is added.

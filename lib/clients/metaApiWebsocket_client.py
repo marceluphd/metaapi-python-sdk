@@ -7,9 +7,7 @@ from lib.clients.reconnectListener import ReconnectListener
 from lib.models import MetatraderHistoryOrders, MetatraderDeals
 import socketio
 import asyncio
-import math
 import re
-import time
 from datetime import datetime
 from typing import Coroutine
 import lib.models as models
@@ -63,8 +61,7 @@ class MetaApiWebsocketClient:
             result = asyncio.Future()
 
             url = f'{self._url}?auth-token={self._token}'
-            self._socket = socketio.AsyncClient(reconnection=True, reconnection_delay=1000,
-                                                reconnection_delay_max=5000, reconnection_attempts=math.inf)
+            self._socket = socketio.AsyncClient(reconnection=True, reconnection_delay=1, reconnection_delay_max=5)
             await self._socket.connect(url, socketio_path='ws')
 
             @self._socket.on('connect')
@@ -98,7 +95,7 @@ class MetaApiWebsocketClient:
                     result.set_exception(TimeoutException('MetaApi websocket client connection timed out'))
 
             @self._socket.on('disconnect')
-            async def on_disconnect(reason):
+            async def on_disconnect(reason: str = ''):
                 print(f'[{datetime.now().isoformat()}] MetaApi websocket client disconnected from the MetaApi '
                       f'server because of {reason}')
                 await self._reconnect()
@@ -493,7 +490,7 @@ class MetaApiWebsocketClient:
 
     async def _reconnect(self):
         while (not self._socket.connected) and self._connected:
-            time.sleep(1)
+            await asyncio.sleep(1)
             await self._socket.connect()
 
     async def _rpc_request(self, account_id: str, request: dict) -> Coroutine:
@@ -537,18 +534,20 @@ class MetaApiWebsocketClient:
 
     async def _process_synchronization_packet(self, data):
         try:
-            if data['type'] == 'authenticated' and (data['accountId'] in self._synchronizationListeners):
-                for listener in self._synchronizationListeners[data['accountId']]:
-                    try:
-                        await listener.on_connected()
-                    except Exception as err:
-                        print('Failed to notify listener about connected event', err)
-            elif data['type'] == 'disconnected' and (data['accountId'] in self._synchronizationListeners):
-                for listener in self._synchronizationListeners[data['accountId']]:
-                    try:
-                        await listener.on_disconnected()
-                    except Exception as err:
-                        print('Failed to notify listener about disconnected event', err)
+            if data['type'] == 'authenticated':
+                if data['accountId'] in self._synchronizationListeners:
+                    for listener in self._synchronizationListeners[data['accountId']]:
+                        try:
+                            await listener.on_connected()
+                        except Exception as err:
+                            print('Failed to notify listener about connected event', err)
+            elif data['type'] == 'disconnected':
+                if data['accountId'] in self._synchronizationListeners:
+                    for listener in self._synchronizationListeners[data['accountId']]:
+                        try:
+                            await listener.on_disconnected()
+                        except Exception as err:
+                            print('Failed to notify listener about disconnected event', err)
             elif data['type'] == 'accountInformation':
                 if data['accountInformation'] and (data['accountId'] in self._synchronizationListeners):
                     for listener in self._synchronizationListeners[data['accountId']]:
@@ -556,38 +555,42 @@ class MetaApiWebsocketClient:
                             await listener.on_account_information_updated(data['accountInformation'])
                         except Exception as err:
                             print('Failed to notify listener about accountInformation event', err)
-            elif data['type'] == 'deals' and ('deals' in data):
-                for deal in data['deals']:
-                    if data['accountId'] in self._synchronizationListeners:
-                        for listener in self._synchronizationListeners[data['accountId']]:
-                            try:
-                                await listener.on_deal_added(deal)
-                            except Exception as err:
-                                print('Failed to notify listener about deals event', err)
-            elif data['type'] == 'orders' and ('orders' in data):
-                for order in data['orders']:
-                    if data['accountId'] in self._synchronizationListeners:
-                        for listener in self._synchronizationListeners[data['accountId']]:
-                            try:
-                                await listener.on_order_updated(order)
-                            except Exception as err:
-                                print('Failed to notify listener about orders event', err)
-            elif data['type'] == 'historyOrders' and ('historyOrders' in data):
-                for historyOrder in data['historyOrders']:
-                    if data['accountId'] in self._synchronizationListeners:
-                        for listener in self._synchronizationListeners[data['accountId']]:
-                            try:
-                                await listener.on_history_order_added(historyOrder)
-                            except Exception as err:
-                                print('Failed to notify listener about historyOrders event', err)
-            elif data['type'] == 'positions' and ('positions' in data):
-                for position in data['positions']:
-                    if data['accountId'] in self._synchronizationListeners:
-                        for listener in self._synchronizationListeners[data['accountId']]:
-                            try:
-                                await listener.on_position_updated(position)
-                            except Exception as err:
-                                print('Failed to notify listener about positions event', err)
+            elif data['type'] == 'deals':
+                if 'deals' in data:
+                    for deal in data['deals']:
+                        if data['accountId'] in self._synchronizationListeners:
+                            for listener in self._synchronizationListeners[data['accountId']]:
+                                try:
+                                    await listener.on_deal_added(deal)
+                                except Exception as err:
+                                    print('Failed to notify listener about deals event', err)
+            elif data['type'] == 'orders':
+                if 'orders' in data:
+                    for order in data['orders']:
+                        if data['accountId'] in self._synchronizationListeners:
+                            for listener in self._synchronizationListeners[data['accountId']]:
+                                try:
+                                    await listener.on_order_updated(order)
+                                except Exception as err:
+                                    print('Failed to notify listener about orders event', err)
+            elif data['type'] == 'historyOrders':
+                if 'historyOrders' in data :
+                    for historyOrder in data['historyOrders']:
+                        if data['accountId'] in self._synchronizationListeners:
+                            for listener in self._synchronizationListeners[data['accountId']]:
+                                try:
+                                    await listener.on_history_order_added(historyOrder)
+                                except Exception as err:
+                                    print('Failed to notify listener about historyOrders event', err)
+            elif data['type'] == 'positions':
+                if 'positions' in data:
+                    for position in data['positions']:
+                        if data['accountId'] in self._synchronizationListeners:
+                            for listener in self._synchronizationListeners[data['accountId']]:
+                                try:
+                                    await listener.on_position_updated(position)
+                                except Exception as err:
+                                    print('Failed to notify listener about positions event', err)
             elif data['type'] == 'update':
                 if 'accountInformation' in data and (data['accountId'] in self._synchronizationListeners):
                     for listener in self._synchronizationListeners[data['accountId']]:
@@ -664,22 +667,24 @@ class MetaApiWebsocketClient:
                             await listener.on_broker_connection_status_changed(bool(data['connected']))
                         except Exception as err:
                             print('Failed to notify listener about brokerConnectionStatusChanged event', err)
-            elif data['type'] == 'specifications' and ('specifications' in data):
-                for specification in data['specifications']:
-                    if data['accountId'] in self._synchronizationListeners:
-                        for listener in self._synchronizationListeners[data['accountId']]:
-                            try:
-                                await listener.on_symbol_specification_updated(specification)
-                            except Exception as err:
-                                print('Failed to notify listener about specifications event', err)
-            elif data['type'] == 'prices' and ('prices' in data):
-                for price in data['prices']:
-                    if data['accountId'] in self._synchronizationListeners:
-                        for listener in self._synchronizationListeners[data['accountId']]:
-                            try:
-                                await listener.on_symbol_price_updated(price)
-                            except Exception as err:
-                                print('Failed to notify listener about prices event', err)
+            elif data['type'] == 'specifications':
+                if 'specifications' in data:
+                    for specification in data['specifications']:
+                        if data['accountId'] in self._synchronizationListeners:
+                            for listener in self._synchronizationListeners[data['accountId']]:
+                                try:
+                                    await listener.on_symbol_specification_updated(specification)
+                                except Exception as err:
+                                    print('Failed to notify listener about specifications event', err)
+            elif data['type'] == 'prices':
+                if 'prices' in data:
+                    for price in data['prices']:
+                        if data['accountId'] in self._synchronizationListeners:
+                            for listener in self._synchronizationListeners[data['accountId']]:
+                                try:
+                                    await listener.on_symbol_price_updated(price)
+                                except Exception as err:
+                                    print('Failed to notify listener about prices event', err)
         except Exception as err:
             print('Failed to process incoming synchronization packet', err)
 
