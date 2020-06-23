@@ -7,9 +7,8 @@ from lib.metatraderAccountModel import MetatraderAccountModel
 from lib.historyStorage import HistoryStorage
 from lib.clients.timeoutException import TimeoutException
 from datetime import datetime, timedelta
-from typing import Optional, Coroutine
+from typing import Coroutine
 import asyncio
-import time
 
 
 class MetaApiConnection(SynchronizationListener, ReconnectListener):
@@ -17,7 +16,7 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
 
     def __init__(self, websocket_client: MetaApiWebsocketClient, account: MetatraderAccountModel,
                  history_storage: HistoryStorage = None):
-        """Constructs MetaApi MetaTrader Api connection.
+        """Inits MetaApi MetaTrader Api connection.
 
         Args:
             websocket_client: MetaApi websocket client.
@@ -524,7 +523,7 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
         """
         return await self._websocketClient.subscribe(self._account.id)
 
-    def subscribe_to_market_data(self, symbol: str):
+    def subscribe_to_market_data(self, symbol: str) -> Coroutine:
         """Subscribes on market data of specified symbol (see
         https://metaapi.cloud/docs/client/websocket/marketDataStreaming/subscribeToMarketData/).
 

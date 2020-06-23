@@ -13,7 +13,7 @@ class HistoryStorage(SynchronizationListener, ABC):
     """
 
     def __init__(self):
-        """Constructs the history storage"""
+        """Inits the history storage"""
         super().__init__()
         self._orderSynchronizationFinished = False
         self._dealSynchronizationFinished = False

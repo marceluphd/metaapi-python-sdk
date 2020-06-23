@@ -1,14 +1,13 @@
 from lib.memoryHistoryStorage import MemoryHistoryStorage
 from lib.models import date
 import pytest
-import datetime
 storage = MemoryHistoryStorage()
 
 
 @pytest.fixture(autouse=True)
 async def run_around_tests():
     storage.reset()
-    storage.on_connected()
+    await storage.on_connected()
     yield
 
 
@@ -66,22 +65,22 @@ class TestMemoryHistoryStorage:
         """Should return saved historyOrders."""
 
         await storage.on_history_order_added({'id': '1', 'doneTime': date('2020-01-01T00:00:00.000Z'),
-                                        'type': 'ORDER_TYPE_SELL'})
+                                              'type': 'ORDER_TYPE_SELL'})
         await storage.on_history_order_added({'id': '7', 'doneTime': date('2020-05-01T00:00:00.000Z'),
-                                        'type': 'ORDER_TYPE_BUY'})
+                                              'type': 'ORDER_TYPE_BUY'})
         await storage.on_history_order_added({'id': '8', 'doneTime': date('2020-02-01T00:00:00.000Z'),
-                                        'type': 'ORDER_TYPE_SELL'})
+                                              'type': 'ORDER_TYPE_SELL'})
         await storage.on_history_order_added({'id': '6', 'doneTime': date('2020-10-01T00:00:00.000Z'),
-                                        'type': 'ORDER_TYPE_BUY'})
+                                              'type': 'ORDER_TYPE_BUY'})
         await storage.on_history_order_added({'id': '4', 'doneTime': date('2020-02-01T00:00:00.000Z'),
-                                        'type': 'ORDER_TYPE_SELL'})
+                                              'type': 'ORDER_TYPE_SELL'})
         await storage.on_history_order_added({'id': '5', 'doneTime': date('2020-06-01T00:00:00.000Z'),
-                                        'type': 'ORDER_TYPE_BUY'})
+                                              'type': 'ORDER_TYPE_BUY'})
         await storage.on_history_order_added({'id': '11', 'type': 'ORDER_TYPE_SELL'})
         await storage.on_history_order_added({'id': '3', 'doneTime': date('2020-09-01T00:00:00.000Z'),
-                                        'type': 'ORDER_TYPE_BUY'})
+                                              'type': 'ORDER_TYPE_BUY'})
         await storage.on_history_order_added({'id': '2', 'doneTime': date('2020-08-01T00:00:00.000Z'),
-                                        'type': 'ORDER_TYPE_SELL'})
+                                              'type': 'ORDER_TYPE_SELL'})
         await storage.on_history_order_added({'id': '10', 'type': 'ORDER_TYPE_SELL'})
         await storage.on_history_order_added({'id': '12', 'type': 'ORDER_TYPE_BUY'})
 
