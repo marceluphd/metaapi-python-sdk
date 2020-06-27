@@ -1,12 +1,12 @@
-from lib.metaApiConnection import MetaApiConnection
-from lib.clients.metaApiWebsocket_client import MetaApiWebsocketClient
-from lib.models import MetatraderHistoryOrders, MetatraderDeals
-from lib.clients.reconnectListener import ReconnectListener
-from lib.clients.synchronizationListener import SynchronizationListener
-from lib.metatraderAccount import MetatraderAccount
+from .metaApiConnection import MetaApiConnection
+from .clients.metaApiWebsocket_client import MetaApiWebsocketClient
+from .models import MetatraderHistoryOrders, MetatraderDeals
+from .clients.reconnectListener import ReconnectListener
+from .clients.synchronizationListener import SynchronizationListener
+from .metatraderAccount import MetatraderAccount
 from datetime import datetime, timedelta
 from mock import MagicMock, AsyncMock
-from lib.models import date
+from .models import date
 import pytest
 import asyncio
 

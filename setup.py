@@ -3,6 +3,10 @@ import setuptools
 with open("README.rst", "r") as fh:
     long_description = fh.read()
 
+install_requires = [
+   'typing-extensions', 'iso8601', 'pytz'
+]
+
 setuptools.setup(
     name="metaapi_cloud_sdk",
     version="1.1.1",
@@ -16,10 +20,10 @@ setuptools.setup(
     keywords=['metaapi.cloud', 'MetaTrader', 'MetaTrader 5', 'MetaTrader 4', 'MetaTrader5', 'MetaTrader4', 'MT', 'MT4',
               'MT5', 'forex', 'trading', 'API', 'REST', 'websocket', 'client', 'sdk', 'cloud'],
     url="https://github.com/agiliumtrade-ai/metaapi-python-sdk",
-    package_dir={
-        'metaapi_cloud_sdk': 'lib',
-    },
+    include_package_data=True,
+    package_dir={'metaapi_cloud_sdk': 'lib'},
     packages=['metaapi_cloud_sdk'],
+    install_requires=install_requires,
     license='SEE LICENSE IN LICENSE',
     classifiers=[
         "Programming Language :: Python :: 3",

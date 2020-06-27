@@ -1,7 +1,7 @@
 import responses
 import pytest
-from lib.clients.httpClient import HttpClient
-from lib.clients.metatraderAccount_client import MetatraderAccountClient
+from .httpClient import HttpClient
+from .metatraderAccount_client import MetatraderAccountClient
 import json
 
 PROVISIONING_API_URL = 'https://mt-provisioning-api-v1.agiliumtrade.agiliumtrade.ai'

@@ -1,5 +1,5 @@
-from typing import TypedDict
-from lib.clients.httpClient import HttpClient
+from typing_extensions import TypedDict
+from .httpClient import HttpClient
 from requests import Response
 
 

@@ -1,4 +1,5 @@
-from lib.clients.provisioningProfile_client import ProvisioningProfileDto, ProvisioningProfileClient
+from .clients.provisioningProfile_client import ProvisioningProfileDto, ProvisioningProfileClient
+from requests import Response
 
 
 class ProvisioningProfile:
@@ -57,7 +58,7 @@ class ProvisioningProfile:
         """
         self._data = await self._provisioningProfileClient.get_provisioning_profile(self.id)
 
-    async def remove(self):
+    async def remove(self) -> Response:
         """Removes provisioning profile. The current object instance should be discarded after returned promise
         resolves.
 
@@ -66,7 +67,7 @@ class ProvisioningProfile:
         """
         return await self._provisioningProfileClient.delete_provisioning_profile(self.id)
 
-    async def upload_file(self, file_name: str, file: str or memoryview):
+    async def upload_file(self, file_name: str, file: str or memoryview) -> Response:
         """Uploads a file to provisioning profile.
 
         Args:

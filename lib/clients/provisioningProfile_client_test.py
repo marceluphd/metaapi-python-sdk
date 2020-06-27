@@ -2,8 +2,8 @@ import responses
 import json
 import unittest.mock as mock
 import pytest
-from lib.clients.httpClient import HttpClient
-from lib.clients.provisioningProfile_client import ProvisioningProfileClient
+from .httpClient import HttpClient
+from .provisioningProfile_client import ProvisioningProfileClient
 
 PROVISIONING_API_URL = 'https://mt-provisioning-api-v1.agiliumtrade.agiliumtrade.ai'
 httpClient = HttpClient()

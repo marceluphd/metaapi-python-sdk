@@ -1,12 +1,12 @@
-from lib.clients.httpClient import HttpClient
-from lib.clients.metaApiWebsocket_client import MetaApiWebsocketClient
-from lib.provisioningProfileApi import ProvisioningProfileApi
-from lib.clients.provisioningProfile_client import ProvisioningProfileClient
-from lib.metatraderAccountApi import MetatraderAccountApi
-from lib.clients.metatraderAccount_client import MetatraderAccountClient
-from lib.historyStorage import HistoryStorage
-from lib.memoryHistoryStorage import MemoryHistoryStorage
-from lib.clients.synchronizationListener import SynchronizationListener
+from .clients.httpClient import HttpClient
+from .clients.metaApiWebsocket_client import MetaApiWebsocketClient
+from .provisioningProfileApi import ProvisioningProfileApi
+from .clients.provisioningProfile_client import ProvisioningProfileClient
+from .metatraderAccountApi import MetatraderAccountApi
+from .clients.metatraderAccount_client import MetatraderAccountClient
+from .historyStorage import HistoryStorage
+from .memoryHistoryStorage import MemoryHistoryStorage
+from .clients.synchronizationListener import SynchronizationListener
 
 
 class MetaApi:

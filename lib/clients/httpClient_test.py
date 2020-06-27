@@ -1,7 +1,7 @@
-import lib.clients.httpClient as httpClient
+from .httpClient import HttpClient
 import re
 import pytest
-httpClient = httpClient.HttpClient()
+httpClient = HttpClient()
 
 
 class TestHttpClient:

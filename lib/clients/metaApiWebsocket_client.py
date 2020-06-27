@@ -1,16 +1,15 @@
-from lib.clients.timeoutException import TimeoutException
-from lib.clients.errorHandler import ValidationException, NotFoundException, InternalException, UnauthorizedException
-from lib.clients.notSynchronizedException import NotSynchronizedException
-from lib.clients.notConnectedException import NotConnectedException
-from lib.clients.synchronizationListener import SynchronizationListener
-from lib.clients.reconnectListener import ReconnectListener
-from lib.models import MetatraderHistoryOrders, MetatraderDeals
+from .timeoutException import TimeoutException
+from .errorHandler import ValidationException, NotFoundException, InternalException, UnauthorizedException
+from .notSynchronizedException import NotSynchronizedException
+from .notConnectedException import NotConnectedException
+from .synchronizationListener import SynchronizationListener
+from .reconnectListener import ReconnectListener
+from ..models import MetatraderHistoryOrders, MetatraderDeals, date
 import socketio
 import asyncio
 import re
 from datetime import datetime
 from typing import Coroutine
-import lib.models as models
 import random
 import string
 import pytz
@@ -525,7 +524,7 @@ class MetaApiWebsocketClient:
             for field in packet:
                 value = packet[field]
                 if isinstance(value, str) and re.search('time | Time', field):
-                    packet[field] = models.date(value)
+                    packet[field] = date(value)
                 if isinstance(value, list):
                     for item in value:
                         self._convert_iso_time_to_date(item)

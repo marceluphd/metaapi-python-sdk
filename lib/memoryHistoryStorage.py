@@ -1,8 +1,8 @@
-from lib.models import MetatraderDeal, MetatraderOrder
+from .models import MetatraderDeal, MetatraderOrder
 from typing import List
-from lib.historyStorage import HistoryStorage
+from .historyStorage import HistoryStorage
 from datetime import datetime
-from lib.models import date
+from .models import date
 import pytz
 
 

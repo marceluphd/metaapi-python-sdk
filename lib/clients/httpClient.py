@@ -1,7 +1,8 @@
-from lib.clients.errorHandler import UnauthorizedException, ForbiddenException, ApiException, ConflictException, \
+from .errorHandler import UnauthorizedException, ForbiddenException, ApiException, ConflictException, \
     ValidationException, InternalException, NotFoundException
 import requests
-from typing import TypedDict, Optional
+from typing_extensions import TypedDict
+from typing import Optional
 
 
 class RequestOptions(TypedDict):

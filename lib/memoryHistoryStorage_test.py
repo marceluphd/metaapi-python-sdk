@@ -1,5 +1,5 @@
-from lib.memoryHistoryStorage import MemoryHistoryStorage
-from lib.models import date
+from .memoryHistoryStorage import MemoryHistoryStorage
+from .models import date
 import pytest
 storage = MemoryHistoryStorage()
 

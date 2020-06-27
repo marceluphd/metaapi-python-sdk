@@ -1,7 +1,7 @@
-from lib.clients.metaApiWebsocket_client import MetaApiWebsocketClient
+from .metaApiWebsocket_client import MetaApiWebsocketClient
 from socketio import AsyncServer
 from aiohttp import web
-from lib.models import date
+from ..models import date
 import asyncio
 import pytest
 import copy

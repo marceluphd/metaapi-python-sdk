@@ -1,4 +1,4 @@
-from lib.models import MetatraderPosition, MetatraderAccountInformation, MetatraderOrder, \
+from ..models import MetatraderPosition, MetatraderAccountInformation, MetatraderOrder, \
     MetatraderDeal, MetatraderSymbolSpecification, MetatraderSymbolPrice
 from abc import ABC
 
