@@ -4,7 +4,11 @@ with open("README.rst", "r") as fh:
     long_description = fh.read()
 
 install_requires = [
-   'typing-extensions', 'iso8601', 'pytz'
+   'typing-extensions', 'iso8601', 'pytz', 'python-socketio[asyncio_client]', 'requests'
+]
+
+tests_require = [
+      'pytest', 'pytest-mock', 'pytest-asyncio', 'asynctest', 'aiohttp', 'responses'
 ]
 
 setuptools.setup(
@@ -24,6 +28,7 @@ setuptools.setup(
     package_dir={'metaapi_cloud_sdk': 'lib'},
     packages=['metaapi_cloud_sdk'],
     install_requires=install_requires,
+    tests_require=tests_require,
     license='SEE LICENSE IN LICENSE',
     classifiers=[
         "Programming Language :: Python :: 3",
