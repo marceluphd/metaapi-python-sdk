@@ -1,11 +1,11 @@
-from lib.clients.synchronizationListener import SynchronizationListener
-from lib.clients.reconnectListener import ReconnectListener
-from lib.clients.metaApiWebsocket_client import MetaApiWebsocketClient
-from lib.terminalState import TerminalState
-from lib.memoryHistoryStorage import MemoryHistoryStorage
-from lib.metatraderAccountModel import MetatraderAccountModel
-from lib.historyStorage import HistoryStorage
-from lib.clients.timeoutException import TimeoutException
+from .clients.synchronizationListener import SynchronizationListener
+from .clients.reconnectListener import ReconnectListener
+from .clients.metaApiWebsocket_client import MetaApiWebsocketClient
+from .terminalState import TerminalState
+from .memoryHistoryStorage import MemoryHistoryStorage
+from .metatraderAccountModel import MetatraderAccountModel
+from .historyStorage import HistoryStorage
+from .clients.timeoutException import TimeoutException
 from datetime import datetime, timedelta
 from typing import Coroutine
 import asyncio

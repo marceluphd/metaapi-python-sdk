@@ -1,7 +1,7 @@
-from lib.metatraderAccount import MetatraderAccount
-from lib.clients.metaApiWebsocket_client import MetaApiWebsocketClient
-from lib.clients.metatraderAccount_client import MetatraderAccountClient
-from lib.clients.metatraderAccount_client import NewMetatraderAccountDto
+from .metatraderAccount import MetatraderAccount
+from .clients.metaApiWebsocket_client import MetaApiWebsocketClient
+from .clients.metatraderAccount_client import MetatraderAccountClient
+from .clients.metatraderAccount_client import NewMetatraderAccountDto
 from typing import List
 
 

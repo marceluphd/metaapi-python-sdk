@@ -1,5 +1,5 @@
-from lib.clients.synchronizationListener import SynchronizationListener
-from lib.models import MetatraderOrder, MetatraderDeal
+from .clients.synchronizationListener import SynchronizationListener
+from .models import MetatraderOrder, MetatraderDeal
 from datetime import datetime
 from abc import abstractmethod, ABC
 

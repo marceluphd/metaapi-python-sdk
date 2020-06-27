@@ -1,15 +1,15 @@
-from lib.metatraderAccountApi import MetatraderAccountApi
-from lib.metatraderAccount import MetatraderAccount
-from lib.clients.errorHandler import NotFoundException
-from lib.clients.metaApiWebsocket_client import MetaApiWebsocketClient
-from lib.clients.metatraderAccount_client import MetatraderAccountClient, NewMetatraderAccountDto
-from lib.metaApiConnection import MetaApiConnection
-from lib.clients.reconnectListener import ReconnectListener
-from lib.memoryHistoryStorage import MemoryHistoryStorage
+from .metatraderAccountApi import MetatraderAccountApi
+from .metatraderAccount import MetatraderAccount
+from .clients.errorHandler import NotFoundException
+from .clients.metaApiWebsocket_client import MetaApiWebsocketClient
+from .clients.metatraderAccount_client import MetatraderAccountClient, NewMetatraderAccountDto
+from .metaApiConnection import MetaApiConnection
+from .clients.reconnectListener import ReconnectListener
+from .memoryHistoryStorage import MemoryHistoryStorage
 from mock import AsyncMock, MagicMock
 from requests import Response
 from datetime import datetime
-from lib.models import date
+from .models import date
 import pytest
 
 

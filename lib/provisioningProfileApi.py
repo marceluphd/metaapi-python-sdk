@@ -1,6 +1,5 @@
-from lib.provisioningProfile import ProvisioningProfile
-from lib.clients.provisioningProfile_client import ProvisioningProfileClient, ProvisioningProfileDto, \
-    NewProvisioningProfileDto
+from .provisioningProfile import ProvisioningProfile
+from .clients.provisioningProfile_client import ProvisioningProfileClient, NewProvisioningProfileDto
 from typing import List
 from copy import deepcopy
 
@@ -9,7 +8,7 @@ class ProvisioningProfileApi:
     """Exposes provisioning profile API logic to the consumers."""
 
     def __init__(self, provisioning_profile_client: ProvisioningProfileClient):
-        """Constructs a provisioning profile API instance.
+        """Inits a provisioning profile API instance.
 
         Args:
             provisioning_profile_client: Provisioning profile REST API client.

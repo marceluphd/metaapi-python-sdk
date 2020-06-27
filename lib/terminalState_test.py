@@ -1,4 +1,4 @@
-from lib.terminalState import TerminalState
+from .terminalState import TerminalState
 import pytest
 state = TerminalState()
 

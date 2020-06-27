@@ -1,10 +1,10 @@
-from lib.clients.metatraderAccount_client import MetatraderAccountClient, MetatraderAccountDto, \
+from .clients.metatraderAccount_client import MetatraderAccountClient, MetatraderAccountDto, \
     MetatraderAccountUpdateDto
-from lib.clients.metaApiWebsocket_client import MetaApiWebsocketClient
-from lib.clients.timeoutException import TimeoutException
-from lib.metaApiConnection import MetaApiConnection
-from lib.metatraderAccountModel import MetatraderAccountModel
-from lib.historyStorage import HistoryStorage
+from .clients.metaApiWebsocket_client import MetaApiWebsocketClient
+from .clients.timeoutException import TimeoutException
+from .metaApiConnection import MetaApiConnection
+from .metatraderAccountModel import MetatraderAccountModel
+from .historyStorage import HistoryStorage
 from datetime import datetime, timedelta
 import asyncio
 

@@ -1,6 +1,6 @@
-from lib.provisioningProfile import ProvisioningProfile
-from lib.provisioningProfileApi import ProvisioningProfileApi
-from lib.clients.provisioningProfile_client import ProvisioningProfileClient, ProvisioningProfileDto
+from .provisioningProfile import ProvisioningProfile
+from .provisioningProfileApi import ProvisioningProfileApi
+from .clients.provisioningProfile_client import ProvisioningProfileClient, ProvisioningProfileDto
 import pytest
 from unittest.mock import MagicMock, AsyncMock
 

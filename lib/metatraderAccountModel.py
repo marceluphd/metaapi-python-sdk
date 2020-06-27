@@ -1,4 +1,4 @@
-from lib.historyStorage import HistoryStorage
+from .historyStorage import HistoryStorage
 from typing import Optional
 from abc import ABC, abstractmethod
 

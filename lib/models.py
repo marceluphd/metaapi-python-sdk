@@ -1,5 +1,6 @@
 from datetime import datetime
-from typing import List, TypedDict, Optional
+from typing_extensions import TypedDict
+from typing import List, Optional
 import iso8601
 
 

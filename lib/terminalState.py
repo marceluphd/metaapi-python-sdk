@@ -1,5 +1,5 @@
-from lib.clients.synchronizationListener import SynchronizationListener
-from lib.models import MetatraderAccountInformation, MetatraderPosition, MetatraderOrder, \
+from .clients.synchronizationListener import SynchronizationListener
+from .models import MetatraderAccountInformation, MetatraderPosition, MetatraderOrder, \
     MetatraderSymbolSpecification, MetatraderSymbolPrice
 import functools
 from typing import List
