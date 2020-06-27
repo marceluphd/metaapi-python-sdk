@@ -1,5 +1,4 @@
 import os
-from dotenv import load_dotenv
 import asyncio
 from metaapi_cloud_sdk import MetaApi
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')

@@ -5,3 +5,7 @@ lib/__pycache__
 source
 build
 docs
+.env
+test.log
+dist
+*.egg-info

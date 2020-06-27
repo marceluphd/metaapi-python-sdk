@@ -1,5 +1,4 @@
 import os
-from dotenv import load_dotenv
 import asyncio
 from metaapi_cloud_sdk import MetaApi
 from datetime import datetime, timedelta
