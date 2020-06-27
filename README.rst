@@ -21,7 +21,7 @@ You can obtain MetaApi token via https://app.metaapi.cloud/token UI.
 
 Working code examples
 ---------------------
-You can find code examples at `examples folder of our github repo <https://github.com/agiliumtrade-ai/metaapi-python-client/tree/master/examples>`_ or in the examples folder of the pip package.
+You can find code examples at `examples folder of our github repo <https://github.com/agiliumtrade-ai/metaapi-python-sdk/tree/master/examples>`_ or in the examples folder of the pip package.
 
 Add MetaTrader account to MetaApi
 ---------------------------------

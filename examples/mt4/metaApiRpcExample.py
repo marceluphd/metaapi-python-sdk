@@ -2,9 +2,6 @@ import os
 import asyncio
 from metaapi_cloud_sdk import MetaApi
 from datetime import datetime, timedelta
-dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
-if os.path.exists(dotenv_path):
-    load_dotenv(dotenv_path)
 
 token = os.getenv('TOKEN') or '<put in your token here>'
 login = os.getenv('LOGIN') or '<put in your MT login here>'
