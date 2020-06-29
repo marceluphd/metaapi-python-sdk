@@ -139,7 +139,7 @@ class MetatraderHistoryOrders(TypedDict):
     historyOrders: List[MetatraderOrder]
     """Array of history orders returned."""
     synchronizing: bool
-    """Flag indicating that history order initial synchronization is still in progress 
+    """Flag indicating that history order initial synchronization is still in progress
     and thus search results may be incomplete"""
 
 
@@ -183,10 +183,10 @@ class MetatraderDeal(TypedDict):
     originalComment: Optional[str]
     """Optional deal original comment (present if possible to restore original comment from history)."""
     clientId: Optional[str]
-    """Optional client-assigned id. The id value can be assigned when submitting a trade and will be present on 
-    position, history orders and history deals related to the trade. You can use this field to bind your trades 
-    to objects in your application and then track trade progress. The sum of the line lengths of the comment and 
-    the clientId must be less than or equal to 27. For more information see 
+    """Optional client-assigned id. The id value can be assigned when submitting a trade and will be present on
+    position, history orders and history deals related to the trade. You can use this field to bind your trades
+    to objects in your application and then track trade progress. The sum of the line lengths of the comment and
+    the clientId must be less than or equal to 27. For more information see
     https://metaapi.cloud/docs/client/clientIdUsage/"""
     platform: str
     """Platform id (mt4 or mt5)."""
