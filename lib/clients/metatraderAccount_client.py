@@ -29,7 +29,7 @@ class MetatraderAccountDto(TypedDict):
     provisioningProfileId: str
     """Id of the account's provisioning profile."""
     timeConverter: str
-    """Algorithm used to parse your broker timezone. Supported values are icmarkets for America/New_York DST switch 
+    """Algorithm used to parse your broker timezone. Supported values are icmarkets for America/New_York DST switch
     and roboforex for EET DST switch (the values will be changed soon)"""
     application: str
     """Application name to connect the account to. Currently allowed values are MetaApi and AgiliumTrade"""
@@ -53,7 +53,7 @@ class NewMetatraderAccountDto(TypedDict):
     login: str
     """MetaTrader account number."""
     password: str
-    """MetaTrader account password. The password can be either investor password for read-only access or master 
+    """MetaTrader account password. The password can be either investor password for read-only access or master
     password to enable trading features. Required for cloud account."""
     server: str
     """MetaTrader server which hosts the account."""
@@ -63,7 +63,7 @@ class NewMetatraderAccountDto(TypedDict):
     provisioningProfileId: str
     """Id of the account's provisioning profile."""
     timeConverter: str
-    """Algorithm used to parse your broker timezone. Supported values are icmarkets for America/New_York DST switch 
+    """Algorithm used to parse your broker timezone. Supported values are icmarkets for America/New_York DST switch
     and roboforex for EET DST switch (the values will be changed soon)."""
     application: str
     """Application name to connect the account to. Currently allowed values are MetaApi and AgiliumTrade."""
@@ -82,7 +82,7 @@ class MetatraderAccountUpdateDto(TypedDict):
     server: str
     """MetaTrader server which hosts the account"""
     synchronizationMode: str
-    """Synchronization mode, can be automatic or user. See 
+    """Synchronization mode, can be automatic or user. See
     https://metaapi.cloud/docs/client/websocket/synchronizationMode/ for more details."""
 
 

@@ -66,7 +66,7 @@ class TerminalState(SynchronizationListener):
             A local copy of MetaTrader orders opened.
         """
         return self._orders
-    
+
     @property
     def specifications(self) -> List[MetatraderSymbolSpecification]:
         """Returns a local copy of symbol specifications available in MetaTrader trading terminal.
@@ -75,7 +75,7 @@ class TerminalState(SynchronizationListener):
              A local copy of symbol specifications available in MetaTrader trading terminal.
         """
         return self._specifications
-    
+
     def specification(self, symbol: str) -> MetatraderSymbolSpecification:
         """Returns MetaTrader symbol specification by symbol.
 

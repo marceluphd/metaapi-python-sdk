@@ -573,7 +573,7 @@ class MetaApiWebsocketClient:
                                 except Exception as err:
                                     print('Failed to notify listener about orders event', err)
             elif data['type'] == 'historyOrders':
-                if 'historyOrders' in data :
+                if 'historyOrders' in data:
                     for historyOrder in data['historyOrders']:
                         if data['accountId'] in self._synchronizationListeners:
                             for listener in self._synchronizationListeners[data['accountId']]:

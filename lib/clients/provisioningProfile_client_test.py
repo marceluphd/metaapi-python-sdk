@@ -1,6 +1,6 @@
 import responses
 import json
-import unittest.mock as mock
+import mock as mock
 import pytest
 from .httpClient import HttpClient
 from .provisioningProfile_client import ProvisioningProfileClient

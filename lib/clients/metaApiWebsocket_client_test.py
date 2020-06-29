@@ -2,25 +2,23 @@ from .metaApiWebsocket_client import MetaApiWebsocketClient
 from socketio import AsyncServer
 from aiohttp import web
 from ..models import date
-import asyncio
 import pytest
 import copy
 from urllib.parse import parse_qs
 from mock import MagicMock, AsyncMock
-from threading import Thread
 sio = None
 client = None
 
 
-class ServerThread(Thread):
-    def __init__(self, name):
-        Thread.__init__(self)
-        self.name = name
+class FakeServer:
 
-    def run(self):
+    def __init__(self):
+        self.app = web.Application()
+        self.runner = None
+
+    async def start(self):
+        port = 8080
         global sio
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
         sio = AsyncServer(async_mode='aiohttp')
 
         @sio.event
@@ -30,28 +28,27 @@ class ServerThread(Thread):
                 environ.emit({'error': 'UnauthorizedError', 'message': 'Authorization token invalid'})
                 environ.close()
 
-        app = web.Application()
-        sio.attach(app, socketio_path='ws')
-        web.run_app(app)
+        sio.attach(self.app, socketio_path='ws')
+        self.runner = web.AppRunner(self.app)
+        await self.runner.setup()
+        site = web.TCPSite(self.runner, 'localhost', port)
+        await site.start()
 
-
-def init_socket():
-    server_thread = ServerThread('Server thread')
-    server_thread.setDaemon(True)
-    server_thread.start()
+    async def stop(self):
+        await self.runner.cleanup()
 
 
 @pytest.fixture(autouse=True)
 async def run_around_tests():
+    fake_server = FakeServer()
+    await fake_server.start()
     global client
     client = MetaApiWebsocketClient('token')
     client.set_url('http://localhost:8080')
     await client.connect()
     yield
-    await client._socket.disconnect()
     await client.close()
-
-init_socket()
+    await fake_server.stop()
 
 
 # This method closes the client once the required socket event has been called
@@ -122,6 +119,8 @@ class TestMetaApiWebsocketClient:
             if data['type'] == 'getPositions' and data['accountId'] == 'accountId':
                 await sio.emit('response', {'type': 'response', 'accountId': data['accountId'],
                                             'requestId': data['requestId'], 'positions': positions})
+            else:
+                raise Exception('Wrong request')
 
         actual = await client.get_positions('accountId')
         assert actual == positions
@@ -922,7 +921,7 @@ class TestMetaApiWebsocketClient:
                 await sio.emit('response', {'type': 'response', 'accountId': data['accountId'],
                                             'requestId': data['requestId']})
 
-        await client.subscribe_to_market_data('accountId', 'EURUSD');
+        await client.subscribe_to_market_data('accountId', 'EURUSD')
         assert request_received
 
     @pytest.mark.asyncio

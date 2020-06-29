@@ -31,7 +31,7 @@ class ProvisioningProfile:
             Profile name.
         """
         return self._data['name']
-    
+
     @property
     def version(self) -> int:
         """Returns profile version. Possible values are 4 and 5.
@@ -40,7 +40,7 @@ class ProvisioningProfile:
             Profile version.
         """
         return self._data['version']
-    
+
     @property
     def status(self) -> str:
         """Returns profile status. Possible values are new and active.
