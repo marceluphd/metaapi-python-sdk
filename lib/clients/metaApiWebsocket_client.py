@@ -94,9 +94,8 @@ class MetaApiWebsocketClient:
                     result.set_exception(TimeoutException('MetaApi websocket client connection timed out'))
 
             @self._socket.on('disconnect')
-            async def on_disconnect(reason: str = ''):
-                print(f'[{datetime.now().isoformat()}] MetaApi websocket client disconnected from the MetaApi '
-                      f'server because of {reason}')
+            async def on_disconnect():
+                print(f'[{datetime.now().isoformat()}] MetaApi websocket client disconnected from the MetaApi server')
                 await self._reconnect()
 
             @self._socket.on('error')

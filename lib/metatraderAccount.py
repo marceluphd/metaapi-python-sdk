@@ -162,7 +162,11 @@ class MetatraderAccount(MetatraderAccountModel):
         """
         await self._metatraderAccountClient.delete_account(self.id)
         if self.type != 'self-hosted':
-            await self.reload()
+            try:
+                await self.reload()
+            except Exception as err:
+                if err.__class__.__name__ != 'NotFoundException':
+                    raise err
 
     async def deploy(self):
         """Schedules account for deployment. It takes some time for API server to be started and account to reach the
