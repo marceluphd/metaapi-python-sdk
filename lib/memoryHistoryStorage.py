@@ -78,15 +78,17 @@ class MemoryHistoryStorage(HistoryStorage):
         history_order_time = get_done_time(history_order)
 
         for i in range(len(self._historyOrders)):
-            order = self._historyOrders[i]
+            index = len(self._historyOrders) - 1 - i
+            order = self._historyOrders[index]
             order_time = get_done_time(order)
-
             if (order_time < history_order_time) or \
-                    (order_time == history_order_time and order['id'] <= history_order['id']):
+               (order_time == history_order_time and order['id'] <= history_order['id']):
                 if (order_time == history_order_time and order['id'] == history_order['id'] and
                    order['type'] == history_order['type']):
-                    replacement_index = i
-                insert_index = i + 1
+                    replacement_index = index
+                else:
+                    insert_index = index + 1
+                break
         if replacement_index != -1:
             self._historyOrders[replacement_index] = history_order
         else:
@@ -110,14 +112,17 @@ class MemoryHistoryStorage(HistoryStorage):
 
         new_deal_time = get_time(new_deal)
         for i in range(len(self._deals)):
-            deal = self._deals[i]
+            index = len(self._deals) - 1 - i
+            deal = self._deals[index]
             deal_time = get_time(deal)
             if (deal_time < new_deal_time) or \
                     (deal_time == new_deal_time and deal['id'] <= new_deal['id']):
                 if (deal_time == new_deal_time and deal['id'] == new_deal['id'] and
                         deal['type'] == new_deal['type']):
-                    replacement_index = i
-                insert_index = i + 1
+                    replacement_index = index
+                else:
+                    insert_index = index + 1
+                break
         if replacement_index != -1:
             self._deals[replacement_index] = new_deal
         else:

@@ -8,6 +8,7 @@ password = os.getenv('PASSWORD') or '<put in your MT password here>'
 server_name = os.getenv('SERVER') or '<put in your MT server name here>'
 server_dat_file = os.getenv('PATH_TO_SERVERS_DAT') or '/path/to/your/servers.dat'
 api = MetaApi(token)
+# Note: for information on how to use this example code please read https://metaapi.cloud/docs/client/usingCodeExamples
 
 
 async def test_meta_api_synchronization():
