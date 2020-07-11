@@ -85,7 +85,7 @@ async def test_meta_api_synchronization():
 
         # trade
         print('Submitting pending order')
-        result = await connection.create_limit_buy_order('GBPUSD', 0.07, 1.0, 0.9, 2.0, 'comment',
+        result = await connection.create_limit_buy_order('GBPUSD', 0.07, 1.0, 0.9, 2.0, 'comm',
                                                              'TE_GBPUSD_7hyINWqAlE')
         if result['description'] == 'TRADE_RETCODE_DONE':
             print('Trade successful')
