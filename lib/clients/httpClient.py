@@ -17,6 +17,8 @@ class RequestOptions(TypedDict):
 
 class HttpClient:
     """HTTP client library based on requests module."""
+    def __init__(self, timeout: float = 60):
+        self._timeout = timeout
 
     async def request(self, options: RequestOptions) -> requests.Response:
         """Performs a request. Response errors are returned as ApiError or subclasses.
@@ -53,12 +55,13 @@ class HttpClient:
             req.json = options['body']
         prepped = req.prepare()
         s = requests.Session()
-        return s.send(prepped)
+        return s.send(prepped, timeout=self._timeout)
 
     def _convert_error(self, err: requests.HTTPError):
         status = err.response.status_code
         if status == 400:
-            raise ValidationException(err.response.reason, err.response.text['message'])
+            validation_text = err.response.text['message'] if isinstance(err.response.text, dict) else err.response.text
+            raise ValidationException(err.response.reason, validation_text)
         elif status == 401:
             raise UnauthorizedException(err.response.reason)
         elif status == 403:
