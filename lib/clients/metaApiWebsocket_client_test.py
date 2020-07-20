@@ -920,6 +920,27 @@ class TestMetaApiWebsocketClient:
         listener.on_deal_added.assert_called_with(update['deals'][0])
 
     @pytest.mark.asyncio
+    async def test_timeout_on_no_response(self):
+        """Should return timeout error if no server response received."""
+
+        trade = {
+            'actionType': 'ORDER_TYPE_SELL',
+            'symbol': 'AUDNZD',
+            'volume': 0.07
+        }
+
+        @sio.on('request')
+        async def on_request(sid, data):
+            pass
+
+        try:
+            await client.trade('accountId', trade)
+            Exception('TimeoutError expected')
+        except Exception as err:
+            assert err.__class__.__name__ == 'TimeoutError'
+            await client.close()
+
+    @pytest.mark.asyncio
     async def test_subscribe_to_market_data_with_mt_terminal(self):
         """Should subscribe to market data with MetaTrader terminal."""
 

@@ -24,7 +24,8 @@ def format_date(date: datetime) -> str:
 class MetaApiWebsocketClient:
     """MetaApi websocket API client (see https://metaapi.cloud/docs/client/websocket/overview/)"""
 
-    def __init__(self, token: str, domain: str = 'agiliumtrade.agiliumtrade.ai'):
+    def __init__(self, token: str, domain: str = 'agiliumtrade.agiliumtrade.ai', request_timeout: float = 60,
+                 connect_timeout: float = 60):
         """Inits MetaApi websocket API client instance.
 
         Args:
@@ -32,6 +33,8 @@ class MetaApiWebsocketClient:
             domain: Domain to connect to, default is agiliumtrade.agiliumtrade.ai.
         """
         self._url = f'https://mt-client-api-v1.{domain}'
+        self._request_timeout = request_timeout
+        self._connect_timeout = connect_timeout
         self._token = token
         self._requestResolves = {}
         self._synchronizationListeners = {}
@@ -58,10 +61,14 @@ class MetaApiWebsocketClient:
             self._requestResolves = {}
             self._resolved = False
             result = asyncio.Future()
-
             url = f'{self._url}?auth-token={self._token}'
-            self._socket = socketio.AsyncClient(reconnection=True, reconnection_delay=1, reconnection_delay_max=5)
-            await self._socket.connect(url, socketio_path='ws')
+            self._socket = socketio.AsyncClient(reconnection=False, request_timeout=self._request_timeout)
+
+            while not self._socket.connected:
+                try:
+                    await asyncio.wait_for(self._socket.connect(url, socketio_path='ws'), timeout=self._connect_timeout)
+                except Exception:
+                    pass
 
             @self._socket.on('connect')
             async def on_connect():
@@ -69,22 +76,16 @@ class MetaApiWebsocketClient:
                 if not self._resolved:
                     self._resolved = True
                     result.set_result(None)
-                else:
-                    await self._fire_reconnected()
 
                 if not self._connected:
                     self._socket.disconnect()
-
-            @self._socket.on('reconnect')
-            async def on_reconnect():
-                await self._fire_reconnected()
 
             @self._socket.on('connect_error')
             def on_connect_error(err):
                 print(f'[{datetime.now().isoformat()}] MetaApi websocket client connection error', err)
                 if not self._resolved:
                     self._resolved = True
-                    result.set_exception(err)
+                    result.set_exception(Exception(err))
 
             @self._socket.on('connect_timeout')
             def on_connect_timeout(timeout):
@@ -486,11 +487,19 @@ class MetaApiWebsocketClient:
         self._reconnectListeners = []
 
     async def _reconnect(self):
-        while (not self._socket.connected) and self._connected:
-            await asyncio.sleep(1)
-            await self._socket.connect()
+        reconnected = False
+        while self._connected and not reconnected:
+            try:
+                await self._socket.disconnect()
+                url = f'{self._url}?auth-token={self._token}'
+                await asyncio.wait_for(self._socket.connect(url, socketio_path='ws'), timeout=self._timeout)
+                reconnected = True
+                await self._fire_reconnected()
+                await self._socket.wait()
+            except Exception:
+                pass
 
-    async def _rpc_request(self, account_id: str, request: dict) -> Coroutine:
+    async def _rpc_request(self, account_id: str, request: dict, timeout: int = 60) -> Coroutine:
         if not self._connected:
             await self.connect()
 
@@ -500,7 +509,8 @@ class MetaApiWebsocketClient:
         request['accountId'] = account_id
         request['requestId'] = request_id
         await self._socket.emit('request', request)
-        return await self._requestResolves[request_id]['promise']
+        resolve = await asyncio.wait_for(self._requestResolves[request_id]['promise'], timeout=timeout)
+        return resolve
 
     def _convert_error(self, data) -> Exception:
         if data['error'] == 'ValidationError':

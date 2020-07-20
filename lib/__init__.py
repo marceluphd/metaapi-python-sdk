@@ -12,15 +12,16 @@ from .clients.synchronizationListener import SynchronizationListener
 class MetaApi:
     """MetaApi MetaTrader API SDK"""
 
-    def __init__(self, token: str, domain: str = 'agiliumtrade.agiliumtrade.ai'):
+    def __init__(self, token: str, domain: str = 'agiliumtrade.agiliumtrade.ai', request_timeout: float = 60,
+                 connect_timeout: float = 60):
         """Inits MetaApi class instance.
 
         Args:
             token: Authorization token.
             domain: Domain to connect to.
         """
-        http_client = HttpClient()
-        self._metaApiWebsocketClient = MetaApiWebsocketClient(token, domain)
+        http_client = HttpClient(request_timeout)
+        self._metaApiWebsocketClient = MetaApiWebsocketClient(token, domain, request_timeout, connect_timeout)
         self._provisioningProfileApi = ProvisioningProfileApi(ProvisioningProfileClient(http_client, token, domain))
         self._metatraderAccountApi = MetatraderAccountApi(MetatraderAccountClient(http_client, token, domain),
                                                           self._metaApiWebsocketClient)

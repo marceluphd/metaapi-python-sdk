@@ -1,3 +1,6 @@
+1.1.5
+  - increased websocket client stability
+  - added websocket and http client timeouts
 1.1.4
   - increased synchronization speed
   - fixed connection stability issue during initial synchronization
