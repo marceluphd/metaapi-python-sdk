@@ -109,9 +109,9 @@ class MetaApiWebsocketClient:
                     request_resolve = self._requestResolves[data['requestId']]
                     del self._requestResolves[data['requestId']]
                 else:
-                    request_resolve = asyncio.Future()
+                    request_resolve = {'accountId': data['accountId'], 'promise': asyncio.Future()}
                 self._convert_iso_time_to_date(data)
-                request_resolve.set_result(data)
+                request_resolve['promise'].set_result(data)
 
             @self._socket.on('processingError')
             def on_processing_error(data):
@@ -119,8 +119,8 @@ class MetaApiWebsocketClient:
                     request_resolve = self._requestResolves[data['requestId']]
                     del self._requestResolves[data['requestId']]
                 else:
-                    request_resolve = asyncio.Future()
-                request_resolve.set_exception(self._convert_error(data))
+                    request_resolve = {'accountId': data['accountId'], 'promise': asyncio.Future()}
+                request_resolve['promise'].set_exception(self._convert_error(data))
 
             @self._socket.on('synchronization')
             async def on_synchronization(data):
@@ -134,8 +134,7 @@ class MetaApiWebsocketClient:
         if self._connected:
             self._connected = False
             await self._socket.disconnect()
-            for request_resolve in self._requestResolves:
-                self._requestResolves[request_resolve].set_exception(Exception('MetaApi connection closed'))
+            self._drop_all_requests()
             self._requestResolves = {}
             self._synchronizationListeners = {}
 
@@ -497,11 +496,11 @@ class MetaApiWebsocketClient:
 
         request_id = ''.join(random.choice(string.ascii_lowercase) for i in range(32))
 
-        self._requestResolves[request_id] = asyncio.Future()
+        self._requestResolves[request_id] = {'accountId': account_id, 'promise': asyncio.Future()}
         request['accountId'] = account_id
         request['requestId'] = request_id
         await self._socket.emit('request', request)
-        return await self._requestResolves[request_id]
+        return await self._requestResolves[request_id]['promise']
 
     def _convert_error(self, data) -> Exception:
         if data['error'] == 'ValidationError':
@@ -540,6 +539,7 @@ class MetaApiWebsocketClient:
                         except Exception as err:
                             print('Failed to notify listener about connected event', err)
             elif data['type'] == 'disconnected':
+                self._drop_all_requests(data['accountId'])
                 if data['accountId'] in self._synchronizationListeners:
                     for listener in self._synchronizationListeners[data['accountId']]:
                         try:
@@ -685,6 +685,12 @@ class MetaApiWebsocketClient:
                                     print('Failed to notify listener about prices event', err)
         except Exception as err:
             print('Failed to process incoming synchronization packet', err)
+
+    def _drop_all_requests(self, account_id: str = None):
+        for request_resolve in self._requestResolves:
+            if (not self._requestResolves[request_resolve]['promise'].done()) and \
+                    (self._requestResolves[request_resolve]['accountId'] == account_id if account_id else True):
+                self._requestResolves[request_resolve]['promise'].set_exception(Exception('MetaApi connection closed'))
 
     async def _fire_reconnected(self):
         for listener in self._reconnectListeners:

@@ -3,6 +3,7 @@ from socketio import AsyncServer
 from aiohttp import web
 from ..models import date
 import pytest
+import asyncio
 import copy
 from urllib.parse import parse_qs
 from mock import MagicMock, AsyncMock
@@ -40,6 +41,7 @@ class FakeServer:
 
 @pytest.fixture(autouse=True)
 async def run_around_tests():
+    FinalMock.__await__ = lambda x: async_magic_close().__await__()
     fake_server = FakeServer()
     await fake_server.start()
     global client
@@ -637,13 +639,24 @@ class TestMetaApiWebsocketClient:
     @pytest.mark.asyncio
     async def test_process_disconnected_synchronization_event(self):
         """Should process disconnected synchronization event."""
+
+        async def test_close():
+            assert client._requestResolves['test']['promise'].exception().args[0] == 'MetaApi connection closed'
+            assert not client._requestResolves['test2']['promise'].done()
+            await client.close()
+
+        FinalMock.__await__ = lambda x: test_close().__await__()
+
         listener = MagicMock()
         listener.on_disconnected = FinalMock()
 
+        client._requestResolves['test'] = {'accountId': 'accountId', 'promise': asyncio.Future()}
+        client._requestResolves['test2'] = {'accountId': 'accountId2', 'promise': asyncio.Future()}
         client.add_synchronization_listener('accountId', listener)
         await sio.emit('synchronization', {'type': 'disconnected', 'accountId': 'accountId'})
         await client._socket.wait()
         listener.on_disconnected.assert_called_with()
+        assert 'test' not in client._requestResolves
 
     @pytest.mark.asyncio
     async def test_synchronize_with_metatrader_terminal(self):
