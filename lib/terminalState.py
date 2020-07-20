@@ -101,12 +101,6 @@ class TerminalState(SynchronizationListener):
     async def on_connected(self):
         """Invoked when connection to MetaTrader terminal established."""
         self._connected = True
-        self._accountInformation = None
-        self._positions = []
-        self._orders = []
-        self._specifications = []
-        self._specificationsBySymbol = {}
-        self._pricesBySymbol = {}
 
     async def on_disconnected(self):
         """Invoked when connection to MetaTrader terminal terminated."""
@@ -114,7 +108,7 @@ class TerminalState(SynchronizationListener):
         self._connectedToBroker = False
 
     async def on_broker_connection_status_changed(self, connected: bool):
-        """Invoked when broker connection satus have changed.
+        """Invoked when broker connection status have changed.
 
         Args:
             connected: Whether MetaTrader terminal is connected to broker.
