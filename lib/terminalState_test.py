@@ -1,5 +1,6 @@
 from .terminalState import TerminalState
 import pytest
+import asyncio
 state = TerminalState()
 
 
@@ -32,6 +33,20 @@ class TestTerminalState:
         await state.on_broker_connection_status_changed(True)
         await state.on_disconnected()
         assert not state.connected_to_broker
+
+    @pytest.mark.asyncio
+    async def test_call_disconnect(self):
+        """Should call an on_disconnect if there was no signal for a long time"""
+        await state.on_connected()
+        await state.on_broker_connection_status_changed(True)
+        await asyncio.sleep(10)
+        await state.on_broker_connection_status_changed(True)
+        await asyncio.sleep(55)
+        assert state.connected_to_broker
+        assert state.connected
+        await asyncio.sleep(10)
+        assert not state.connected_to_broker
+        assert not state.connected
 
     @pytest.mark.asyncio
     async def test_return_account_information(self):

@@ -1,1 +1,1 @@
-metaapi-cloud-sdk
+metaapi-cloud-sdk==2.0.0

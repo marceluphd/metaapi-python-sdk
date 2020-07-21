@@ -3,6 +3,8 @@ from .models import MetatraderAccountInformation, MetatraderPosition, Metatrader
     MetatraderSymbolSpecification, MetatraderSymbolPrice
 import functools
 from typing import List
+import asyncio
+from threading import Timer
 
 
 class TerminalState(SynchronizationListener):
@@ -113,7 +115,13 @@ class TerminalState(SynchronizationListener):
         Args:
             connected: Whether MetaTrader terminal is connected to broker.
         """
+        def disconnect():
+            asyncio.run(self.on_disconnected())
         self._connectedToBroker = connected
+        if hasattr(self, '_status_timer'):
+            self._status_timer.cancel()
+        self._status_timer = Timer(60, disconnect)
+        self._status_timer.start()
 
     async def on_account_information_updated(self, account_information: MetatraderAccountInformation):
         """Invoked when MetaTrader account information is updated.

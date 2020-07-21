@@ -309,7 +309,7 @@ Execute trades (both RPC and streaming APIs)
     print(await connection.close_position_partially('46870472', 0.9))
     print(await connection.close_position('46870472'))
     print(await connection.close_position_by_symbol('EURUSD'))
-    print(await connection.modify_order('46870472', 0.07, 1.0, 2.0, 0.9))
+    print(await connection.modify_order('46870472', 1.0, 2.0, 0.9))
     print(await connection.cancel_order('46870472'))
 
     # Note: trade methods do not throw an exception if terminal have refused
