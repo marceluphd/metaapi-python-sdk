@@ -461,13 +461,12 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
             trade_params['clientId'] = client_id
         return self._websocketClient.trade(self._account.id, trade_params)
 
-    def modify_order(self, order_id: str, volume: float, open_price: float, stop_loss: float = None,
+    def modify_order(self, order_id: str, open_price: float, stop_loss: float = None,
                      take_profit: float = None) -> Coroutine:
         """Modifies a pending order (see https://metaapi.cloud/docs/client/websocket/api/trade/).
 
         Args:
             order_id: Order id (ticket number).
-            volume: Order volume.
             open_price: Order stop price.
             stop_loss: Optional stop loss price.
             take_profit: Optional take profit price.
@@ -475,7 +474,7 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
         Returns:
             A coroutine resolving with trade result.
         """
-        trade_params = {'actionType': 'ORDER_MODIFY', 'orderId': order_id, 'volume': volume, 'openPrice': open_price}
+        trade_params = {'actionType': 'ORDER_MODIFY', 'orderId': order_id, 'openPrice': open_price}
         if stop_loss:
             trade_params['stopLoss'] = stop_loss
         if take_profit:

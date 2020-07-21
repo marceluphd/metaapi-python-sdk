@@ -562,11 +562,10 @@ class TestMetaApiConnection:
             'orderId': 46870472
         }
         client.trade = AsyncMock(return_value=trade_result)
-        actual = await api.modify_order('46870472', 0.07, 1.0, 2.0, 0.9)
+        actual = await api.modify_order('46870472', 1.0, 2.0, 0.9)
         assert actual == trade_result
         client.trade.assert_called_with('accountId', {'actionType': 'ORDER_MODIFY', 'orderId': '46870472',
-                                                      'volume': 0.07, 'openPrice': 1.0, 'stopLoss': 2.0,
-                                                      'takeProfit': 0.9})
+                                                      'openPrice': 1.0, 'stopLoss': 2.0, 'takeProfit': 0.9})
 
     @pytest.mark.asyncio
     async def test_cancel_order(self):

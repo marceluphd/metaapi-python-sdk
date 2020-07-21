@@ -1,4 +1,6 @@
-1.1.5
+2.0.0
+  - breaking change: removed volume as an argument from a modifyOrder function
+  - mark account as disconnected if there is no status notification for a long time
   - increased websocket client stability
   - added websocket and http client timeouts
 1.1.4
