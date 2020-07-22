@@ -492,7 +492,7 @@ class MetaApiWebsocketClient:
             try:
                 await self._socket.disconnect()
                 url = f'{self._url}?auth-token={self._token}'
-                await asyncio.wait_for(self._socket.connect(url, socketio_path='ws'), timeout=self._timeout)
+                await asyncio.wait_for(self._socket.connect(url, socketio_path='ws'), timeout=self._connect_timeout)
                 reconnected = True
                 await self._fire_reconnected()
                 await self._socket.wait()
@@ -700,7 +700,10 @@ class MetaApiWebsocketClient:
         for request_resolve in self._requestResolves:
             if (not self._requestResolves[request_resolve]['promise'].done()) and \
                     (self._requestResolves[request_resolve]['accountId'] == account_id if account_id else True):
-                self._requestResolves[request_resolve]['promise'].set_exception(Exception('MetaApi connection closed'))
+                exception_message = f'Account {account_id} has disconnected from MetaApi, thus all requests to ' \
+                                    f'this account were cancelled' if account_id else 'MetaApi connection closed'
+                self._requestResolves[request_resolve]['promise'].set_exception(
+                    NotConnectedException(exception_message))
 
     async def _fire_reconnected(self):
         for listener in self._reconnectListeners:

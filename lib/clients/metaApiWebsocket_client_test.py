@@ -641,7 +641,8 @@ class TestMetaApiWebsocketClient:
         """Should process disconnected synchronization event."""
 
         async def test_close():
-            assert client._requestResolves['test']['promise'].exception().args[0] == 'MetaApi connection closed'
+            assert client._requestResolves['test']['promise'].exception().args[0] == \
+                   'Account accountId has disconnected from MetaApi, thus all requests to this account were cancelled'
             assert not client._requestResolves['test2']['promise'].done()
             await client.close()
 
