@@ -349,7 +349,7 @@ class MetaApiWebsocketClient:
         response = await self._rpc_request(account_id, {'type': 'trade', 'trade': trade})
         return response['response']
 
-    def subscribe(self, account_id: str):
+    async def subscribe(self, account_id: str):
         """Subscribes to the Metatrader terminal events
         (see https://metaapi.cloud/docs/client/websocket/api/subscribe/).
 
@@ -359,7 +359,14 @@ class MetaApiWebsocketClient:
         Returns:
             A coroutine which resolves when subscription started.
         """
-        return self._rpc_request(account_id, {'type': 'subscribe'})
+        async def run_subscribe():
+            try:
+                await self._rpc_request(account_id, {'type': 'subscribe'})
+            except Exception as err:
+                print(f'[{datetime.now().isoformat()}] MetaApi websocket client failed to receive subscribe response',
+                      err)
+
+        asyncio.create_task(run_subscribe())
 
     def reconnect(self, account_id: str) -> Coroutine:
         """Reconnects to the Metatrader terminal (see https://metaapi.cloud/docs/client/websocket/api/reconnect/).
@@ -499,7 +506,7 @@ class MetaApiWebsocketClient:
             except Exception:
                 pass
 
-    async def _rpc_request(self, account_id: str, request: dict, timeout: int = 60) -> Coroutine:
+    async def _rpc_request(self, account_id: str, request: dict) -> Coroutine:
         if not self._connected:
             await self.connect()
 
@@ -509,7 +516,8 @@ class MetaApiWebsocketClient:
         request['accountId'] = account_id
         request['requestId'] = request_id
         await self._socket.emit('request', request)
-        resolve = await asyncio.wait_for(self._requestResolves[request_id]['promise'], timeout=timeout)
+        resolve = await asyncio.wait_for(self._requestResolves[request_id]['promise'],
+                                         timeout=self._request_timeout)
         return resolve
 
     def _convert_error(self, data) -> Exception:
