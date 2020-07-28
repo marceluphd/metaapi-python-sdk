@@ -457,11 +457,17 @@ class TestMetaApiWebsocketClient:
     @pytest.mark.asyncio
     async def test_connect_to_terminal(self):
         """Should connect to MetaTrader terminal."""
+        request_received = False
+
         @sio.on('request')
         async def on_request(sid, data):
-            pass
+            if data['type'] == 'subscribe' and data['accountId'] == 'accountId':
+                nonlocal request_received
+                request_received = True
 
         await client.subscribe('accountId')
+        await asyncio.sleep(0.05)
+        assert request_received
 
     @pytest.mark.asyncio
     async def test_reconnect_to_terminal(self):
