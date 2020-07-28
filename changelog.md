@@ -1,3 +1,5 @@
+2.0.1
+  - improved account connection stability
 2.0.0
   - breaking change: removed volume as an argument from a modifyOrder function
   - mark account as disconnected if there is no status notification for a long time
