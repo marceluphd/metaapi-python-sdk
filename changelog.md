@@ -1,10 +1,9 @@
-2.0.1
-  - improved account connection stability
 2.0.0
   - breaking change: removed volume as an argument from a modifyOrder function
   - mark account as disconnected if there is no status notification for a long time
   - increased websocket client stability
   - added websocket and http client timeouts
+  - improved account connection stability
 1.1.4
   - increased synchronization speed
   - fixed connection stability issue during initial synchronization

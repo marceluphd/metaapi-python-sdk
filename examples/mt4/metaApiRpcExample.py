@@ -3,15 +3,14 @@ import asyncio
 from metaapi_cloud_sdk import MetaApi
 from datetime import datetime, timedelta
 
+# Note: for information on how to use this example code please read https://metaapi.cloud/docs/client/usingCodeExamples
+
 token = os.getenv('TOKEN') or '<put in your token here>'
 login = os.getenv('LOGIN') or '<put in your MT login here>'
 password = os.getenv('PASSWORD') or '<put in your MT password here>'
 server_name = os.getenv('SERVER') or '<put in your MT server name here>'
 broker_srv_file = os.getenv('PATH_TO_BROKER_SRV') or '/path/to/your/broker.srv'
-
 api = MetaApi(token)
-# Note: for information on how to use this example code please read https://metaapi.cloud/docs/client/usingCodeExamples
-
 
 async def test_meta_api_synchronization():
     try:
