@@ -17,7 +17,6 @@ class TestProvisioningProfileClient:
         expected = [{
             '_id': 'id',
             'name': 'name',
-            'type': 'standard',
             'version': 4,
             'status': 'active'
         }]
@@ -36,7 +35,6 @@ class TestProvisioningProfileClient:
         expected = {
             '_id': 'id',
             'name': 'name',
-            'type': 'standard',
             'version': 4,
             'status': 'active'
         }
@@ -56,11 +54,8 @@ class TestProvisioningProfileClient:
             'id': 'id'
         }
         profile = {
-            '_id': 'id',
             'name': 'name',
-            'type': 'standard',
             'version': 4,
-            'status': 'active'
         }
         with responses.RequestsMock() as rsps:
             rsps.add(responses.POST, f'{PROVISIONING_API_URL}/users/current/provisioning-profiles',

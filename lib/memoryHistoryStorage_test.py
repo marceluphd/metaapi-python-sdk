@@ -103,7 +103,7 @@ class TestMemoryHistoryStorage:
         """Should return saved order synchronization status."""
 
         assert not storage.order_synchronization_finished
-        await storage.on_order_synchronization_finished()
+        await storage.on_order_synchronization_finished('synchronizationId')
         assert storage.order_synchronization_finished
 
     @pytest.mark.asyncio
@@ -111,5 +111,5 @@ class TestMemoryHistoryStorage:
         """Should return saved deal synchronization status."""
 
         assert not storage.deal_synchronization_finished
-        await storage.on_deal_synchronization_finished()
+        await storage.on_deal_synchronization_finished('synchronizationId')
         assert storage.deal_synchronization_finished

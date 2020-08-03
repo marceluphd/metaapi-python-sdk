@@ -6,6 +6,7 @@ from .memoryHistoryStorage import MemoryHistoryStorage
 from .metatraderAccountModel import MetatraderAccountModel
 from .historyStorage import HistoryStorage
 from .clients.timeoutException import TimeoutException
+from .models import random_id
 from datetime import datetime, timedelta
 from typing import Coroutine
 import asyncio
@@ -28,6 +29,9 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
         self._websocketClient = websocket_client
         self._account = account
         self._synchronized = False
+        self._ordersSynchronized = {}
+        self._dealsSynchronized = {}
+        self._lastSynchronizationId = None
         if account.synchronization_mode == 'user':
             self._terminalState = TerminalState()
             self._historyStorage = history_storage or MemoryHistoryStorage()
@@ -511,8 +515,10 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
         if self._account.synchronization_mode == 'user':
             starting_history_order_time = await self._historyStorage.last_history_order_time()
             starting_deal_time = await self._historyStorage.last_deal_time()
-            return await self._websocketClient.synchronize(self._account.id, starting_history_order_time,
-                                                           starting_deal_time)
+            synchronization_id = random_id()
+            self._lastSynchronizationId = synchronization_id
+            return await self._websocketClient.synchronize(self._account.id, synchronization_id,
+                                                           starting_history_order_time, starting_deal_time)
 
     async def subscribe(self) -> Coroutine:
         """Initiates subscription to MetaTrader terminal.
@@ -605,11 +611,23 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
 
     async def on_disconnected(self):
         """Invoked when connection to MetaTrader terminal terminated"""
-        self._synchronized = False
+        self._lastSynchronizationId = None
 
-    async def on_deal_synchronization_finished(self):
-        """Invoked when a synchronization of history deals on a MetaTrader account have finished"""
-        self._synchronized = True
+    async def on_deal_synchronization_finished(self, synchronization_id: str):
+        """Invoked when a synchronization of history deals on a MetaTrader account have finished
+
+        Args:
+            synchronization_id: Synchronization request id.
+        """
+        self._dealsSynchronized[synchronization_id] = True
+
+    async def on_order_synchronization_finished(self, synchronization_id: str):
+        """Invoked when a synchronization of history orders on a MetaTrader account have finished
+
+        Args:
+            synchronization_id: Synchronization request id.
+        """
+        self._ordersSynchronized[synchronization_id] = True
 
     async def on_reconnected(self):
         """Invoked when connection to MetaApi websocket API restored after a disconnect.
@@ -619,24 +637,31 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
         """
         await self.subscribe()
 
-    async def is_synchronized(self) -> bool:
+    async def is_synchronized(self, synchronization_id: str = None) -> bool:
         """Returns flag indicating status of state synchronization with MetaTrader terminal.
+
+        Args:
+            synchronization_id: Optional synchronization request id, last synchronization request id will be used.
 
         Returns:
             A coroutine resolving with a flag indicating status of state synchronization with MetaTrader terminal.
         """
+        synchronization_id = synchronization_id or self._lastSynchronizationId
         if self._account.synchronization_mode == 'user':
-            return self._synchronized
+            return synchronization_id in self._ordersSynchronized and self._ordersSynchronized[synchronization_id] \
+                and synchronization_id in self._dealsSynchronized and self._dealsSynchronized[synchronization_id]
         else:
             result = await self.get_deals_by_time_range(datetime.utcnow(), datetime.utcnow())
             return not result['synchronizing']
 
-    async def wait_synchronized(self, timeout_in_seconds: int = 300, interval_in_milliseconds: int = 5000):
+    async def wait_synchronized(self, synchronization_id: str = None, timeout_in_seconds: int = 300,
+                                interval_in_milliseconds: int = 1000):
         """Waits until synchronization to MetaTrader terminal is completed.
 
         Args:
-            timeout_in_seconds: Wait timeout in seconds.
-            interval_in_milliseconds: Interval between account reloads while waiting for a change.
+            synchronization_id: Optional synchronization id, last synchronization request id will be used by default.
+            timeout_in_seconds: Wait timeout in seconds, default is 5m.
+            interval_in_milliseconds: Interval between account reloads while waiting for a change, default is 1s.
 
         Returns:
             A coroutine which resolves when synchronization to MetaTrader terminal is completed.
@@ -645,12 +670,12 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
             TimeoutException: If application failed to synchronize with the terminal within timeout allowed.
         """
         start_time = datetime.now()
-        while not(await self.is_synchronized()) and (start_time + timedelta(seconds=timeout_in_seconds) >
-                                                     datetime.now()):
+        while not(await self.is_synchronized(synchronization_id)) \
+                and (start_time + timedelta(seconds=timeout_in_seconds) > datetime.now()):
             await asyncio.sleep(interval_in_milliseconds / 1000)
-        if not(await self.is_synchronized()):
+        if not(await self.is_synchronized(synchronization_id)):
             raise TimeoutException('Timed out waiting for MetaApi to synchronize to MetaTrader account ' +
-                                   self._account.id)
+                                   self._account.id + ', synchronization id ' + (synchronization_id or 'None'))
 
     def close(self):
         """Closes the connection. The instance of the class should no longer be used after this method is invoked."""
