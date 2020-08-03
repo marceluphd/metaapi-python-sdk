@@ -5,8 +5,8 @@ from .clients.reconnectListener import ReconnectListener
 from .clients.synchronizationListener import SynchronizationListener
 from .metatraderAccount import MetatraderAccount
 from datetime import datetime, timedelta
-from mock import MagicMock, AsyncMock
-from .models import date
+from mock import MagicMock, AsyncMock, patch
+from .models import date, random_id
 import pytest
 import asyncio
 
@@ -598,12 +598,13 @@ class TestMetaApiConnection:
     async def test_synchronize_state_with_terminal(self):
         """Should synchronize state with terminal."""
         client.synchronize = AsyncMock()
-        api = MetaApiConnection(client, account)
-        await api.history_storage.on_history_order_added({'doneTime': date('2020-01-01T00:00:00.000Z')})
-        await api.history_storage.on_deal_added({'time': date('2020-01-02T00:00:00.000Z')})
-        await api.synchronize()
-        client.synchronize.assert_called_with('accountId', date('2020-01-01T00:00:00.000Z'),
-                                              date('2020-01-02T00:00:00.000Z'))
+        with patch('lib.metaApiConnection.random_id', return_value='synchronizationId'):
+            api = MetaApiConnection(client, account)
+            await api.history_storage.on_history_order_added({'doneTime': date('2020-01-01T00:00:00.000Z')})
+            await api.history_storage.on_deal_added({'time': date('2020-01-02T00:00:00.000Z')})
+            await api.synchronize()
+            client.synchronize.assert_called_with('accountId', 'synchronizationId', date('2020-01-01T00:00:00.000Z'),
+                                                  date('2020-01-02T00:00:00.000Z'))
 
     @pytest.mark.asyncio
     async def test_subscribe_to_market_data(self):
@@ -675,13 +676,14 @@ class TestMetaApiConnection:
     @pytest.mark.asyncio
     async def test_sync_on_connection(self):
         """Should synchronize on connection."""
-        client.synchronize = AsyncMock()
-        api = MetaApiConnection(client, account)
-        await api.history_storage.on_history_order_added({'doneTime': date('2020-01-01T00:00:00.000Z')})
-        await api.history_storage.on_deal_added({'time': date('2020-01-02T00:00:00.000Z')})
-        await api.on_connected()
-        client.synchronize.assert_called_with('accountId', date('2020-01-01T00:00:00.000Z'),
-                                              date('2020-01-02T00:00:00.000Z'))
+        with patch('lib.metaApiConnection.random_id', return_value='synchronizationId'):
+            client.synchronize = AsyncMock()
+            api = MetaApiConnection(client, account)
+            await api.history_storage.on_history_order_added({'doneTime': date('2020-01-01T00:00:00.000Z')})
+            await api.history_storage.on_deal_added({'time': date('2020-01-02T00:00:00.000Z')})
+            await api.on_connected()
+            client.synchronize.assert_called_with('accountId', 'synchronizationId', date('2020-01-01T00:00:00.000Z'),
+                                                  date('2020-01-02T00:00:00.000Z'))
 
     @pytest.mark.asyncio
     async def test_unsubscribe_from_events_on_close(self):
@@ -697,29 +699,30 @@ class TestMetaApiConnection:
     @pytest.mark.timeout(60)
     @pytest.mark.asyncio
     async def test_wait_sync_complete_user_mode(self):
-        """Should wait util synchronization complete in user mode."""
+        """Should wait until synchronization complete in user mode."""
         assert not (await api.is_synchronized())
         try:
-            await api.wait_synchronized(1, 10)
+            await api.wait_synchronized('synchronizationId', 1, 10)
             raise Exception('TimeoutError is expected')
         except Exception as err:
             assert err.__class__.__name__ == 'TimeoutException'
-        await api.on_deal_synchronization_finished()
-        promise = api.wait_synchronized(1, 10)
+        await api.on_order_synchronization_finished('synchronizationId')
+        await api.on_deal_synchronization_finished('synchronizationId')
+        promise = api.wait_synchronized('synchronizationId', 1, 10)
         start_time = datetime.now()
         await promise
         assert pytest.approx(0, 10) == (datetime.now() - start_time).seconds * 1000
-        assert (await api.is_synchronized())
+        assert (await api.is_synchronized('synchronizationId'))
 
     @pytest.mark.asyncio
     async def test_time_out_waiting_for_sync_user_mode(self):
         """Should time out waiting for synchronization complete in user mode."""
         try:
-            await api.wait_synchronized(1, 10)
+            await api.wait_synchronized('synchronizationId', 1, 10)
             raise Exception('TimeoutError is expected')
         except Exception as err:
             assert err.__class__.__name__ == 'TimeoutException'
-        assert not (await api.is_synchronized())
+        assert not (await api.is_synchronized('synchronizationId'))
 
     @pytest.mark.asyncio
     async def test_wait_sync_complete_automatic_mode(self):
@@ -730,9 +733,9 @@ class TestMetaApiConnection:
                                                    {'synchronizing': False}, {'synchronizing': False}])
         assert not (await api.is_synchronized())
         start_time = datetime.now()
-        await api.wait_synchronized(1, 10)
+        await api.wait_synchronized('synchronizationId', 1, 10)
         assert pytest.approx(20, 10) == (datetime.now() - start_time).seconds * 1000
-        assert (await api.is_synchronized())
+        assert (await api.is_synchronized('synchronizationId'))
 
     @pytest.mark.asyncio
     async def test_subscribe_to_terminal_on_reconnect(self):

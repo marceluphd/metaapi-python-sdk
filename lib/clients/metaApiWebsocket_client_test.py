@@ -5,8 +5,9 @@ from ..models import date
 import pytest
 import asyncio
 import copy
+import re
 from urllib.parse import parse_qs
-from mock import MagicMock, AsyncMock
+from mock import MagicMock, AsyncMock, patch
 sio = None
 client = None
 
@@ -470,6 +471,25 @@ class TestMetaApiWebsocketClient:
         assert request_received
 
     @pytest.mark.asyncio
+    @patch('builtins.print', autospec=True, side_effect=print)
+    async def test_return_error_if_failed(self, mock_print):
+        """Should return error if connect to MetaTrader terminal failed."""
+        request_received = False
+
+        @sio.on('request')
+        async def on_request(sid, data):
+            if data['type'] == 'subscribe' and data['accountId'] == 'accountId':
+                nonlocal request_received
+                request_received = True
+            await sio.emit('processingError', {'id': 1, 'error': 'NotAuthenticatedError', 'message': 'Error message',
+                                               'requestId': data['requestId']})
+
+        await client.subscribe('accountId')
+        await asyncio.sleep(0.05)
+        re.match(r'MetaApi websocket client failed to receive subscribe response', mock_print.call_args_list[0].args[0])
+        assert request_received
+
+    @pytest.mark.asyncio
     async def test_reconnect_to_terminal(self):
         """Should reconnect to MetaTrader terminal."""
 
@@ -638,24 +658,12 @@ class TestMetaApiWebsocketClient:
     async def test_process_disconnected_synchronization_event(self):
         """Should process disconnected synchronization event."""
 
-        async def test_close():
-            assert client._requestResolves['test']['promise'].exception().args[0] == \
-                   'Account accountId has disconnected from MetaApi, thus all requests to this account were cancelled'
-            assert not client._requestResolves['test2']['promise'].done()
-            await client.close()
-
-        FinalMock.__await__ = lambda x: test_close().__await__()
-
         listener = MagicMock()
         listener.on_disconnected = FinalMock()
-
-        client._requestResolves['test'] = {'accountId': 'accountId', 'promise': asyncio.Future()}
-        client._requestResolves['test2'] = {'accountId': 'accountId2', 'promise': asyncio.Future()}
         client.add_synchronization_listener('accountId', listener)
         await sio.emit('synchronization', {'type': 'disconnected', 'accountId': 'accountId'})
         await client._socket.wait()
         listener.on_disconnected.assert_called_with()
-        assert 'test' not in client._requestResolves
 
     @pytest.mark.asyncio
     async def test_synchronize_with_metatrader_terminal(self):
@@ -667,13 +675,14 @@ class TestMetaApiWebsocketClient:
         async def on_request(sid, data):
             if data['type'] == 'synchronize' and data['accountId'] == 'accountId' and \
                     data['startingHistoryOrderTime'] == '2020-01-01T00:00:00.000Z' and \
-                    data['startingDealTime'] == '2020-01-02T00:00:00.000Z':
+                    data['startingDealTime'] == '2020-01-02T00:00:00.000Z' and data['requestId'] == 'synchronizationId':
                 nonlocal request_received
                 request_received = True
                 await sio.emit('response', {'type': 'response', 'accountId': data['accountId'],
                                             'requestId': data['requestId']})
 
-        await client.synchronize('accountId', date('2020-01-01T00:00:00.000Z'), date('2020-01-02T00:00:00.000Z'))
+        await client.synchronize('accountId', 'synchronizationId', date('2020-01-01T00:00:00.000Z'),
+                                 date('2020-01-02T00:00:00.000Z'))
         assert request_received
 
     @pytest.mark.asyncio

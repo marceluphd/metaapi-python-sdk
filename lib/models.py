@@ -2,15 +2,25 @@ from datetime import datetime
 from typing_extensions import TypedDict
 from typing import List, Optional
 import iso8601
+import random
+import string
 
 
 def date(date_time: str) -> datetime:
+    """Parses a date string into a datetime object."""
     return iso8601.parse_date(date_time)
+
+
+def random_id() -> str:
+    """Generates a random id of 32 symbols."""
+    return ''.join(random.choice(string.ascii_lowercase) for i in range(32))
 
 
 class MetatraderAccountInformation(TypedDict):
     """MetaTrader account information (see https://metaapi.cloud/docs/client/models/metatraderAccountInformation/)"""
 
+    platform: str
+    """Platform id (mt4 or mt5)"""
     broker: str
     """Broker name."""
     currency: str

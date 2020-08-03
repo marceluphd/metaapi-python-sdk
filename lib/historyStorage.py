@@ -78,16 +78,22 @@ class HistoryStorage(SynchronizationListener, ABC):
         """
         pass
 
-    async def on_deal_synchronization_finished(self):
+    async def on_deal_synchronization_finished(self, synchronization_id: str):
         """Invoked when a synchronization of history deals on a MetaTrader account have finished.
+
+        Args:
+            synchronization_id: Synchronization request id.
 
         Returns:
             A coroutine which resolves when the asynchronous event is processed.
         """
         self._dealSynchronizationFinished = True
 
-    async def on_order_synchronization_finished(self):
+    async def on_order_synchronization_finished(self, synchronization_id: str):
         """Invoked when a synchronization of history orders on a MetaTrader account have finished.
+
+        Args:
+            synchronization_id: Synchronization request id.
 
         Returns:
              A coroutine which resolves when the asynchronous event is processed

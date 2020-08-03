@@ -171,12 +171,12 @@ class MetatraderAccountModel(ABC):
         """
 
     @abstractmethod
-    async def wait_deployed(self, timeout_in_seconds=300, interval_in_milliseconds=5000):
+    async def wait_deployed(self, timeout_in_seconds=300, interval_in_milliseconds=1000):
         """Waits until API server has finished deployment and account reached the DEPLOYED state.
 
         Args:
-            timeout_in_seconds: Wait timeout in seconds.
-            interval_in_milliseconds: Interval between account reloads while waiting for a change.
+            timeout_in_seconds: Wait timeout in seconds, default is 5m.
+            interval_in_milliseconds: Interval between account reloads while waiting for a change, default is 1s.
 
         Returns:
             A coroutine which resolves when account is deployed.
@@ -186,12 +186,12 @@ class MetatraderAccountModel(ABC):
         """
 
     @abstractmethod
-    async def wait_undeployed(self, timeout_in_seconds=300, interval_in_milliseconds=5000):
+    async def wait_undeployed(self, timeout_in_seconds=300, interval_in_milliseconds=1000):
         """Waits until API server has finished undeployment and account reached the UNDEPLOYED state.
 
         Args:
-            timeout_in_seconds: Wait timeout in seconds.
-            interval_in_milliseconds: Interval between account reloads while waiting for a change.
+            timeout_in_seconds: Wait timeout in seconds, default is 5m.
+            interval_in_milliseconds: Interval between account reloads while waiting for a change, default is 1s.
 
         Returns:
             A coroutine which resolves when account is undeployed.
@@ -201,12 +201,12 @@ class MetatraderAccountModel(ABC):
         """
 
     @abstractmethod
-    async def wait_removed(self, timeout_in_seconds=300, interval_in_milliseconds=5000):
+    async def wait_removed(self, timeout_in_seconds=300, interval_in_milliseconds=1000):
         """Waits until account has been deleted.
 
         Args:
-            timeout_in_seconds: Wait timeout in seconds.
-            interval_in_milliseconds: Interval between account reloads while waiting for a change.
+            timeout_in_seconds: Wait timeout in seconds, default is 5m.
+            interval_in_milliseconds: Interval between account reloads while waiting for a change, default is 1s.
 
         Returns:
             A coroutine which resolves when account is deleted.
@@ -216,12 +216,12 @@ class MetatraderAccountModel(ABC):
         """
 
     @abstractmethod
-    async def wait_connected(self, timeout_in_seconds=300, interval_in_milliseconds=5000):
+    async def wait_connected(self, timeout_in_seconds=300, interval_in_milliseconds=1000):
         """Waits until API server has connected to the terminal and terminal has connected to the broker.
 
         Args:
-            timeout_in_seconds: Wait timeout in seconds.
-            interval_in_milliseconds: Interval between account reloads while waiting for a change.
+            timeout_in_seconds: Wait timeout in seconds, default is 5m.
+            interval_in_milliseconds: Interval between account reloads while waiting for a change, default is 1s.
 
         Returns:
             A coroutine which resolves when API server is connected to the broker.

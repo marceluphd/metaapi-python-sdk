@@ -4,14 +4,12 @@ from .notSynchronizedException import NotSynchronizedException
 from .notConnectedException import NotConnectedException
 from .synchronizationListener import SynchronizationListener
 from .reconnectListener import ReconnectListener
-from ..models import MetatraderHistoryOrders, MetatraderDeals, date
+from ..models import MetatraderHistoryOrders, MetatraderDeals, date, random_id
 import socketio
 import asyncio
 import re
 from datetime import datetime
 from typing import Coroutine
-import random
-import string
 import pytz
 
 
@@ -110,9 +108,9 @@ class MetaApiWebsocketClient:
                     request_resolve = self._requestResolves[data['requestId']]
                     del self._requestResolves[data['requestId']]
                 else:
-                    request_resolve = {'accountId': data['accountId'], 'promise': asyncio.Future()}
+                    request_resolve = asyncio.Future()
                 self._convert_iso_time_to_date(data)
-                request_resolve['promise'].set_result(data)
+                request_resolve.set_result(data)
 
             @self._socket.on('processingError')
             def on_processing_error(data):
@@ -120,8 +118,8 @@ class MetaApiWebsocketClient:
                     request_resolve = self._requestResolves[data['requestId']]
                     del self._requestResolves[data['requestId']]
                 else:
-                    request_resolve = {'accountId': data['accountId'], 'promise': asyncio.Future()}
-                request_resolve['promise'].set_exception(self._convert_error(data))
+                    request_resolve = asyncio.Future()
+                request_resolve.set_exception(self._convert_error(data))
 
             @self._socket.on('synchronization')
             async def on_synchronization(data):
@@ -135,7 +133,9 @@ class MetaApiWebsocketClient:
         if self._connected:
             self._connected = False
             await self._socket.disconnect()
-            self._drop_all_requests()
+            for request_resolve in self._requestResolves:
+                if not self._requestResolves[request_resolve].done():
+                    self._requestResolves[request_resolve].set_exception(Exception('MetaApi connection closed'))
             self._requestResolves = {}
             self._synchronizationListeners = {}
 
@@ -379,13 +379,14 @@ class MetaApiWebsocketClient:
         """
         return self._rpc_request(account_id, {'type': 'reconnect'})
 
-    def synchronize(self, account_id: str, starting_history_order_time: datetime, starting_deal_time: datetime) \
-            -> Coroutine:
+    def synchronize(self, account_id: str, synchronization_id: str, starting_history_order_time: datetime,
+                    starting_deal_time: datetime) -> Coroutine:
         """Requests the terminal to start synchronization process. Use it if user synchronization mode is set to user
         for the account (see https://metaapi.cloud/docs/client/websocket/synchronizing/synchronize/).
 
         Args:
             account_id: Id of the MetaTrader account to synchronize.
+            synchronization_id: Synchronization request id.
             starting_history_order_time: From what date to start synchronizing history orders from. If not specified,
             the entire order history will be downloaded.
             starting_deal_time: From what date to start deal synchronization from. If not specified, then all
@@ -394,7 +395,7 @@ class MetaApiWebsocketClient:
         Returns:
             A coroutine which resolves when synchronization is started.
         """
-        return self._rpc_request(account_id, {'type': 'synchronize',
+        return self._rpc_request(account_id, {'requestId': synchronization_id, 'type': 'synchronize',
                                               'startingHistoryOrderTime': format_date(starting_history_order_time),
                                               'startingDealTime': format_date(starting_deal_time)})
 
@@ -510,14 +511,16 @@ class MetaApiWebsocketClient:
         if not self._connected:
             await self.connect()
 
-        request_id = ''.join(random.choice(string.ascii_lowercase) for i in range(32))
+        if 'requestId' in request:
+            request_id = request['requestId']
+        else:
+            request_id = random_id()
+            request['requestId'] = request_id
 
-        self._requestResolves[request_id] = {'accountId': account_id, 'promise': asyncio.Future()}
+        self._requestResolves[request_id] = asyncio.Future()
         request['accountId'] = account_id
-        request['requestId'] = request_id
         await self._socket.emit('request', request)
-        resolve = await asyncio.wait_for(self._requestResolves[request_id]['promise'],
-                                         timeout=self._request_timeout)
+        resolve = await asyncio.wait_for(self._requestResolves[request_id], timeout=self._request_timeout)
         return resolve
 
     def _convert_error(self, data) -> Exception:
@@ -557,7 +560,6 @@ class MetaApiWebsocketClient:
                         except Exception as err:
                             print('Failed to notify listener about connected event', err)
             elif data['type'] == 'disconnected':
-                self._drop_all_requests(data['accountId'])
                 if data['accountId'] in self._synchronizationListeners:
                     for listener in self._synchronizationListeners[data['accountId']]:
                         try:
@@ -666,14 +668,14 @@ class MetaApiWebsocketClient:
                 if data['accountId'] in self._synchronizationListeners:
                     for listener in self._synchronizationListeners[data['accountId']]:
                         try:
-                            await listener.on_deal_synchronization_finished()
+                            await listener.on_deal_synchronization_finished(data['synchronizationId'])
                         except Exception as err:
                             print('Failed to notify listener about dealSynchronizationFinished event', err)
             elif data['type'] == 'orderSynchronizationFinished':
                 if data['accountId'] in self._synchronizationListeners:
                     for listener in self._synchronizationListeners[data['accountId']]:
                         try:
-                            await listener.on_order_synchronization_finished()
+                            await listener.on_order_synchronization_finished(data['synchronizationId'])
                         except Exception as err:
                             print('Failed to notify listener about orderSynchronizationFinished event', err)
             elif data['type'] == 'status':
@@ -703,15 +705,6 @@ class MetaApiWebsocketClient:
                                     print('Failed to notify listener about prices event', err)
         except Exception as err:
             print('Failed to process incoming synchronization packet', err)
-
-    def _drop_all_requests(self, account_id: str = None):
-        for request_resolve in self._requestResolves:
-            if (not self._requestResolves[request_resolve]['promise'].done()) and \
-                    (self._requestResolves[request_resolve]['accountId'] == account_id if account_id else True):
-                exception_message = f'Account {account_id} has disconnected from MetaApi, thus all requests to ' \
-                                    f'this account were cancelled' if account_id else 'MetaApi connection closed'
-                self._requestResolves[request_resolve]['promise'].set_exception(
-                    NotConnectedException(exception_message))
 
     async def _fire_reconnected(self):
         for listener in self._reconnectListeners:
