@@ -675,7 +675,8 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
             await asyncio.sleep(interval_in_milliseconds / 1000)
         if not(await self.is_synchronized(synchronization_id)):
             raise TimeoutException('Timed out waiting for MetaApi to synchronize to MetaTrader account ' +
-                                   self._account.id + ', synchronization id ' + (synchronization_id or 'None'))
+                                   self._account.id + ', synchronization id ' + (synchronization_id or
+                                                                                 self._lastSynchronizationId or 'None'))
 
     def close(self):
         """Closes the connection. The instance of the class should no longer be used after this method is invoked."""
