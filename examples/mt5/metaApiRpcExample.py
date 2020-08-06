@@ -92,7 +92,7 @@ async def test_meta_api_synchronization():
         print('Submitting pending order')
         result = await connection.create_limit_buy_order('GBPUSD', 0.07, 1.0, 0.9, 2.0, 'comm',
                                                          'TE_GBPUSD_7hyINWqAlE')
-        print('Trade successful, result code is ' + result.stringCode)
+        print('Trade successful, result code is ' + result['stringCode'])
 
         # finally, undeploy account after the test
         print('Undeploying MT5 account so that it does not consume any unwanted resources')
