@@ -38,7 +38,7 @@ class MetatraderAccountInformation(TypedDict):
     leverage: float
     """Account leverage coefficient."""
     marginLevel: float
-    """Margin level calculated as % of freeMargin/margin."""
+    """Margin level calculated as % of equity/margin."""
 
 
 class MetatraderPosition(TypedDict):

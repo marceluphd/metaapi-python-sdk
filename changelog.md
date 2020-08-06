@@ -1,3 +1,8 @@
+4.0.0
+  - add fields to trade result to match upcoming MetaApi contract
+  - breaking change: throw TradeException in case of trade error
+  - rename trade response fields so that they are more meaningful
+
 3.0.0
   - improved account connection stability
   - added platform field to MetatraderAccountInformation model
