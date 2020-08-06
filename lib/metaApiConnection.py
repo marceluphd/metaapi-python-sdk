@@ -200,6 +200,9 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
 
         Returns:
             A coroutine resolving with trade result.
+
+        Raises:
+            TradeException: On trade error.
         """
         trade_params = {'actionType': 'ORDER_TYPE_BUY', 'symbol': symbol, 'volume': volume}
         if stop_loss:
@@ -231,6 +234,9 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
 
         Returns:
             A coroutine resolving with trade result.
+
+        Raises:
+            TradeException: On trade error.
         """
         trade_params = {'actionType': 'ORDER_TYPE_SELL', 'symbol': symbol, 'volume': volume}
         if stop_loss:
@@ -263,6 +269,9 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
 
         Returns:
             A coroutine resolving with trade result.
+
+        Raises:
+            TradeException: On trade error.
         """
         trade_params = {'actionType': 'ORDER_TYPE_BUY_LIMIT', 'symbol': symbol, 'volume': volume,
                         'openPrice': open_price}
@@ -296,6 +305,9 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
 
         Returns:
             A coroutine resolving with trade result.
+
+        Raises:
+            TradeException: On trade error.
         """
         trade_params = {'actionType': 'ORDER_TYPE_SELL_LIMIT', 'symbol': symbol, 'volume': volume,
                         'openPrice': open_price}
@@ -329,6 +341,9 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
 
         Returns:
             A coroutine resolving with trade result.
+
+        Raises:
+            TradeException: On trade error.
         """
         trade_params = {'actionType': 'ORDER_TYPE_BUY_STOP', 'symbol': symbol, 'volume': volume,
                         'openPrice': open_price}
@@ -362,6 +377,9 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
 
         Returns:
             A coroutine resolving with trade result.
+
+        Raises:
+            TradeException: On trade error.
         """
         trade_params = {'actionType': 'ORDER_TYPE_SELL_STOP', 'symbol': symbol, 'volume': volume,
                         'openPrice': open_price}
@@ -385,6 +403,9 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
 
         Returns:
             A coroutine resolving with trade result.
+
+        Raises:
+            TradeException: On trade error.
         """
         trade_params = {'actionType': 'POSITION_MODIFY', 'positionId': position_id}
         if stop_loss:
@@ -410,6 +431,9 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
 
         Returns:
             A coroutine resolving with trade result.
+
+        Raises:
+            TradeException: On trade error.
         """
         trade_params = {'actionType': 'POSITION_PARTIAL', 'positionId': position_id, 'volume': volume}
         if comment:
@@ -433,6 +457,9 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
 
         Returns:
             A coroutine resolving with trade result.
+
+        Raises:
+            TradeException: On trade error.
         """
         trade_params = {'actionType': 'POSITION_CLOSE_ID', 'positionId': position_id}
         if comment:
@@ -457,6 +484,9 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
 
         Returns:
             A coroutine resolving with trade result.
+
+        Raises:
+            TradeException: On trade error.
         """
         trade_params = {'actionType': 'POSITION_CLOSE_SYMBOL', 'symbol': symbol}
         if comment:
@@ -477,6 +507,9 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
 
         Returns:
             A coroutine resolving with trade result.
+
+        Raises:
+            TradeException: On trade error.
         """
         trade_params = {'actionType': 'ORDER_MODIFY', 'orderId': order_id, 'openPrice': open_price}
         if stop_loss:
@@ -493,6 +526,9 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
 
         Returns:
             A coroutine resolving with trade result.
+
+        Raises:
+            TradeException: On trade error.
         """
         return self._websocketClient.trade(self._account.id, {'actionType': 'ORDER_CANCEL', 'orderId': order_id})
 

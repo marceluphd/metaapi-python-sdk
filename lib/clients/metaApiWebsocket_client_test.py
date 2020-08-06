@@ -432,7 +432,7 @@ class TestMetaApiWebsocketClient:
 
     @pytest.mark.asyncio
     async def test_execute_trade(self):
-        """Should execute a trade via API."""
+        """Should execute a trade via new API version."""
 
         trade = {
             'actionType': 'ORDER_TYPE_SELL',
@@ -440,8 +440,9 @@ class TestMetaApiWebsocketClient:
             'volume': 0.07
         }
         response = {
-            'error': 10009,
-            'description': 'TRADE_RETCODE_DONE',
+            'numericCode': 10009,
+            'stringCode': 'TRADE_RETCODE_DONE',
+            'message': 'Request completed',
             'orderId': '46870472'
         }
 
@@ -454,6 +455,38 @@ class TestMetaApiWebsocketClient:
 
         actual = await client.trade('accountId', trade)
         assert actual == response
+
+    @pytest.mark.asyncio
+    async def test_fail_trade_on_old_api(self):
+        """Should execute a trade via API and receive trade error from old API version."""
+
+        trade = {
+            'actionType': 'ORDER_TYPE_SELL',
+            'symbol': 'AUDNZD',
+            'volume': 0.07
+        }
+        response = {
+            'error': 10006,
+            'description': 'TRADE_RETCODE_REJECT',
+            'message': 'Request rejected',
+            'orderId': '46870472'
+        }
+
+        @sio.on('request')
+        async def on_request(sid, data):
+            assert data['trade'] == trade
+            if data['type'] == 'trade' and data['accountId'] == 'accountId':
+                await sio.emit('response', {'type': 'response', 'accountId': data['accountId'],
+                                            'requestId': data['requestId'], 'response': response})
+
+        try:
+            await client.trade('accountId', trade)
+            Exception('TradeException expected')
+        except Exception as err:
+            assert err.__class__.__name__ == 'TradeException'
+            assert err.__str__() == 'Request rejected'
+            assert err.stringCode == 'TRADE_RETCODE_REJECT'
+            assert err.numericCode == 10006
 
     @pytest.mark.asyncio
     async def test_connect_to_terminal(self):

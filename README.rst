@@ -312,11 +312,8 @@ Execute trades (both RPC and streaming APIs)
     print(await connection.modify_order('46870472', 1.0, 2.0, 0.9))
     print(await connection.cancel_order('46870472'))
 
-    # Note: trade methods do not throw an exception if terminal have refused
-    # the trade, thus you must check the returned value
     result = await connection.create_market_buy_order('GBPUSD', 0.07, 0.9, 2.0, 'comment', 'TE_GBPUSD_7hyINWqAlE')
-    if result['description'] != 'TRADE_RETCODE_DONE':
-      print('Trade was rejected by MetaTrader terminal with ' + result['description'] + ' error')
+    print('Trade successful, result code is ' + result.stringCode)
 
 Keywords: MetaTrader API, MetaTrader REST API, MetaTrader websocket API,
 MetaTrader 5 API, MetaTrader 5 REST API, MetaTrader 5 websocket API,

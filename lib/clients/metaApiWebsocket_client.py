@@ -1,4 +1,5 @@
 from .timeoutException import TimeoutException
+from .tradeException import TradeException
 from .errorHandler import ValidationException, NotFoundException, InternalException, UnauthorizedException
 from .notSynchronizedException import NotSynchronizedException
 from .notConnectedException import NotConnectedException
@@ -345,9 +346,21 @@ class MetaApiWebsocketClient:
 
         Returns:
             A coroutine resolving with trade result.
+
+        Raises:
+            TradeException: On trade error.
         """
         response = await self._rpc_request(account_id, {'type': 'trade', 'trade': trade})
-        return response['response']
+        if 'stringCode' not in response['response']:
+            response['response']['stringCode'] = response['response']['description']
+        if response['response']['stringCode'] in ['ERR_NO_ERROR', 'TRADE_RETCODE_PLACED', 'TRADE_RETCODE_DONE',
+                                                  'TRADE_RETCODE_DONE_PARTIAL', 'TRADE_RETCODE_NO_CHANGES']:
+            if 'numericCode' not in response['response']:
+                response['response']['numericCode'] = response['response']['error']
+            return response['response']
+        else:
+            raise TradeException(response['response']['message'], response['response']['error'],
+                                 response['response']['description'])
 
     async def subscribe(self, account_id: str):
         """Subscribes to the Metatrader terminal events
@@ -532,6 +545,8 @@ class MetaApiWebsocketClient:
             return NotSynchronizedException(data['message'])
         elif data['error'] == 'NotAuthenticatedError':
             return NotConnectedException(data['message'])
+        elif data['error'] == 'TradeError':
+            return TradeException(data['message'], data['numericCode'], data['stringCode'])
         elif data['error'] == 'UnauthorizedError':
             self.close()
             return UnauthorizedException(data['message'])
