@@ -290,6 +290,23 @@ You can override SynchronizationListener in order to receive synchronization eve
     # remove the listener when no longer needed
     connection.remove_synchronization_listener(listener)
 
+Retrieve contract specifications and quotes via streaming API
+--------------------------------------------
+.. code-block:: python
+
+    connection = await account.connect()
+
+    await connection.wait_synchronized()
+
+    # first, subscribe to market data
+    await connection.subscribe_to_market_data('GBPUSD')
+
+    # read constract specification
+    print(terminalState.specification('EURUSD'))
+
+    # read current price
+    print(terminalState.price('EURUSD'))
+
 Execute trades (both RPC and streaming APIs)
 --------------------------------------------
 .. code-block:: python
@@ -299,12 +316,18 @@ Execute trades (both RPC and streaming APIs)
     await connection.wait_synchronized()
 
     # trade
-    print(await connection.create_market_buy_order('GBPUSD', 0.07, 0.9, 2.0, 'comment', 'TE_GBPUSD_7hyINWqAlE'))
-    print(await connection.create_market_sell_order('GBPUSD', 0.07, 2.0, 0.9, 'comment', 'TE_GBPUSD_7hyINWqAlE'))
-    print(await connection.create_limit_buy_order('GBPUSD', 0.07, 1.0, 0.9, 2.0, 'comment', 'TE_GBPUSD_7hyINWqAlE'))
-    print(await connection.create_limit_sell_order('GBPUSD', 0.07, 1.5, 2.0, 0.9, 'comment', 'TE_GBPUSD_7hyINWqAlE'))
-    print(await connection.create_stop_buy_order('GBPUSD', 0.07, 1.5, 0.9, 2.0, 'comment', 'TE_GBPUSD_7hyINWqAlE'))
-    print(await connection.create_stop_sell_order('GBPUSD', 0.07, 1.0, 2.0, 0.9, 'comment', 'TE_GBPUSD_7hyINWqAlE'))
+    print(await connection.create_market_buy_order('GBPUSD', 0.07, 0.9, 2.0, {'comment': 'comment',
+                                                                              'clientId': 'TE_GBPUSD_7hyINWqAl'}))
+    print(await connection.create_market_sell_order('GBPUSD', 0.07, 2.0, 0.9, {'comment': 'comment',
+                                                                               'clientId': 'TE_GBPUSD_7hyINWqAl'}))
+    print(await connection.create_limit_buy_order('GBPUSD', 0.07, 1.0, 0.9, 2.0, {'comment': 'comment',
+                                                                                  'clientId': 'TE_GBPUSD_7hyINWqAl'}))
+    print(await connection.create_limit_sell_order('GBPUSD', 0.07, 1.5, 2.0, 0.9, {'comment': 'comment',
+                                                                                   'clientId': 'TE_GBPUSD_7hyINWqAl'}))
+    print(await connection.create_stop_buy_order('GBPUSD', 0.07, 1.5, 0.9, 2.0, {'comment': 'comment',
+                                                                                 'clientId': 'TE_GBPUSD_7hyINWqAl'}))
+    print(await connection.create_stop_sell_order('GBPUSD', 0.07, 1.0, 2.0, 0.9, {'comment': 'comment',
+                                                                                  'clientId': 'TE_GBPUSD_7hyINWqAl'}))
     print(await connection.modify_position('46870472', 2.0, 0.9))
     print(await connection.close_position_partially('46870472', 0.9))
     print(await connection.close_position('46870472'))
@@ -312,8 +335,10 @@ Execute trades (both RPC and streaming APIs)
     print(await connection.modify_order('46870472', 1.0, 2.0, 0.9))
     print(await connection.cancel_order('46870472'))
 
-    result = await connection.create_market_buy_order('GBPUSD', 0.07, 0.9, 2.0, 'comment', 'TE_GBPUSD_7hyINWqAlE')
-    print('Trade successful, result code is ' + result.stringCode)
+    # if you need to, check the extra result information in stringCode and numericCode properties of the response
+    result = await connection.create_market_buy_order('GBPUSD', 0.07, 0.9, 2.0, {'comment': 'comment',
+                                                                                 'clientId': 'TE_GBPUSD_7hyINWqAl'})
+    print('Trade successful, result code is ' + result['stringCode'])
 
 Keywords: MetaTrader API, MetaTrader REST API, MetaTrader websocket API,
 MetaTrader 5 API, MetaTrader 5 REST API, MetaTrader 5 websocket API,

@@ -245,3 +245,39 @@ class MetatraderSymbolPrice(TypedDict):
     """Tick value for a profitable position."""
     lossTickValue: float
     """Tick value for a loosing position."""
+
+
+class MetatraderTradeResponse(TypedDict):
+    """MetaTrader trade response."""
+
+    numericCode: int
+    """Numeric response code, see https://www.mql5.com/en/docs/constants/errorswarnings/enum_trade_return_codes and
+    https://book.mql4.com/appendix/errors. Response codes which indicate success are 0, 10008-10010, 10025. The rest
+    codes are errors."""
+    stringCode: str
+    """String response code, see https://www.mql5.com/en/docs/constants/errorswarnings/enum_trade_return_codes and
+    https://book.mql4.com/appendix/errors. Response codes which indicate success are ERR_NO_ERROR,
+    TRADE_RETCODE_PLACED, TRADE_RETCODE_DONE, TRADE_RETCODE_DONE_PARTIAL, TRADE_RETCODE_NO_CHANGES. The rest codes are
+    errors."""
+    message: str
+    """Human-readable response message."""
+    orderId: str
+    """Order id which was created/modified during the trade."""
+    positionId: str
+    """Position id which was modified during the trade."""
+
+
+class TradeOptions(TypedDict):
+    """Trade options."""
+
+    comment: str
+    """Optional order comment. The sum of the line lengths of the comment and the clientId must be less than or equal
+    to 27. For more information see https://metaapi.cloud/docs/client/clientIdUsage/"""
+    clientId: str
+    """Optional client-assigned id. The id value can be assigned when submitting a trade and will be present on
+    position, history orders and history deals related to the trade. You can use this field to bind your trades to
+    objects in your application and then track trade progress. The sum of the line lengths of the comment and the
+    clientId must be less than or equal to 27. For more information see
+    https://metaapi.cloud/docs/client/clientIdUsage/"""
+    magic: str
+    """Magic (expert id) number."""

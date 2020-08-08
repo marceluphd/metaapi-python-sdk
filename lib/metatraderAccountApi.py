@@ -29,6 +29,8 @@ class MetatraderAccountApi:
             A coroutine resolving with an array of MetaTrader account entities.
         """
         accounts = await self._metatraderAccountClient.get_accounts(provisioning_profile_id)
+        if 'items' in accounts:
+            accounts = accounts['items']
         return list(map(lambda account: MetatraderAccount(account, self._metatraderAccountClient,
                                                           self._metaApiWebsocketClient), accounts))
 

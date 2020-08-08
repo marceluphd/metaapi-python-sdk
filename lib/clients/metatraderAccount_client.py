@@ -41,6 +41,8 @@ class MetatraderAccountDto(TypedDict):
     """Terminal & broker connection status, one of CONNECTED, DISCONNECTED, DISCONNECTED_FROM_BROKER"""
     accessToken: str
     """Authorization token to be used for accessing single account data. Intended to be used in browser API."""
+    manualTrades: bool
+    """Flag indicating if trades should be placed as manual trades. Default is false."""
 
 
 class NewMetatraderAccountDto(TypedDict):
@@ -69,6 +71,8 @@ class NewMetatraderAccountDto(TypedDict):
     """Application name to connect the account to. Currently allowed values are MetaApi and AgiliumTrade."""
     magic: int
     """MetaTrader magic to place trades using."""
+    manualTrades: bool
+    """Flag indicating if trades should be placed as manual trades. Default is false."""
 
 
 class MetatraderAccountUpdateDto(TypedDict):
@@ -84,6 +88,8 @@ class MetatraderAccountUpdateDto(TypedDict):
     synchronizationMode: str
     """Synchronization mode, can be automatic or user. See
     https://metaapi.cloud/docs/client/websocket/synchronizationMode/ for more details."""
+    manualTrades: bool
+    """Flag indicating if trades should be placed as manual trades. Default is false."""
 
 
 class MetatraderAccountClient:

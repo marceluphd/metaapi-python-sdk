@@ -414,7 +414,8 @@ class TestMetaApiConnection:
             'orderId': 46870472
         }
         client.trade = AsyncMock(return_value=trade_result)
-        actual = await api.create_market_buy_order('GBPUSD', 0.07, 0.9, 2.0, 'comment', 'TE_GBPUSD_7hyINWqAlE')
+        actual = await api.create_market_buy_order('GBPUSD', 0.07, 0.9, 2.0, {'comment': 'comment',
+                                                                              'clientId': 'TE_GBPUSD_7hyINWqAlE'})
         assert actual == trade_result
         client.trade.assert_called_with('accountId', {'actionType': 'ORDER_TYPE_BUY', 'symbol': 'GBPUSD',
                                                       'volume': 0.07, 'stopLoss': 0.9, 'takeProfit': 2.0,
@@ -429,7 +430,8 @@ class TestMetaApiConnection:
             'orderId': 46870472
         }
         client.trade = AsyncMock(return_value=trade_result)
-        actual = await api.create_market_sell_order('GBPUSD', 0.07, 0.9, 2.0, 'comment', 'TE_GBPUSD_7hyINWqAlE')
+        actual = await api.create_market_sell_order('GBPUSD', 0.07, 0.9, 2.0, {'comment': 'comment',
+                                                                               'clientId': 'TE_GBPUSD_7hyINWqAlE'})
         assert actual == trade_result
         client.trade.assert_called_with('accountId', {'actionType': 'ORDER_TYPE_SELL', 'symbol': 'GBPUSD',
                                                       'volume': 0.07, 'stopLoss': 0.9, 'takeProfit': 2.0,
@@ -444,7 +446,8 @@ class TestMetaApiConnection:
             'orderId': 46870472
         }
         client.trade = AsyncMock(return_value=trade_result)
-        actual = await api.create_limit_buy_order('GBPUSD', 0.07, 1.0, 0.9, 2.0, 'comment', 'TE_GBPUSD_7hyINWqAlE')
+        actual = await api.create_limit_buy_order('GBPUSD', 0.07, 1.0, 0.9, 2.0, {'comment': 'comment',
+                                                                                  'clientId': 'TE_GBPUSD_7hyINWqAlE'})
         assert actual == trade_result
         client.trade.assert_called_with('accountId', {'actionType': 'ORDER_TYPE_BUY_LIMIT', 'symbol': 'GBPUSD',
                                                       'volume': 0.07, 'openPrice': 1.0, 'stopLoss': 0.9,
@@ -460,7 +463,8 @@ class TestMetaApiConnection:
             'orderId': 46870472
         }
         client.trade = AsyncMock(return_value=trade_result)
-        actual = await api.create_limit_sell_order('GBPUSD', 0.07, 1.0, 0.9, 2.0, 'comment', 'TE_GBPUSD_7hyINWqAlE')
+        actual = await api.create_limit_sell_order('GBPUSD', 0.07, 1.0, 0.9, 2.0, {'comment': 'comment',
+                                                                                   'clientId': 'TE_GBPUSD_7hyINWqAlE'})
         assert actual == trade_result
         client.trade.assert_called_with('accountId', {'actionType': 'ORDER_TYPE_SELL_LIMIT', 'symbol': 'GBPUSD',
                                                       'volume': 0.07, 'openPrice': 1.0, 'stopLoss': 0.9,
@@ -476,7 +480,8 @@ class TestMetaApiConnection:
             'orderId': 46870472
         }
         client.trade = AsyncMock(return_value=trade_result)
-        actual = await api.create_stop_buy_order('GBPUSD', 0.07, 1.0, 0.9, 2.0, 'comment', 'TE_GBPUSD_7hyINWqAlE')
+        actual = await api.create_stop_buy_order('GBPUSD', 0.07, 1.0, 0.9, 2.0, {'comment': 'comment',
+                                                                                 'clientId': 'TE_GBPUSD_7hyINWqAlE'})
         assert actual == trade_result
         client.trade.assert_called_with('accountId', {'actionType': 'ORDER_TYPE_BUY_STOP', 'symbol': 'GBPUSD',
                                                       'volume': 0.07, 'openPrice': 1.0, 'stopLoss': 0.9,
@@ -492,7 +497,8 @@ class TestMetaApiConnection:
             'orderId': 46870472
         }
         client.trade = AsyncMock(return_value=trade_result)
-        actual = await api.create_stop_sell_order('GBPUSD', 0.07, 1.0, 0.9, 2.0, 'comment', 'TE_GBPUSD_7hyINWqAlE')
+        actual = await api.create_stop_sell_order('GBPUSD', 0.07, 1.0, 0.9, 2.0, {'comment': 'comment',
+                                                                                  'clientId': 'TE_GBPUSD_7hyINWqAlE'})
         assert actual == trade_result
         client.trade.assert_called_with('accountId', {'actionType': 'ORDER_TYPE_SELL_STOP', 'symbol': 'GBPUSD',
                                                       'volume': 0.07, 'openPrice': 1.0, 'stopLoss': 0.9,

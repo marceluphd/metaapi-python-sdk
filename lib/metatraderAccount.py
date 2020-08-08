@@ -145,6 +145,15 @@ class MetatraderAccount(MetatraderAccountModel):
         """
         return self._data['accessToken']
 
+    @property
+    def manual_trades(self) -> bool:
+        """Returns flag indicating if trades should be placed as manual trades on this account.
+
+        Returns:
+            Flag indicating if trades should be placed as manual trades on this account.
+        """
+        return 'manualTrades' in self._data and self._data['manualTrades']
+
     async def reload(self):
         """Reloads MetaTrader account from API.
 
