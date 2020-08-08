@@ -1,6 +1,7 @@
 import os
 import asyncio
 from metaapi_cloud_sdk import MetaApi
+from metaapi_cloud_sdk.clients.tradeException import TradeException
 from datetime import datetime, timedelta
 
 # Note: for information on how to use this example code please read https://metaapi.cloud/docs/client/usingCodeExamples
@@ -91,9 +92,12 @@ async def test_meta_api_synchronization():
 
         # trade
         print('Submitting pending order')
-        result = await connection.create_limit_buy_order('GBPUSD', 0.07, 1.0, 0.9, 2.0, 'comm',
-                                                         'TE_GBPUSD_7hyINWqAlE')
-        print('Trade successful, result code is ' + result['stringCode'])
+        try:
+            result = await connection.create_limit_buy_order('GBPUSD', 0.07, 1.0, 0.9, 2.0,
+                                                             {'comment': 'comm', 'clientId': 'TE_GBPUSD_7hyINWqAlE'})
+            print('Trade successful, result code is ' + result['stringCode'])
+        except TradeException as err:
+            print('Trade failed with result code ' + err.stringCode)
 
         # finally, undeploy account after the test
         print('Undeploying MT4 account so that it does not consume any unwanted resources')

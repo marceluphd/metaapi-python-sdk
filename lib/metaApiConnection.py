@@ -6,7 +6,7 @@ from .memoryHistoryStorage import MemoryHistoryStorage
 from .metatraderAccountModel import MetatraderAccountModel
 from .historyStorage import HistoryStorage
 from .clients.timeoutException import TimeoutException
-from .models import random_id
+from .models import random_id, TradeOptions
 from datetime import datetime, timedelta
 from typing import Coroutine
 import asyncio
@@ -182,7 +182,7 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
         return self._websocketClient.remove_history(self._account.id)
 
     def create_market_buy_order(self, symbol: str, volume: float, stop_loss: float = None, take_profit: float = None,
-                                comment: str = None, client_id: str = None) -> Coroutine:
+                                options: TradeOptions = None) -> Coroutine:
         """Creates a market buy order (see https://metaapi.cloud/docs/client/websocket/api/trade/).
 
         Args:
@@ -190,13 +190,7 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
             volume: Order volume.
             stop_loss: Optional stop loss price.
             take_profit: Optional take profit price.
-            comment: Optional order comment. The sum of the line lengths of the comment and the clientId must
-            be less than or equal to 27. For more information see https://metaapi.cloud/docs/client/clientIdUsage/
-            client_id: optional client-assigned id. The id value can be assigned when submitting a trade and will be
-            present on position, history orders and history deals related to the trade. You can use this field to bind
-            your trades to objects in your application and then track trade progress. The sum of the line lengths of
-            the comment and the clientId must be less than or equal to 27. For more information
-            see https://metaapi.cloud/docs/client/clientIdUsage/
+            options: Optional trade options.
 
         Returns:
             A coroutine resolving with trade result.
@@ -209,14 +203,11 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
             trade_params['stopLoss'] = stop_loss
         if take_profit:
             trade_params['takeProfit'] = take_profit
-        if comment:
-            trade_params['comment'] = comment
-        if client_id:
-            trade_params['clientId'] = client_id
+        trade_params.update(options or {})
         return self._websocketClient.trade(self._account.id, trade_params)
 
     def create_market_sell_order(self, symbol: str, volume: float, stop_loss: float = None, take_profit: float = None,
-                                 comment: str = None, client_id: str = None) -> Coroutine:
+                                 options: TradeOptions = None) -> Coroutine:
         """Creates a market sell order (see https://metaapi.cloud/docs/client/websocket/api/trade/).
 
         Args:
@@ -224,13 +215,7 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
             volume: Order volume.
             stop_loss: Optional stop loss price.
             take_profit: Optional take profit price.
-            comment: Optional order comment. The sum of the line lengths of the comment and the clientId must
-            be less than or equal to 27. For more information see https://metaapi.cloud/docs/client/clientIdUsage/
-            client_id: optional client-assigned id. The id value can be assigned when submitting a trade and will be
-            present on position, history orders and history deals related to the trade. You can use this field to bind
-            your trades to objects in your application and then track trade progress. The sum of the line lengths of
-            the comment and the clientId must be less than or equal to 27. For more information
-            see https://metaapi.cloud/docs/client/clientIdUsage/
+            options: Optional trade options.
 
         Returns:
             A coroutine resolving with trade result.
@@ -243,14 +228,11 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
             trade_params['stopLoss'] = stop_loss
         if take_profit:
             trade_params['takeProfit'] = take_profit
-        if comment:
-            trade_params['comment'] = comment
-        if client_id:
-            trade_params['clientId'] = client_id
+        trade_params.update(options or {})
         return self._websocketClient.trade(self._account.id, trade_params)
 
     def create_limit_buy_order(self, symbol: str, volume: float, open_price: float, stop_loss: float = None,
-                               take_profit: float = None, comment: str = None, client_id: str = None) -> Coroutine:
+                               take_profit: float = None, options: TradeOptions = None) -> Coroutine:
         """Creates a limit buy order (see https://metaapi.cloud/docs/client/websocket/api/trade/).
 
         Args:
@@ -259,13 +241,7 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
             open_price: Order limit price.
             stop_loss: Optional stop loss price.
             take_profit: Optional take profit price.
-            comment: Optional order comment. The sum of the line lengths of the comment and the clientId must
-            be less than or equal to 27. For more information see https://metaapi.cloud/docs/client/clientIdUsage/
-            client_id: optional client-assigned id. The id value can be assigned when submitting a trade and will be
-            present on position, history orders and history deals related to the trade. You can use this field to bind
-            your trades to objects in your application and then track trade progress. The sum of the line lengths of
-            the comment and the clientId must be less than or equal to 27. For more information
-            see https://metaapi.cloud/docs/client/clientIdUsage/
+            options: Optional trade options.
 
         Returns:
             A coroutine resolving with trade result.
@@ -279,14 +255,11 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
             trade_params['stopLoss'] = stop_loss
         if take_profit:
             trade_params['takeProfit'] = take_profit
-        if comment:
-            trade_params['comment'] = comment
-        if client_id:
-            trade_params['clientId'] = client_id
+        trade_params.update(options or {})
         return self._websocketClient.trade(self._account.id, trade_params)
 
     def create_limit_sell_order(self, symbol: str, volume: float, open_price: float, stop_loss: float = None,
-                                take_profit: float = None, comment: str = None, client_id: str = None) -> Coroutine:
+                                take_profit: float = None, options: TradeOptions = None) -> Coroutine:
         """Creates a limit sell order (see https://metaapi.cloud/docs/client/websocket/api/trade/).
 
         Args:
@@ -295,13 +268,7 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
             open_price: Order limit price.
             stop_loss: Optional stop loss price.
             take_profit: Optional take profit price.
-            comment: Optional order comment. The sum of the line lengths of the comment and the clientId must
-            be less than or equal to 27. For more information see https://metaapi.cloud/docs/client/clientIdUsage/
-            client_id: optional client-assigned id. The id value can be assigned when submitting a trade and will be
-            present on position, history orders and history deals related to the trade. You can use this field to bind
-            your trades to objects in your application and then track trade progress. The sum of the line lengths of
-            the comment and the clientId must be less than or equal to 27. For more information
-            see https://metaapi.cloud/docs/client/clientIdUsage/
+            options: Optional trade options.
 
         Returns:
             A coroutine resolving with trade result.
@@ -315,14 +282,11 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
             trade_params['stopLoss'] = stop_loss
         if take_profit:
             trade_params['takeProfit'] = take_profit
-        if comment:
-            trade_params['comment'] = comment
-        if client_id:
-            trade_params['clientId'] = client_id
+        trade_params.update(options or {})
         return self._websocketClient.trade(self._account.id, trade_params)
 
     def create_stop_buy_order(self, symbol: str, volume: float, open_price: float, stop_loss: float = None,
-                              take_profit: float = None, comment: str = None, client_id: str = None) -> Coroutine:
+                              take_profit: float = None, options: TradeOptions = None) -> Coroutine:
         """Creates a stop buy order (see https://metaapi.cloud/docs/client/websocket/api/trade/).
 
         Args:
@@ -331,13 +295,7 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
             open_price: Order limit price.
             stop_loss: Optional stop loss price.
             take_profit: Optional take profit price.
-            comment: Optional order comment. The sum of the line lengths of the comment and the clientId must
-            be less than or equal to 27. For more information see https://metaapi.cloud/docs/client/clientIdUsage/
-            client_id: optional client-assigned id. The id value can be assigned when submitting a trade and will be
-            present on position, history orders and history deals related to the trade. You can use this field to bind
-            your trades to objects in your application and then track trade progress. The sum of the line lengths of
-            the comment and the clientId must be less than or equal to 27. For more information
-            see https://metaapi.cloud/docs/client/clientIdUsage/
+            options: Optional trade options.
 
         Returns:
             A coroutine resolving with trade result.
@@ -351,14 +309,11 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
             trade_params['stopLoss'] = stop_loss
         if take_profit:
             trade_params['takeProfit'] = take_profit
-        if comment:
-            trade_params['comment'] = comment
-        if client_id:
-            trade_params['clientId'] = client_id
+        trade_params.update(options or {})
         return self._websocketClient.trade(self._account.id, trade_params)
 
     def create_stop_sell_order(self, symbol: str, volume: float, open_price: float, stop_loss: float = None,
-                               take_profit: float = None, comment: str = None, client_id: str = None) -> Coroutine:
+                               take_profit: float = None, options: TradeOptions = None) -> Coroutine:
         """Creates a stop sell order (see https://metaapi.cloud/docs/client/websocket/api/trade/).
 
         Args:
@@ -367,13 +322,7 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
             open_price: Order limit price.
             stop_loss: Optional stop loss price.
             take_profit: Optional take profit price.
-            comment: Optional order comment. The sum of the line lengths of the comment and the clientId must
-            be less than or equal to 27. For more information see https://metaapi.cloud/docs/client/clientIdUsage/
-            client_id: optional client-assigned id. The id value can be assigned when submitting a trade and will be
-            present on position, history orders and history deals related to the trade. You can use this field to bind
-            your trades to objects in your application and then track trade progress. The sum of the line lengths of
-            the comment and the clientId must be less than or equal to 27. For more information
-            see https://metaapi.cloud/docs/client/clientIdUsage/
+            options: Optional trade options.
 
         Returns:
             A coroutine resolving with trade result.
@@ -387,10 +336,7 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
             trade_params['stopLoss'] = stop_loss
         if take_profit:
             trade_params['takeProfit'] = take_profit
-        if comment:
-            trade_params['comment'] = comment
-        if client_id:
-            trade_params['clientId'] = client_id
+        trade_params.update(options or {})
         return self._websocketClient.trade(self._account.id, trade_params)
 
     def modify_position(self, position_id: str, stop_loss: float = None, take_profit: float = None) -> Coroutine:
@@ -414,20 +360,13 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
             trade_params['takeProfit'] = take_profit
         return self._websocketClient.trade(self._account.id, trade_params)
 
-    def close_position_partially(self, position_id: str, volume: float, comment: str = None, client_id: str = None) \
-            -> Coroutine:
+    def close_position_partially(self, position_id: str, volume: float, options: TradeOptions = None) -> Coroutine:
         """Partially closes a position (see https://metaapi.cloud/docs/client/websocket/api/trade/).
 
         Args:
             position_id: Position id to modify.
             volume: Volume to close.
-            comment: Optional order comment. The sum of the line lengths of the comment and the clientId must be less
-            than or equal to 27. For more information see https://metaapi.cloud/docs/client/clientIdUsage/.
-            client_id: Optional client-assigned id. The id value can be assigned when submitting a trade and will be
-            present on position, history orders and history deals related to the trade. You can use this field to bind
-            your trades to objects in your application and then track trade progress. The sum of the line lengths of
-            the comment and the clientId must be less than or equal to 27. For more information
-            see https://metaapi.cloud/docs/client/clientIdUsage/
+            options: Optional trade options.
 
         Returns:
             A coroutine resolving with trade result.
@@ -436,24 +375,15 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
             TradeException: On trade error.
         """
         trade_params = {'actionType': 'POSITION_PARTIAL', 'positionId': position_id, 'volume': volume}
-        if comment:
-            trade_params['comment'] = comment
-        if client_id:
-            trade_params['clientId'] = client_id
+        trade_params.update(options or {})
         return self._websocketClient.trade(self._account.id, trade_params)
 
-    def close_position(self, position_id: str, comment: str = None, client_id: str = None) -> Coroutine:
+    def close_position(self, position_id: str, options: TradeOptions = None) -> Coroutine:
         """Fully closes a position (see https://metaapi.cloud/docs/client/websocket/api/trade/).
 
         Args:
             position_id: Position id to modify.
-            comment: Optional order comment. The sum of the line lengths of the comment and the clientId must be less
-            than or equal to 27. For more information see https://metaapi.cloud/docs/client/clientIdUsage/.
-            client_id: Optional client-assigned id. The id value can be assigned when submitting a trade and will be
-            present on position, history orders and history deals related to the trade. You can use this field to bind
-            your trades to objects in your application and then track trade progress. The sum of the line lengths of
-            the comment and the clientId must be less than or equal to 27. For more information
-            see https://metaapi.cloud/docs/client/clientIdUsage/
+            options: Optional trade options.
 
         Returns:
             A coroutine resolving with trade result.
@@ -462,25 +392,16 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
             TradeException: On trade error.
         """
         trade_params = {'actionType': 'POSITION_CLOSE_ID', 'positionId': position_id}
-        if comment:
-            trade_params['comment'] = comment
-        if client_id:
-            trade_params['clientId'] = client_id
+        trade_params.update(options or {})
         return self._websocketClient.trade(self._account.id, trade_params)
 
-    def close_position_by_symbol(self, symbol: str, comment: str = None, client_id: str = None) -> Coroutine:
+    def close_position_by_symbol(self, symbol: str, options: TradeOptions = None) -> Coroutine:
         """Closes position by a symbol. Available on MT5 netting accounts only. (see
         https://metaapi.cloud/docs/client/websocket/api/trade/).
 
         Args:
             symbol: Symbol to trade.
-            comment: optional order comment. The sum of the line lengths of the comment and the clientId
-            must be less than or equal to 27. For more information see https://metaapi.cloud/docs/client/clientIdUsage/
-            client_id: Optional client-assigned id. The id value can be assigned when submitting a trade and will be
-            present on position, history orders and history deals related to the trade. You can use this field to bind
-            your trades to objects in your application and then track trade progress. The sum of the line lengths of
-            the comment and the clientId must be less than or equal to 27. For more information
-            see https://metaapi.cloud/docs/client/clientIdUsage/
+            options: Optional trade options.
 
         Returns:
             A coroutine resolving with trade result.
@@ -489,10 +410,7 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
             TradeException: On trade error.
         """
         trade_params = {'actionType': 'POSITION_CLOSE_SYMBOL', 'symbol': symbol}
-        if comment:
-            trade_params['comment'] = comment
-        if client_id:
-            trade_params['clientId'] = client_id
+        trade_params.update(options or {})
         return self._websocketClient.trade(self._account.id, trade_params)
 
     def modify_order(self, order_id: str, open_price: float, stop_loss: float = None,

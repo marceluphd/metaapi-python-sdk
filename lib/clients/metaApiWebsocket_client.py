@@ -345,22 +345,24 @@ class MetaApiWebsocketClient:
             trade: Trade to execute (see docs for possible trade types).
 
         Returns:
-            A coroutine resolving with trade result.
+            A coroutine resolving with trade result MetatraderTradeResponse.
 
         Raises:
-            TradeException: On trade error.
+            TradeException: On trade error, check error properties for error code details.
         """
         response = await self._rpc_request(account_id, {'type': 'trade', 'trade': trade})
+        if 'response' not in response:
+            response['response'] = {}
         if 'stringCode' not in response['response']:
             response['response']['stringCode'] = response['response']['description']
+        if 'numericCode' not in response['response']:
+            response['response']['numericCode'] = response['response']['error']
         if response['response']['stringCode'] in ['ERR_NO_ERROR', 'TRADE_RETCODE_PLACED', 'TRADE_RETCODE_DONE',
                                                   'TRADE_RETCODE_DONE_PARTIAL', 'TRADE_RETCODE_NO_CHANGES']:
-            if 'numericCode' not in response['response']:
-                response['response']['numericCode'] = response['response']['error']
             return response['response']
         else:
-            raise TradeException(response['response']['message'], response['response']['error'],
-                                 response['response']['description'])
+            raise TradeException(response['response']['message'], response['response']['numericCode'],
+                                 response['response']['stringCode'])
 
     async def subscribe(self, account_id: str):
         """Subscribes to the Metatrader terminal events
