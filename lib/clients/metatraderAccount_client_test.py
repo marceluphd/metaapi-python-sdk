@@ -33,7 +33,8 @@ class TestMetatraderAccountClient:
             rsps.add(responses.GET, f'{PROVISIONING_API_URL}/users/current/accounts',
                      json=expected, status=200)
 
-            accounts = await provisioningClient.get_accounts('f9ce1f12-e720-4b9a-9477-c2d4cb25f076')
+            accounts = await provisioningClient.get_accounts({'provisioningProfileId':
+                                                              'f9ce1f12-e720-4b9a-9477-c2d4cb25f076'})
             assert rsps.calls[0].request.url == f'{PROVISIONING_API_URL}/users/current/accounts' + \
                 '?provisioningProfileId=f9ce1f12-e720-4b9a-9477-c2d4cb25f076'
             assert rsps.calls[0].request.method == 'GET'

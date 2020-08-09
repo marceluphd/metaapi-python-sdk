@@ -1,6 +1,49 @@
 from .httpClient import HttpClient
 from typing_extensions import TypedDict
+from typing import List, Union, Optional
 from requests import Response
+from enum import Enum
+
+
+class State(Enum):
+    """Account state."""
+    CREATED = 'CREATED'
+    DEPLOYING = 'DEPLOYING'
+    DEPLOYED = 'DEPLOYED'
+    DEPLOY_FAILED = 'DEPLOY_FAILED'
+    UNDEPLOYING = 'UNDEPLOYING'
+    UNDEPLOYED = 'UNDEPLOYED'
+    UNDEPLOY_FAILED = 'UNDEPLOY_FAILED'
+    DELETING = 'DELETING'
+    DELETE_FAILED = 'DELETE_FAILED'
+    REDEPLOY_FAILED = 'REDEPLOY_FAILED'
+
+
+class ConnectionStatus(Enum):
+    """Account connection status."""
+    CONNECTED = 'CONNECTED'
+    DISCONNECTED = 'DISCONNECTED'
+    DISCONNECTED_FROM_BROKER = 'DISCONNECTED_FROM_BROKER'
+
+
+class AccountsFilter(TypedDict):
+
+    offset: Optional[int]
+    """Search offset (defaults to 0) (must be greater or equal to 0)."""
+    limit: Optional[int]
+    """Search limit (defaults to 1000) (must be greater or equal to 1 and less or equal to 1000)."""
+    version: Optional[Union[List[int], int]]
+    """MT version (allowed values are 4 and 5)"""
+    type: Optional[Union[List[str], str]]
+    """Account type. Allowed values are 'cloud' and 'self-hosted'"""
+    state: Optional[Union[List[State], State]]
+    """Account state."""
+    connectionStatus: Optional[Union[List[ConnectionStatus], ConnectionStatus]]
+    """Connection status."""
+    query: Optional[str]
+    """Searches over _id, name, server and login to match query."""
+    provisioningProfileId: Optional[str]
+    """Provisioning profile id."""
 
 
 class MetatraderAccountIdDto(TypedDict):
@@ -113,23 +156,20 @@ class MetatraderAccountClient:
         self._host = f'https://mt-provisioning-api-v1.{domain}'
         self._token = token
 
-    async def get_accounts(self, provisioning_profile_id: str = None) -> Response:
+    async def get_accounts(self, accounts_filter: AccountsFilter = None) -> Response:
         """Retrieves MetaTrader accounts owned by user
         (see https://metaapi.cloud/docs/provisioning/api/account/readAccounts/)
 
         Args:
-            provisioning_profile_id: Optional provisioning profile id filter.
+            accounts_filter: Optional filter.
 
         Returns:
             A coroutine resolving with List[MetatraderAccountDto] - MetaTrader accounts found.
         """
-        params = {}
-        if provisioning_profile_id:
-            params['provisioningProfileId'] = provisioning_profile_id
         opts = {
             'url': f'{self._host}/users/current/accounts',
             'method': 'GET',
-            'params': params,
+            'params': accounts_filter or {},
             'headers': {
                 'auth-token': self._token
             }
