@@ -116,10 +116,15 @@ Retrieving existing accounts via API
 ------------------------------------
 .. code-block:: python
 
-    # specifying provisioning profile id is optional
-    provisioningProfileId = '...'
-    accounts = await api.metatrader_account_api.get_accounts(provisioningProfileId)
-    account = await api.metatrader_account_api.get_account('accountId')
+    # filter and paginate accounts, see esdoc for full list of filter options available
+    accounts = await api.metatraderAccountApi.getAccounts({
+        'limit': 10
+        'offset': 0,
+        'query': 'ICMarketsSC-MT5',
+        'state': ['DEPLOYED']
+    })
+    # get accounts without filter (returns 1000 accounts max)
+    accounts = await api.metatraderAccountApi.getAccounts();
 
 Updating an existing account via API
 ------------------------------------

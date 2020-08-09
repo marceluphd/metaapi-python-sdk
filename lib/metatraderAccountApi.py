@@ -1,7 +1,6 @@
 from .metatraderAccount import MetatraderAccount
 from .clients.metaApiWebsocket_client import MetaApiWebsocketClient
-from .clients.metatraderAccount_client import MetatraderAccountClient
-from .clients.metatraderAccount_client import NewMetatraderAccountDto
+from .clients.metatraderAccount_client import MetatraderAccountClient, NewMetatraderAccountDto, AccountsFilter
 from typing import List
 
 
@@ -19,16 +18,16 @@ class MetatraderAccountApi:
         self._metatraderAccountClient = metatrader_account_client
         self._metaApiWebsocketClient = meta_api_websocket_client
 
-    async def get_accounts(self, provisioning_profile_id: str = None) -> List[MetatraderAccount]:
+    async def get_accounts(self, accounts_filter: AccountsFilter = None) -> List[MetatraderAccount]:
         """Retrieves MetaTrader accounts.
 
         Args:
-            provisioning_profile_id: Provisioning profile id.
+            accounts_filter: Optional filter.
 
         Returns:
             A coroutine resolving with an array of MetaTrader account entities.
         """
-        accounts = await self._metatraderAccountClient.get_accounts(provisioning_profile_id)
+        accounts = await self._metatraderAccountClient.get_accounts(accounts_filter or {})
         if 'items' in accounts:
             accounts = accounts['items']
         return list(map(lambda account: MetatraderAccount(account, self._metatraderAccountClient,

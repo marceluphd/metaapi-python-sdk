@@ -65,11 +65,11 @@ class TestMetatraderAccountApi:
     async def test_retrive_mt_accounts(self):
         """Should retrieve MT accounts."""
         client.get_accounts = AsyncMock(return_value=[{'_id': 'id'}])
-        accounts = await api.get_accounts('profileId')
+        accounts = await api.get_accounts({'provisioningProfileId': 'profileId'})
         assert list(map(lambda a: a.id, accounts)) == ['id']
         for account in accounts:
             assert isinstance(account, MetatraderAccount)
-        client.get_accounts.assert_called_with('profileId')
+        client.get_accounts.assert_called_with({'provisioningProfileId': 'profileId'})
 
     @pytest.mark.asyncio
     async def test_retrive_mt_account_by_id(self):
