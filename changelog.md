@@ -1,10 +1,13 @@
-5.0.0
+6.0.0
   - breaking change: moved comment and clientId arguments from MetaApiConnection trade methods to options argument
   - added magic trade option to let you specify distinct magic number (expert advisor id) on each trade
   - added manualTrades field to account model so that it is possible to configure if MetaApi should place manual trades on the account
   - prepare MetatraderAccountApi class for upcoming breaking change in the API
   - added pagination and more filters to getAccounts API
   - added slippage option to trades
+  - breaking change: rename close_position_by_symbol -> close_position**s**_by_symbol
+  - added fillingModes to symbol specification
+  - added executionMode to symbol specification
   
 4.0.0
   - add fields to trade result to match upcoming MetaApi contract

@@ -229,6 +229,15 @@ class MetatraderSymbolSpecification(TypedDict):
     """Maximum order volume for the symbol."""
     volumeStep: float
     """Order volume step for the symbol."""
+    fillingModes: List[str]
+    """List of allowed order filling modes. Can contain ORDER_FILLING_FOK, ORDER_FILLING_IOC or both.
+    See https://www.mql5.com/en/docs/constants/environment_state/marketinfoconstants#symbol_filling_mode for more
+    details."""
+    executionMode: str
+    """Deal execution mode. Possible values are SYMBOL_TRADE_EXECUTION_REQUEST, SYMBOL_TRADE_EXECUTION_INSTANT,
+    SYMBOL_TRADE_EXECUTION_MARKET, SYMBOL_TRADE_EXECUTION_EXCHANGE. See
+    https://www.mql5.com/en/docs/constants/environment_state/marketinfoconstants#enum_symbol_trade_execution for more
+    details."""
 
 
 class MetatraderSymbolPrice(TypedDict):

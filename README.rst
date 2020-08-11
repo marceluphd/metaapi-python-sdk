@@ -118,7 +118,7 @@ Retrieving existing accounts via API
 
     # filter and paginate accounts, see esdoc for full list of filter options available
     accounts = await api.metatraderAccountApi.getAccounts({
-        'limit': 10
+        'limit': 10,
         'offset': 0,
         'query': 'ICMarketsSC-MT5',
         'state': ['DEPLOYED']
@@ -336,7 +336,7 @@ Execute trades (both RPC and streaming APIs)
     print(await connection.modify_position('46870472', 2.0, 0.9))
     print(await connection.close_position_partially('46870472', 0.9))
     print(await connection.close_position('46870472'))
-    print(await connection.close_position_by_symbol('EURUSD'))
+    print(await connection.close_positions_by_symbol('EURUSD'))
     print(await connection.modify_order('46870472', 1.0, 2.0, 0.9))
     print(await connection.cancel_order('46870472'))
 
