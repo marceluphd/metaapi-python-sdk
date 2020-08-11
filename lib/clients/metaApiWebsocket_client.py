@@ -5,12 +5,13 @@ from .notSynchronizedException import NotSynchronizedException
 from .notConnectedException import NotConnectedException
 from .synchronizationListener import SynchronizationListener
 from .reconnectListener import ReconnectListener
-from ..models import MetatraderHistoryOrders, MetatraderDeals, date, random_id
+from ..models import MetatraderHistoryOrders, MetatraderDeals, date, random_id, MetatraderSymbolSpecification, \
+    MetatraderTradeResponse, MetatraderSymbolPrice, MetatraderAccountInformation, MetatraderPosition, MetatraderOrder
 import socketio
 import asyncio
 import re
 from datetime import datetime
-from typing import Coroutine
+from typing import Coroutine, List
 import pytz
 
 
@@ -140,7 +141,7 @@ class MetaApiWebsocketClient:
             self._requestResolves = {}
             self._synchronizationListeners = {}
 
-    async def get_account_information(self, account_id: str) -> asyncio.Future:
+    async def get_account_information(self, account_id: str) -> 'asyncio.Future[MetatraderAccountInformation]':
         """Returns account information for a specified MetaTrader account
         (see https://metaapi.cloud/docs/client/websocket/api/readTradingTerminalState/readAccountInformation/).
 
@@ -153,7 +154,7 @@ class MetaApiWebsocketClient:
         response = await self._rpc_request(account_id, {'type': 'getAccountInformation'})
         return response['accountInformation']
 
-    async def get_positions(self, account_id: str) -> asyncio.Future:
+    async def get_positions(self, account_id: str) -> 'asyncio.Future[List[MetatraderPosition]]':
         """Returns positions for a specified MetaTrader account
         (see https://metaapi.cloud/docs/client/websocket/api/readTradingTerminalState/readPositions/).
 
@@ -166,7 +167,7 @@ class MetaApiWebsocketClient:
         response = await self._rpc_request(account_id, {'type': 'getPositions'})
         return response['positions']
 
-    async def get_position(self, account_id: str, position_id: str) -> asyncio.Future:
+    async def get_position(self, account_id: str, position_id: str) -> 'asyncio.Future[MetatraderPosition]':
         """Returns specific position for a MetaTrader account
         (see https://metaapi.cloud/docs/client/websocket/api/readTradingTerminalState/readPosition/).
 
@@ -180,7 +181,7 @@ class MetaApiWebsocketClient:
         response = await self._rpc_request(account_id, {'type': 'getPosition', 'positionId': position_id})
         return response['position']
 
-    async def get_orders(self, account_id: str) -> asyncio.Future:
+    async def get_orders(self, account_id: str) -> 'asyncio.Future[List[MetatraderOrder]]':
         """Returns open orders for a specified MetaTrader account
         (see https://metaapi.cloud/docs/client/websocket/api/readTradingTerminalState/readOrders/).
 
@@ -193,7 +194,7 @@ class MetaApiWebsocketClient:
         response = await self._rpc_request(account_id, {'type': 'getOrders'})
         return response['orders']
 
-    async def get_order(self, account_id: str, order_id: str) -> asyncio.Future:
+    async def get_order(self, account_id: str, order_id: str) -> 'asyncio.Future[MetatraderOrder]':
         """Returns specific open order for a MetaTrader account
         (see https://metaapi.cloud/docs/client/websocket/api/readTradingTerminalState/readOrder/).
 
@@ -336,7 +337,7 @@ class MetaApiWebsocketClient:
         """
         return self._rpc_request(account_id, {'type': 'removeHistory'})
 
-    async def trade(self, account_id: str, trade) -> asyncio.Future:
+    async def trade(self, account_id: str, trade) -> 'asyncio.Future[MetatraderTradeResponse]':
         """Execute a trade on a connected MetaTrader account
         (see https://metaapi.cloud/docs/client/websocket/api/trade/).
 
@@ -345,7 +346,7 @@ class MetaApiWebsocketClient:
             trade: Trade to execute (see docs for possible trade types).
 
         Returns:
-            A coroutine resolving with trade result MetatraderTradeResponse.
+            A coroutine resolving with trade result.
 
         Raises:
             TradeException: On trade error, check error properties for error code details.
@@ -427,7 +428,8 @@ class MetaApiWebsocketClient:
         """
         return self._rpc_request(account_id, {'type': 'subscribeToMarketData', 'symbol': symbol})
 
-    async def get_symbol_specification(self, account_id: str, symbol: str) -> asyncio.Future:
+    async def get_symbol_specification(self, account_id: str, symbol: str) -> \
+            'asyncio.Future[MetatraderSymbolSpecification]':
         """Retrieves specification for a symbol
         (see https://metaapi.cloud/docs/client/websocket/api/retrieveMarketData/getSymbolSpecification/).
 
@@ -441,7 +443,7 @@ class MetaApiWebsocketClient:
         response = await self._rpc_request(account_id, {'type': 'getSymbolSpecification', 'symbol': symbol})
         return response['specification']
 
-    async def get_symbol_price(self, account_id: str, symbol: str) -> asyncio.Future:
+    async def get_symbol_price(self, account_id: str, symbol: str) -> 'asyncio.Future[MetatraderSymbolPrice]':
         """Retrieves price for a symbol
         (see https://metaapi.cloud/docs/client/websocket/api/retrieveMarketData/getSymbolPrice/).
 

@@ -6,9 +6,11 @@ from .memoryHistoryStorage import MemoryHistoryStorage
 from .metatraderAccountModel import MetatraderAccountModel
 from .historyStorage import HistoryStorage
 from .clients.timeoutException import TimeoutException
-from .models import random_id, TradeOptions
+from .models import random_id, TradeOptions, MetatraderSymbolSpecification, MetatraderAccountInformation, \
+    MetatraderPosition, MetatraderOrder, MetatraderHistoryOrders, MetatraderDeals, MetatraderTradeResponse, \
+    MetatraderSymbolPrice
 from datetime import datetime, timedelta
-from typing import Coroutine
+from typing import Coroutine, List
 import asyncio
 
 
@@ -40,7 +42,7 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
             self._websocketClient.add_synchronization_listener(account.id, self._historyStorage)
             self._websocketClient.add_reconnect_listener(self)
 
-    def get_account_information(self) -> Coroutine:
+    def get_account_information(self) -> 'Coroutine[asyncio.Future[MetatraderAccountInformation]]':
         """Returns account information (see
         https://metaapi.cloud/docs/client/websocket/api/readTradingTerminalState/readAccountInformation/).
 
@@ -49,7 +51,7 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
         """
         return self._websocketClient.get_account_information(self._account.id)
 
-    def get_positions(self) -> Coroutine:
+    def get_positions(self) -> 'Coroutine[asyncio.Future[List[MetatraderPosition]]]':
         """Returns positions (see
         https://metaapi.cloud/docs/client/websocket/api/readTradingTerminalState/readPositions/).
 
@@ -58,7 +60,7 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
         """
         return self._websocketClient.get_positions(self._account.id)
 
-    def get_position(self, position_id: str) -> Coroutine:
+    def get_position(self, position_id: str) -> 'Coroutine[asyncio.Future[MetatraderPosition]]':
         """Returns specific position (see
         https://metaapi.cloud/docs/client/websocket/api/readTradingTerminalState/readPosition/).
 
@@ -70,7 +72,7 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
         """
         return self._websocketClient.get_position(self._account.id, position_id)
 
-    def get_orders(self) -> Coroutine:
+    def get_orders(self) -> 'Coroutine[asyncio.Future[List[MetatraderOrder]]]':
         """Returns open orders (see
         https://metaapi.cloud/docs/client/websocket/api/readTradingTerminalState/readOrders/).
 
@@ -79,7 +81,7 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
         """
         return self._websocketClient.get_orders(self._account.id)
 
-    def get_order(self, order_id: str) -> Coroutine:
+    def get_order(self, order_id: str) -> 'Coroutine[asyncio.Future[MetatraderOrder]]':
         """Returns specific open order (see
         https://metaapi.cloud/docs/client/websocket/api/readTradingTerminalState/readOrder/).
 
@@ -91,7 +93,7 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
         """
         return self._websocketClient.get_order(self._account.id, order_id)
 
-    def get_history_orders_by_ticket(self, ticket: str) -> Coroutine:
+    def get_history_orders_by_ticket(self, ticket: str) -> 'Coroutine[MetatraderHistoryOrders]':
         """Returns the history of completed orders for a specific ticket number (see
         https://metaapi.cloud/docs/client/websocket/api/retrieveHistoricalData/readHistoryOrdersByTicket/).
 
@@ -103,7 +105,7 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
         """
         return self._websocketClient.get_history_orders_by_ticket(self._account.id, ticket)
 
-    def get_history_orders_by_position(self, position_id: str) -> Coroutine:
+    def get_history_orders_by_position(self, position_id: str) -> 'Coroutine[MetatraderHistoryOrders]':
         """Returns the history of completed orders for a specific position id (see
         https://metaapi.cloud/docs/client/websocket/api/retrieveHistoricalData/readHistoryOrdersByPosition/)
 
@@ -116,7 +118,7 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
         return self._websocketClient.get_history_orders_by_position(self._account.id, position_id)
 
     def get_history_orders_by_time_range(self, start_time: datetime, end_time: datetime, offset: int = 0,
-                                         limit: int = 1000) -> Coroutine:
+                                         limit: int = 1000) -> 'Coroutine[MetatraderHistoryOrders]':
         """Returns the history of completed orders for a specific time range (see
         https://metaapi.cloud/docs/client/websocket/api/retrieveHistoricalData/readHistoryOrdersByTimeRange/)
 
@@ -132,7 +134,7 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
         return self._websocketClient.get_history_orders_by_time_range(self._account.id, start_time, end_time,
                                                                       offset, limit)
 
-    def get_deals_by_ticket(self, ticket: str) -> Coroutine:
+    def get_deals_by_ticket(self, ticket: str) -> 'Coroutine[MetatraderDeals]':
         """Returns history deals with a specific ticket number (see
         https://metaapi.cloud/docs/client/websocket/api/retrieveHistoricalData/readDealsByTicket/).
 
@@ -144,7 +146,7 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
         """
         return self._websocketClient.get_deals_by_ticket(self._account.id, ticket)
 
-    def get_deals_by_position(self, position_id) -> Coroutine:
+    def get_deals_by_position(self, position_id) -> 'Coroutine[MetatraderDeals]':
         """Returns history deals for a specific position id (see
         https://metaapi.cloud/docs/client/websocket/api/retrieveHistoricalData/readDealsByPosition/).
 
@@ -157,7 +159,7 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
         return self._websocketClient.get_deals_by_position(self._account.id, position_id)
 
     def get_deals_by_time_range(self, start_time: datetime, end_time: datetime, offset: int = 0,
-                                limit: int = 1000) -> Coroutine:
+                                limit: int = 1000) -> 'Coroutine[MetatraderDeals]':
         """Returns history deals with for a specific time range (see
         https://metaapi.cloud/docs/client/websocket/api/retrieveHistoricalData/readDealsByTimeRange/).
 
@@ -182,7 +184,7 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
         return self._websocketClient.remove_history(self._account.id)
 
     def create_market_buy_order(self, symbol: str, volume: float, stop_loss: float = None, take_profit: float = None,
-                                options: TradeOptions = None) -> Coroutine:
+                                options: TradeOptions = None) -> 'Coroutine[asyncio.Future[MetatraderTradeResponse]]':
         """Creates a market buy order (see https://metaapi.cloud/docs/client/websocket/api/trade/).
 
         Args:
@@ -207,7 +209,7 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
         return self._websocketClient.trade(self._account.id, trade_params)
 
     def create_market_sell_order(self, symbol: str, volume: float, stop_loss: float = None, take_profit: float = None,
-                                 options: TradeOptions = None) -> Coroutine:
+                                 options: TradeOptions = None) -> 'Coroutine[asyncio.Future[MetatraderTradeResponse]]':
         """Creates a market sell order (see https://metaapi.cloud/docs/client/websocket/api/trade/).
 
         Args:
@@ -232,7 +234,8 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
         return self._websocketClient.trade(self._account.id, trade_params)
 
     def create_limit_buy_order(self, symbol: str, volume: float, open_price: float, stop_loss: float = None,
-                               take_profit: float = None, options: TradeOptions = None) -> Coroutine:
+                               take_profit: float = None, options: TradeOptions = None) -> \
+            'Coroutine[asyncio.Future[MetatraderTradeResponse]]':
         """Creates a limit buy order (see https://metaapi.cloud/docs/client/websocket/api/trade/).
 
         Args:
@@ -259,7 +262,8 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
         return self._websocketClient.trade(self._account.id, trade_params)
 
     def create_limit_sell_order(self, symbol: str, volume: float, open_price: float, stop_loss: float = None,
-                                take_profit: float = None, options: TradeOptions = None) -> Coroutine:
+                                take_profit: float = None, options: TradeOptions = None) -> \
+            'Coroutine[asyncio.Future[MetatraderTradeResponse]]':
         """Creates a limit sell order (see https://metaapi.cloud/docs/client/websocket/api/trade/).
 
         Args:
@@ -286,7 +290,8 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
         return self._websocketClient.trade(self._account.id, trade_params)
 
     def create_stop_buy_order(self, symbol: str, volume: float, open_price: float, stop_loss: float = None,
-                              take_profit: float = None, options: TradeOptions = None) -> Coroutine:
+                              take_profit: float = None, options: TradeOptions = None) -> \
+            'Coroutine[asyncio.Future[MetatraderTradeResponse]]':
         """Creates a stop buy order (see https://metaapi.cloud/docs/client/websocket/api/trade/).
 
         Args:
@@ -313,7 +318,8 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
         return self._websocketClient.trade(self._account.id, trade_params)
 
     def create_stop_sell_order(self, symbol: str, volume: float, open_price: float, stop_loss: float = None,
-                               take_profit: float = None, options: TradeOptions = None) -> Coroutine:
+                               take_profit: float = None, options: TradeOptions = None) -> \
+            'Coroutine[asyncio.Future[MetatraderTradeResponse]]':
         """Creates a stop sell order (see https://metaapi.cloud/docs/client/websocket/api/trade/).
 
         Args:
@@ -339,7 +345,8 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
         trade_params.update(options or {})
         return self._websocketClient.trade(self._account.id, trade_params)
 
-    def modify_position(self, position_id: str, stop_loss: float = None, take_profit: float = None) -> Coroutine:
+    def modify_position(self, position_id: str, stop_loss: float = None, take_profit: float = None) -> \
+            'Coroutine[asyncio.Future[MetatraderTradeResponse]]':
         """Modifies a position (see https://metaapi.cloud/docs/client/websocket/api/trade/).
 
         Args:
@@ -360,7 +367,8 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
             trade_params['takeProfit'] = take_profit
         return self._websocketClient.trade(self._account.id, trade_params)
 
-    def close_position_partially(self, position_id: str, volume: float, options: TradeOptions = None) -> Coroutine:
+    def close_position_partially(self, position_id: str, volume: float, options: TradeOptions = None) -> \
+            'Coroutine[asyncio.Future[MetatraderTradeResponse]]':
         """Partially closes a position (see https://metaapi.cloud/docs/client/websocket/api/trade/).
 
         Args:
@@ -378,7 +386,8 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
         trade_params.update(options or {})
         return self._websocketClient.trade(self._account.id, trade_params)
 
-    def close_position(self, position_id: str, options: TradeOptions = None) -> Coroutine:
+    def close_position(self, position_id: str, options: TradeOptions = None) -> \
+            'Coroutine[asyncio.Future[MetatraderTradeResponse]]':
         """Fully closes a position (see https://metaapi.cloud/docs/client/websocket/api/trade/).
 
         Args:
@@ -395,9 +404,9 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
         trade_params.update(options or {})
         return self._websocketClient.trade(self._account.id, trade_params)
 
-    def close_position_by_symbol(self, symbol: str, options: TradeOptions = None) -> Coroutine:
-        """Closes position by a symbol. Available on MT5 netting accounts only. (see
-        https://metaapi.cloud/docs/client/websocket/api/trade/).
+    def close_positions_by_symbol(self, symbol: str, options: TradeOptions = None) -> \
+            'Coroutine[asyncio.Future[MetatraderTradeResponse]]':
+        """Closes positions by a symbol (see https://metaapi.cloud/docs/client/websocket/api/trade/).
 
         Args:
             symbol: Symbol to trade.
@@ -409,12 +418,13 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
         Raises:
             TradeException: On trade error.
         """
-        trade_params = {'actionType': 'POSITION_CLOSE_SYMBOL', 'symbol': symbol}
+        trade_params = {'actionType': 'POSITIONS_CLOSE_SYMBOL', 'symbol': symbol}
         trade_params.update(options or {})
         return self._websocketClient.trade(self._account.id, trade_params)
 
     def modify_order(self, order_id: str, open_price: float, stop_loss: float = None,
-                     take_profit: float = None) -> Coroutine:
+                     take_profit: float = None) -> \
+            'Coroutine[asyncio.Future[MetatraderTradeResponse]]':
         """Modifies a pending order (see https://metaapi.cloud/docs/client/websocket/api/trade/).
 
         Args:
@@ -436,7 +446,8 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
             trade_params['takeProfit'] = take_profit
         return self._websocketClient.trade(self._account.id, trade_params)
 
-    def cancel_order(self, order_id: str) -> Coroutine:
+    def cancel_order(self, order_id: str) -> \
+            'Coroutine[asyncio.Future[MetatraderTradeResponse]]':
         """Cancels order (see https://metaapi.cloud/docs/client/websocket/api/trade/).
 
         Args:
@@ -494,7 +505,7 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
         """
         return self._websocketClient.subscribe_to_market_data(self._account.id, symbol)
 
-    def get_symbol_specification(self, symbol: str) -> Coroutine:
+    def get_symbol_specification(self, symbol: str) -> 'Coroutine[asyncio.Future[MetatraderSymbolSpecification]]':
         """Retrieves specification for a symbol (see
         https://metaapi.cloud/docs/client/websocket/api/retrieveMarketData/getSymbolSpecification/).
 
@@ -502,11 +513,11 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
             symbol: Symbol to retrieve specification for.
 
         Returns:
-            A coroutine which resolves when specification is retrieved.
+            A coroutine which resolves when specification MetatraderSymbolSpecification is retrieved.
         """
         return self._websocketClient.get_symbol_specification(self._account.id, symbol)
 
-    def get_symbol_price(self, symbol) -> Coroutine:
+    def get_symbol_price(self, symbol) -> 'Coroutine[asyncio.Future[MetatraderSymbolPrice]]':
         """Retrieves specification for a symbol (see
         https://metaapi.cloud/docs/client/websocket/api/retrieveMarketData/getSymbolPrice/).
 
@@ -514,7 +525,7 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
             symbol: Symbol to retrieve price for.
 
         Returns:
-            A coroutine which resolves when price is retrieved.
+            A coroutine which resolves when price MetatraderSymbolPrice is retrieved.
         """
         return self._websocketClient.get_symbol_price(self._account.id, symbol)
 

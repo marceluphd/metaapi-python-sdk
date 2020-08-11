@@ -547,17 +547,17 @@ class TestMetaApiConnection:
         client.trade.assert_called_with('accountId', {'actionType': 'POSITION_CLOSE_ID', 'positionId': '46870472'})
 
     @pytest.mark.asyncio
-    async def test_close_position_by_symbol(self):
-        """Should close position by symbol."""
+    async def test_close_positions_by_symbol(self):
+        """Should close positions by symbol."""
         trade_result = {
             'error': 10009,
             'description': 'TRADE_RETCODE_DONE',
             'orderId': 46870472
         }
         client.trade = AsyncMock(return_value=trade_result)
-        actual = await api.close_position_by_symbol('EURUSD')
+        actual = await api.close_positions_by_symbol('EURUSD')
         assert actual == trade_result
-        client.trade.assert_called_with('accountId', {'actionType': 'POSITION_CLOSE_SYMBOL', 'symbol': 'EURUSD'})
+        client.trade.assert_called_with('accountId', {'actionType': 'POSITIONS_CLOSE_SYMBOL', 'symbol': 'EURUSD'})
 
     @pytest.mark.asyncio
     async def test_modify_order(self):
