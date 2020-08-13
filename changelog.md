@@ -8,6 +8,7 @@
   - breaking change: rename close_position_by_symbol -> close_position**s**_by_symbol
   - added fillingModes to symbol specification
   - added executionMode to symbol specification
+  - added logic to throw an exception if streaming API is invoked in automatic synchronization mode
   
 4.0.0
   - add fields to trade result to match upcoming MetaApi contract

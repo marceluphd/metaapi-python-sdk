@@ -379,8 +379,8 @@ class MetaApiWebsocketClient:
             try:
                 await self._rpc_request(account_id, {'type': 'subscribe'})
             except Exception as err:
-                print(f'[{datetime.now().isoformat()}] MetaApi websocket client failed to receive subscribe response',
-                      err)
+                print(f'[{datetime.now().isoformat()}] MetaApi websocket client failed to receive subscribe response '
+                      f'(this usually does not mean an error)', err)
 
         asyncio.create_task(run_subscribe())
 
@@ -572,156 +572,301 @@ class MetaApiWebsocketClient:
     async def _process_synchronization_packet(self, data):
         try:
             if data['type'] == 'authenticated':
+                on_connected_tasks: List[asyncio.Task] = []
+
+                async def run_on_connected(listener):
+                    try:
+                        await listener.on_connected()
+                    except Exception as err:
+                        print('Failed to notify listener about connected event', err)
+
                 if data['accountId'] in self._synchronizationListeners:
                     for listener in self._synchronizationListeners[data['accountId']]:
-                        try:
-                            await listener.on_connected()
-                        except Exception as err:
-                            print('Failed to notify listener about connected event', err)
+                        on_connected_tasks.append(asyncio.create_task(run_on_connected(listener)))
+                if len(on_connected_tasks) > 0:
+                    await asyncio.wait(on_connected_tasks)
             elif data['type'] == 'disconnected':
+                on_disconnected_tasks: List[asyncio.Task] = []
+
+                async def run_on_disconnected(listener):
+                    try:
+                        await listener.on_disconnected()
+                    except Exception as err:
+                        print('Failed to notify listener about disconnected event', err)
+
                 if data['accountId'] in self._synchronizationListeners:
                     for listener in self._synchronizationListeners[data['accountId']]:
-                        try:
-                            await listener.on_disconnected()
-                        except Exception as err:
-                            print('Failed to notify listener about disconnected event', err)
+                        on_disconnected_tasks.append(asyncio.create_task(run_on_disconnected(listener)))
+                if len(on_disconnected_tasks) > 0:
+                    await asyncio.wait(on_disconnected_tasks)
             elif data['type'] == 'accountInformation':
                 if data['accountInformation'] and (data['accountId'] in self._synchronizationListeners):
-                    for listener in self._synchronizationListeners[data['accountId']]:
+                    on_account_information_updated_tasks: List[asyncio.Task] = []
+
+                    async def run_on_account_info(listener):
                         try:
                             await listener.on_account_information_updated(data['accountInformation'])
                         except Exception as err:
                             print('Failed to notify listener about accountInformation event', err)
+
+                    for listener in self._synchronizationListeners[data['accountId']]:
+                        on_account_information_updated_tasks.append(asyncio.create_task(run_on_account_info(listener)))
+                    if len(on_account_information_updated_tasks) > 0:
+                        await asyncio.wait(on_account_information_updated_tasks)
             elif data['type'] == 'deals':
                 if 'deals' in data:
                     for deal in data['deals']:
+                        on_deal_added_tasks: List[asyncio.Task] = []
+
+                        async def run_on_deal_added(listener):
+                            try:
+                                await listener.on_deal_added(deal)
+                            except Exception as err:
+                                print('Failed to notify listener about deals event', err)
+
                         if data['accountId'] in self._synchronizationListeners:
                             for listener in self._synchronizationListeners[data['accountId']]:
-                                try:
-                                    await listener.on_deal_added(deal)
-                                except Exception as err:
-                                    print('Failed to notify listener about deals event', err)
+                                on_deal_added_tasks.append(asyncio.create_task(run_on_deal_added(listener)))
+                        if len(on_deal_added_tasks) > 0:
+                            await asyncio.wait(on_deal_added_tasks)
             elif data['type'] == 'orders':
                 if 'orders' in data:
                     for order in data['orders']:
+                        on_order_updated_tasks: List[asyncio.Task] = []
+
+                        async def run_on_order_updated(listener):
+                            try:
+                                await listener.on_order_updated(order)
+                            except Exception as err:
+                                print('Failed to notify listener about orders event', err)
+
                         if data['accountId'] in self._synchronizationListeners:
                             for listener in self._synchronizationListeners[data['accountId']]:
-                                try:
-                                    await listener.on_order_updated(order)
-                                except Exception as err:
-                                    print('Failed to notify listener about orders event', err)
+                                on_order_updated_tasks.append(asyncio.create_task(run_on_order_updated(listener)))
+                        if len(on_order_updated_tasks) > 0:
+                            await asyncio.wait(on_order_updated_tasks)
             elif data['type'] == 'historyOrders':
                 if 'historyOrders' in data:
                     for historyOrder in data['historyOrders']:
+                        on_history_order_added_tasks: List[asyncio.Task] = []
+
+                        async def run_on_order_added(listener):
+                            try:
+                                await listener.on_history_order_added(historyOrder)
+                            except Exception as err:
+                                print('Failed to notify listener about historyOrders event', err)
+
                         if data['accountId'] in self._synchronizationListeners:
                             for listener in self._synchronizationListeners[data['accountId']]:
-                                try:
-                                    await listener.on_history_order_added(historyOrder)
-                                except Exception as err:
-                                    print('Failed to notify listener about historyOrders event', err)
+                                on_history_order_added_tasks.append(asyncio.create_task(run_on_order_added(listener)))
+                        if len(on_history_order_added_tasks) > 0:
+                            await asyncio.wait(on_history_order_added_tasks)
             elif data['type'] == 'positions':
                 if 'positions' in data:
                     for position in data['positions']:
+                        on_position_updated_tasks: List[asyncio.Task] = []
+
+                        async def run_on_position_updated(listener):
+                            try:
+                                await listener.on_position_updated(position)
+                            except Exception as err:
+                                print('Failed to notify listener about positions event', err)
+
                         if data['accountId'] in self._synchronizationListeners:
                             for listener in self._synchronizationListeners[data['accountId']]:
-                                try:
-                                    await listener.on_position_updated(position)
-                                except Exception as err:
-                                    print('Failed to notify listener about positions event', err)
+                                on_position_updated_tasks.append(asyncio.create_task(run_on_position_updated(listener)))
+                        if len(on_position_updated_tasks) > 0:
+                            await asyncio.wait(on_position_updated_tasks)
             elif data['type'] == 'update':
                 if 'accountInformation' in data and (data['accountId'] in self._synchronizationListeners):
-                    for listener in self._synchronizationListeners[data['accountId']]:
+                    on_account_information_updated_tasks: List[asyncio.Task] = []
+
+                    async def run_on_account_information_updated(listener):
                         try:
                             await listener.on_account_information_updated(data['accountInformation'])
                         except Exception as err:
                             print('Failed to notify listener about update event', err)
+
+                    for listener in self._synchronizationListeners[data['accountId']]:
+                        on_account_information_updated_tasks.append(
+                            asyncio.create_task(run_on_account_information_updated(listener)))
+                    if len(on_account_information_updated_tasks) > 0:
+                        await asyncio.wait(on_account_information_updated_tasks)
                 if 'updatedPositions' in data:
                     for position in data['updatedPositions']:
+                        on_position_updated_tasks: List[asyncio.Task] = []
+
+                        async def run_on_position_updated(listener):
+                            try:
+                                await listener.on_position_updated(position)
+                            except Exception as err:
+                                print('Failed to notify listener about update event', err)
+
                         if data['accountId'] in self._synchronizationListeners:
                             for listener in self._synchronizationListeners[data['accountId']]:
-                                try:
-                                    await listener.on_position_updated(position)
-                                except Exception as err:
-                                    print('Failed to notify listener about update event', err)
+                                on_position_updated_tasks.append(
+                                    asyncio.create_task(run_on_position_updated(listener)))
+                        if len(on_position_updated_tasks) > 0:
+                            await asyncio.wait(on_position_updated_tasks)
                 if 'removedPositionIds' in data:
                     for positionId in data['removedPositionIds']:
+                        on_position_removed_tasks: List[asyncio.Task] = []
+
+                        async def run_on_position_removed(listener):
+                            try:
+                                await listener.on_position_removed(positionId)
+                            except Exception as err:
+                                print('Failed to notify listener about update event', err)
+
                         if data['accountId'] in self._synchronizationListeners:
                             for listener in self._synchronizationListeners[data['accountId']]:
-                                try:
-                                    await listener.on_position_removed(positionId)
-                                except Exception as err:
-                                    print('Failed to notify listener about update event', err)
+                                on_position_removed_tasks.append(
+                                    asyncio.create_task(run_on_position_removed(listener)))
+                        if len(on_position_removed_tasks) > 0:
+                            await asyncio.wait(on_position_removed_tasks)
                 if 'updatedOrders' in data:
                     for order in data['updatedOrders']:
+                        on_order_updated_tasks: List[asyncio.Task] = []
+
+                        async def run_on_order_updated(listener):
+                            try:
+                                await listener.on_order_updated(order)
+                            except Exception as err:
+                                print('Failed to notify listener about update event', err)
+
                         if data['accountId'] in self._synchronizationListeners:
                             for listener in self._synchronizationListeners[data['accountId']]:
-                                try:
-                                    await listener.on_order_updated(order)
-                                except Exception as err:
-                                    print('Failed to notify listener about update event', err)
+                                on_order_updated_tasks.append(
+                                    asyncio.create_task(run_on_order_updated(listener)))
+                        if len(on_order_updated_tasks) > 0:
+                            await asyncio.wait(on_order_updated_tasks)
                 if 'completedOrderIds' in data:
                     for orderId in data['completedOrderIds']:
+                        on_order_completed_tasks: List[asyncio.Task] = []
+
+                        async def run_on_order_completed(listener):
+                            try:
+                                await listener.on_order_completed(orderId)
+                            except Exception as err:
+                                print('Failed to notify listener about update event', err)
+
                         if data['accountId'] in self._synchronizationListeners:
                             for listener in self._synchronizationListeners[data['accountId']]:
-                                try:
-                                    await listener.on_order_completed(orderId)
-                                except Exception as err:
-                                    print('Failed to notify listener about update event', err)
+                                on_order_completed_tasks.append(
+                                    asyncio.create_task(run_on_order_completed(listener)))
+                        if len(on_order_completed_tasks) > 0:
+                            await asyncio.wait(on_order_completed_tasks)
                 if 'historyOrders' in data:
                     for historyOrder in data['historyOrders']:
+                        on_history_order_added_tasks: List[asyncio.Task] = []
+
+                        async def run_on_history_order_added(listener):
+                            try:
+                                await listener.on_history_order_added(historyOrder)
+                            except Exception as err:
+                                print('Failed to notify listener about update event', err)
+
                         if data['accountId'] in self._synchronizationListeners:
                             for listener in self._synchronizationListeners[data['accountId']]:
-                                try:
-                                    await listener.on_history_order_added(historyOrder)
-                                except Exception as err:
-                                    print('Failed to notify listener about update event', err)
+                                on_history_order_added_tasks.append(
+                                    asyncio.create_task(run_on_history_order_added(listener)))
+                        if len(on_history_order_added_tasks) > 0:
+                            await asyncio.wait(on_history_order_added_tasks)
                 if 'deals' in data:
                     for deal in data['deals']:
+                        on_deal_added_tasks: List[asyncio.Task] = []
+
+                        async def run_on_deal_added(listener):
+                            try:
+                                await listener.on_deal_added(deal)
+                            except Exception as err:
+                                print('Failed to notify listener about update event', err)
+
                         if data['accountId'] in self._synchronizationListeners:
                             for listener in self._synchronizationListeners[data['accountId']]:
-                                try:
-                                    await listener.on_deal_added(deal)
-                                except Exception as err:
-                                    print('Failed to notify listener about update event', err)
+                                on_deal_added_tasks.append(
+                                    asyncio.create_task(run_on_deal_added(listener)))
+                        if len(on_deal_added_tasks) > 0:
+                            await asyncio.wait(on_deal_added_tasks)
             elif data['type'] == 'dealSynchronizationFinished':
                 if data['accountId'] in self._synchronizationListeners:
-                    for listener in self._synchronizationListeners[data['accountId']]:
+                    on_deal_synchronization_finished_tasks: List[asyncio.Task] = []
+
+                    async def run_on_deal_synchronization_finished(listener):
                         try:
                             await listener.on_deal_synchronization_finished(data['synchronizationId'])
                         except Exception as err:
                             print('Failed to notify listener about dealSynchronizationFinished event', err)
+
+                    for listener in self._synchronizationListeners[data['accountId']]:
+                        on_deal_synchronization_finished_tasks.append(
+                                    asyncio.create_task(run_on_deal_synchronization_finished(listener)))
+                    if len(on_deal_synchronization_finished_tasks) > 0:
+                        await asyncio.wait(on_deal_synchronization_finished_tasks)
             elif data['type'] == 'orderSynchronizationFinished':
                 if data['accountId'] in self._synchronizationListeners:
-                    for listener in self._synchronizationListeners[data['accountId']]:
+                    on_order_synchronization_finished_tasks: List[asyncio.Task] = []
+
+                    async def run_on_order_synchronization_finished(listener):
                         try:
                             await listener.on_order_synchronization_finished(data['synchronizationId'])
                         except Exception as err:
                             print('Failed to notify listener about orderSynchronizationFinished event', err)
+
+                    for listener in self._synchronizationListeners[data['accountId']]:
+                        on_order_synchronization_finished_tasks.append(
+                            asyncio.create_task(run_on_order_synchronization_finished(listener)))
+                    if len(on_order_synchronization_finished_tasks) > 0:
+                        await asyncio.wait(on_order_synchronization_finished_tasks)
             elif data['type'] == 'status':
                 if data['accountId'] in self._synchronizationListeners:
-                    for listener in self._synchronizationListeners[data['accountId']]:
+                    on_broker_connection_status_changed_tasks: List[asyncio.Task] = []
+
+                    async def run_on_broker_connection_status_changed(listener):
                         try:
                             await listener.on_broker_connection_status_changed(bool(data['connected']))
                         except Exception as err:
                             print('Failed to notify listener about brokerConnectionStatusChanged event', err)
+
+                    for listener in self._synchronizationListeners[data['accountId']]:
+                        on_broker_connection_status_changed_tasks.append(
+                            asyncio.create_task(run_on_broker_connection_status_changed(listener)))
+                    if len(on_broker_connection_status_changed_tasks) > 0:
+                        await asyncio.wait(on_broker_connection_status_changed_tasks)
             elif data['type'] == 'specifications':
                 if 'specifications' in data:
                     for specification in data['specifications']:
+                        on_symbol_specification_updated_tasks: List[asyncio.Task] = []
+
+                        async def run_on_symbol_specification_updated(listener):
+                            try:
+                                await listener.on_symbol_specification_updated(specification)
+                            except Exception as err:
+                                print('Failed to notify listener about specifications event', err)
+
                         if data['accountId'] in self._synchronizationListeners:
                             for listener in self._synchronizationListeners[data['accountId']]:
-                                try:
-                                    await listener.on_symbol_specification_updated(specification)
-                                except Exception as err:
-                                    print('Failed to notify listener about specifications event', err)
+                                on_symbol_specification_updated_tasks.append(
+                                    asyncio.create_task(run_on_symbol_specification_updated(listener)))
+                            if len(on_symbol_specification_updated_tasks) > 0:
+                                await asyncio.wait(on_symbol_specification_updated_tasks)
             elif data['type'] == 'prices':
                 if 'prices' in data:
                     for price in data['prices']:
+                        on_symbol_price_updated_tasks: List[asyncio.Task] = []
+
+                        async def run_on_symbol_price_updated(listener):
+                            try:
+                                await listener.on_symbol_price_updated(price)
+                            except Exception as err:
+                                print('Failed to notify listener about prices event', err)
+
                         if data['accountId'] in self._synchronizationListeners:
                             for listener in self._synchronizationListeners[data['accountId']]:
-                                try:
-                                    await listener.on_symbol_price_updated(price)
-                                except Exception as err:
-                                    print('Failed to notify listener about prices event', err)
+                                on_symbol_price_updated_tasks.append(
+                                    asyncio.create_task(run_on_symbol_price_updated(listener)))
+                            if len(on_symbol_price_updated_tasks) > 0:
+                                await asyncio.wait(on_symbol_price_updated_tasks)
         except Exception as err:
             print('Failed to process incoming synchronization packet', err)
 
