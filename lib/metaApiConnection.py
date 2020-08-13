@@ -9,6 +9,7 @@ from .clients.timeoutException import TimeoutException
 from .models import random_id, TradeOptions, MetatraderSymbolSpecification, MetatraderAccountInformation, \
     MetatraderPosition, MetatraderOrder, MetatraderHistoryOrders, MetatraderDeals, MetatraderTradeResponse, \
     MetatraderSymbolPrice
+from .invalidSynchronizationModeException import InvalidSynchronizationModeException
 from datetime import datetime, timedelta
 from typing import Coroutine, List
 import asyncio
@@ -503,6 +504,8 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
         Returns:
             Promise which resolves when subscription request was processed.
         """
+        if self._account.synchronization_mode != 'user':
+            raise InvalidSynchronizationModeException(self._account)
         return self._websocketClient.subscribe_to_market_data(self._account.id, symbol)
 
     def get_symbol_specification(self, symbol: str) -> 'Coroutine[asyncio.Future[MetatraderSymbolSpecification]]':
@@ -536,6 +539,8 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
         Returns:
             Local copy of terminal state.
         """
+        if self._account.synchronization_mode != 'user':
+            raise InvalidSynchronizationModeException(self._account)
         return self._terminalState
 
     @property
@@ -545,6 +550,8 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
         Returns:
             Local history storage.
         """
+        if self._account.synchronization_mode != 'user':
+            raise InvalidSynchronizationModeException(self._account)
         return self._historyStorage
 
     def add_synchronization_listener(self, listener):
@@ -555,6 +562,8 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
         """
         if self._account.synchronization_mode == 'user':
             self._websocketClient.add_synchronization_listener(self._account.id, listener)
+        else:
+            raise InvalidSynchronizationModeException(self._account)
 
     def remove_synchronization_listener(self, listener):
         """Removes synchronization listener for specific account. Use this method for accounts in user
@@ -565,6 +574,8 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
         """
         if self._account.synchronization_mode == 'user':
             self._websocketClient.remove_synchronization_listener(self._account.id, listener)
+        else:
+            raise InvalidSynchronizationModeException(self._account)
 
     async def on_connected(self):
         """Invoked when connection to MetaTrader terminal established.
