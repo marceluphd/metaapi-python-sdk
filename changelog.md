@@ -9,6 +9,7 @@
   - added fillingModes to symbol specification
   - added executionMode to symbol specification
   - added logic to throw an exception if streaming API is invoked in automatic synchronization mode
+  - added code samples for created account
   
 4.0.0
   - add fields to trade result to match upcoming MetaApi contract
