@@ -74,12 +74,12 @@ class MetatraderPosition(TypedDict):
     """Position cumulative profit."""
     comment: Optional[str]
     """Optional position comment. The sum of the line lengths of the comment and the clientId
-    must be less than or equal to 27. For more information see https://metaapi.cloud/docs/client/clientIdUsage/"""
+    must be less than or equal to 26. For more information see https://metaapi.cloud/docs/client/clientIdUsage/"""
     clientId: Optional[str]
     """Optional client-assigned id. The id value can be assigned when submitting a trade and
     will be present on position, history orders and history deals related to the trade. You can use this field to bind
     your trades to objects in your application and then track trade progress. The sum of the line lengths of the
-    comment and the clientId must be less than or equal to 27. For more information see
+    comment and the clientId must be less than or equal to 26. For more information see
     https://metaapi.cloud/docs/client/clientIdUsage/"""
     unrealizedProfit: float
     """Profit of the part of the position which is not yet closed, including swap."""
@@ -127,14 +127,14 @@ class MetatraderOrder(TypedDict):
     """Order position id. Present only if the order has a position attached to it."""
     comment: Optional[str]
     """Optional order comment. The sum of the line lengths of the comment and the clientId
-    must be less than or equal to 27. For more information see https://metaapi.cloud/docs/client/clientIdUsage/"""
+    must be less than or equal to 26. For more information see https://metaapi.cloud/docs/client/clientIdUsage/"""
     originalComment: Optional[str]
     """Optional order original comment (present if possible to restore original comment from history)"""
     clientId: Optional[str]
     """Optional client-assigned id. The id value can be assigned when submitting a trade and
     will be present on position, history orders and history deals related to the trade. You can use this field to bind
     your trades to objects in your application and then track trade progress. The sum of the line lengths of the
-    comment and the clientId must be less than or equal to 27. For more information see
+    comment and the clientId must be less than or equal to 26. For more information see
     https://metaapi.cloud/docs/client/clientIdUsage/"""
     platform: str
     """Platform id (mt4 or mt5)."""
@@ -189,14 +189,14 @@ class MetatraderDeal(TypedDict):
     """Optional id of order the deal relates to."""
     comment: Optional[str]
     """Optional deal comment. The sum of the line lengths of the comment and the clientId
-    must be less than or equal to 27. For more information see https://metaapi.cloud/docs/client/clientIdUsage/"""
+    must be less than or equal to 26. For more information see https://metaapi.cloud/docs/client/clientIdUsage/"""
     originalComment: Optional[str]
     """Optional deal original comment (present if possible to restore original comment from history)."""
     clientId: Optional[str]
     """Optional client-assigned id. The id value can be assigned when submitting a trade and will be present on
     position, history orders and history deals related to the trade. You can use this field to bind your trades
     to objects in your application and then track trade progress. The sum of the line lengths of the comment and
-    the clientId must be less than or equal to 27. For more information see
+    the clientId must be less than or equal to 26. For more information see
     https://metaapi.cloud/docs/client/clientIdUsage/"""
     platform: str
     """Platform id (mt4 or mt5)."""
@@ -281,12 +281,12 @@ class TradeOptions(TypedDict):
 
     comment: Optional[str]
     """Optional order comment. The sum of the line lengths of the comment and the clientId must be less than or equal
-    to 27. For more information see https://metaapi.cloud/docs/client/clientIdUsage/"""
+    to 26. For more information see https://metaapi.cloud/docs/client/clientIdUsage/"""
     clientId: Optional[str]
     """Optional client-assigned id. The id value can be assigned when submitting a trade and will be present on
     position, history orders and history deals related to the trade. You can use this field to bind your trades to
     objects in your application and then track trade progress. The sum of the line lengths of the comment and the
-    clientId must be less than or equal to 27. For more information see
+    clientId must be less than or equal to 26. For more information see
     https://metaapi.cloud/docs/client/clientIdUsage/"""
     magic: Optional[str]
     """Magic (expert id) number. If not set default value specified in account entity will be used."""
