@@ -1,17 +1,45 @@
 from .memoryHistoryStorage import MemoryHistoryStorage
 from .models import date
+from mock import AsyncMock
+from datetime import datetime
 import pytest
-storage = MemoryHistoryStorage()
+storage = None
 
 
 @pytest.fixture(autouse=True)
-async def run_around_tests():
-    storage.reset()
+async def run_around_tests(mocker):
+    global storage
+    storage = MemoryHistoryStorage('accountId')
     await storage.on_connected()
     yield
 
 
 class TestMemoryHistoryStorage:
+    @pytest.mark.asyncio
+    async def test_load_data_from_file_manager(self):
+        """Should load data from the file manager."""
+        test_deal = {'id': '37863643', 'type': 'DEAL_TYPE_BALANCE', 'magic': 0, 'time':
+                     datetime.fromtimestamp(100).isoformat(),
+                     'commission': 0, 'swap': 0, 'profit': 10000, 'platform': 'mt5', 'comment': 'Demo deposit 1'}
+        test_order = {'id': '61210463', 'type': 'ORDER_TYPE_SELL', 'state': 'ORDER_STATE_FILLED', 'symbol': 'AUDNZD',
+                      'magic': 0, 'time': datetime.fromtimestamp(50).isoformat(), 'doneTime':
+                          datetime.fromtimestamp(100).isoformat(), 'currentPrice': 1, 'volume': 0.01,
+                      'currentVolume': 0,
+                      'positionId': '61206630', 'platform': 'mt5', 'comment': 'AS_AUDNZD_5YyM6KS7Fv:'}
+        storage._fileManager.get_history_from_disk = AsyncMock(return_value={'deals': [test_deal],
+                                                                             'historyOrders': [test_order]})
+        await storage.load_data_from_disk()
+        assert storage.deals == [test_deal]
+        assert storage.history_orders == [test_order]
+
+    @pytest.mark.asyncio
+    async def test_update_disk_storage(self):
+        """Should update disk storage."""
+
+        storage._fileManager.update_disk_storage = AsyncMock()
+        await storage.update_disk_storage()
+        storage._fileManager.update_disk_storage.assert_called()
+
     @pytest.mark.asyncio
     async def test_return_last_history_order_time(self):
         """Should return last history order time."""

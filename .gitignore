@@ -9,4 +9,5 @@ docs
 .env
 test.log
 dist
+.metaapi
 *.egg-info

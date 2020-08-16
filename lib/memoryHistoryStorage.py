@@ -1,25 +1,47 @@
 from .models import MetatraderDeal, MetatraderOrder
 from typing import List
-from .historyStorage import HistoryStorage
+from .memoryHistoryStorageModel import MemoryHistoryStorageModel
+from .historyFileManager import HistoryFileManager
 from datetime import datetime
 from .models import date
 import pytz
 
 
-class MemoryHistoryStorage(HistoryStorage):
+class MemoryHistoryStorage(MemoryHistoryStorageModel):
     """History storage which stores MetaTrader history in RAM."""
 
-    def __init__(self):
+    def __init__(self, account_id: str):
         """Inits the in-memory history store instance"""
         super().__init__()
+        self._accountId = account_id
+        self._fileManager = HistoryFileManager(account_id, self)
         self._deals = []
         self._historyOrders = []
+        self._fileManager.start_update_job()
 
     def reset(self):
         """Resets the storage. Intended for use in tests."""
 
         self._deals = []
         self._historyOrders = []
+
+    async def load_data_from_disk(self):
+        """Loads history data from the file manager.
+
+        Returns:
+            A coroutine which resolves when the history is loaded.
+        """
+        history = await self._fileManager.get_history_from_disk()
+        self._deals = history['deals']
+        self._historyOrders = history['historyOrders']
+
+    async def update_disk_storage(self):
+        """Saves unsaved history items to disk storage.
+
+        Returns:
+            A coroutine which resolves when the history is saved.
+        """
+        await self._fileManager.update_disk_storage()
 
     @property
     def deals(self) -> List[MetatraderDeal]:
@@ -91,8 +113,10 @@ class MemoryHistoryStorage(HistoryStorage):
                 break
         if replacement_index != -1:
             self._historyOrders[replacement_index] = history_order
+            self._fileManager.set_start_new_order_index(replacement_index)
         else:
             self._historyOrders.insert(insert_index, history_order)
+            self._fileManager.set_start_new_order_index(insert_index)
 
     async def on_deal_added(self, new_deal: MetatraderDeal):
         """Invoked when a new MetaTrader history deal is added.
@@ -125,5 +149,7 @@ class MemoryHistoryStorage(HistoryStorage):
                 break
         if replacement_index != -1:
             self._deals[replacement_index] = new_deal
+            self._fileManager.set_start_new_deal_index(replacement_index)
         else:
             self._deals.insert(insert_index, new_deal)
+            self._fileManager.set_start_new_deal_index(insert_index)
