@@ -25,7 +25,12 @@ We have composed a `short guide explaining how to use the example code <https://
 
 Connecting to MetaApi
 =====================
-Please use https://app.metaapi.cloud/token web UI to obtain your API token and supply it to the MetaApi class constructor.
+Please use one of these ways:
+
+1. https://app.metaapi.cloud/token web UI to obtain your API token.
+2. An account access token which grants access to a single account. See section below on instructions on how to retrieve account access token.
+
+Supply token to the MetaApi class constructor.
 
 .. code-block:: python
 
@@ -33,6 +38,19 @@ Please use https://app.metaapi.cloud/token web UI to obtain your API token and s
 
     token = '...'
     api = MetaApi(token)
+
+Retrieving account access token
+=====================
+Account access token grants access to a single account. You can retrieve account access token via API:
+
+.. code-block:: python
+
+    account_id = '...'
+    account = await api.metatrader_account_api.get_account(account_id)
+    account_access_token = account.access_token
+    print(account_access_token)
+
+Alternatively, you can retrieve account access token via web UI on https://app.metaapi.cloud/accounts page.
 
 Managing MetaTrader accounts (API servers for MT accounts)
 ==========================================================

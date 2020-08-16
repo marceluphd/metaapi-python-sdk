@@ -126,7 +126,7 @@ class HistoryFileManager:
                 f.truncate()
                 f.close()
                 f = open(file_path, "a+")
-                f.write(', ' + stringify(replace_items)[1:])
+                f.write(',' + stringify(replace_items)[1:])
                 f.close()
             return size_array[0:start_index] + list(map(self.get_item_size, replace_items))
 
