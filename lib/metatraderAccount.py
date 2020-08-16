@@ -4,6 +4,7 @@ from .clients.metaApiWebsocket_client import MetaApiWebsocketClient
 from .clients.timeoutException import TimeoutException
 from .metaApiConnection import MetaApiConnection
 from .metatraderAccountModel import MetatraderAccountModel
+from .historyFileManager import HistoryFileManager
 from .historyStorage import HistoryStorage
 from datetime import datetime, timedelta
 import asyncio
@@ -170,6 +171,9 @@ class MetatraderAccount(MetatraderAccountModel):
             A coroutine resolving when account is scheduled for deletion.
         """
         await self._metatraderAccountClient.delete_account(self.id)
+        if self.synchronization_mode == 'user':
+            file_manager = HistoryFileManager(self.id)
+            await file_manager.delete_storage_from_disk()
         if self.type != 'self-hosted':
             try:
                 await self.reload()
@@ -307,6 +311,8 @@ class MetatraderAccount(MetatraderAccountModel):
             MetaApi connection.
         """
         connection = MetaApiConnection(self._metaApiWebsocketClient, self, history_storage)
+        if self.synchronization_mode == 'user':
+            await connection.initialize()
         await connection.subscribe()
         return connection
 

@@ -599,12 +599,14 @@ class TestMetatraderAccountApi:
         """Should connect to an MT terminal."""
         websocket_client.add_synchronization_listener = MagicMock()
         websocket_client.subscribe = AsyncMock()
+        MetaApiConnection.initialize = AsyncMock()
         client.get_account = AsyncMock(return_value={'_id': 'id', 'synchronizationMode': 'user'})
         account = await api.get_account('id')
-        storage = MockStorage()
+        storage = MockStorage('accountId')
         connection = await account.connect(storage)
         assert isinstance(connection, MetaApiConnection)
         assert connection.history_storage == storage
+        connection.initialize.assert_called()
         websocket_client.add_synchronization_listener.assert_called_with('id', storage)
         websocket_client.subscribe.assert_called_with('id')
 

@@ -104,7 +104,7 @@ class AutoMockAccount(MetatraderAccount):
 account = MockAccount(MagicMock(), MagicMock(), MagicMock())
 auto_account = AutoMockAccount(MagicMock(), MagicMock(), MagicMock())
 client = MockClient('token')
-api = MetaApiConnection(client, account)
+api = None
 
 
 @pytest.fixture(autouse=True)
@@ -707,6 +707,7 @@ class TestMetaApiConnection:
     async def test_wait_sync_complete_user_mode(self):
         """Should wait until synchronization complete in user mode."""
         assert not (await api.is_synchronized())
+        api._historyStorage.update_disk_storage = AsyncMock()
         try:
             await api.wait_synchronized('synchronizationId', 1, 10)
             raise Exception('TimeoutError is expected')
@@ -719,6 +720,7 @@ class TestMetaApiConnection:
         await promise
         assert pytest.approx(0, 10) == (datetime.now() - start_time).seconds * 1000
         assert (await api.is_synchronized('synchronizationId'))
+        api._historyStorage.update_disk_storage.assert_called()
 
     @pytest.mark.asyncio
     async def test_time_out_waiting_for_sync_user_mode(self):
@@ -749,3 +751,10 @@ class TestMetaApiConnection:
         api.subscribe = AsyncMock()
         await api.on_reconnected()
         api.subscribe.assert_called_with()
+
+    @pytest.mark.asyncio
+    async def test_load_history_storage_from_disk(self):
+        """Should load data to history storage from disk."""
+        api._historyStorage.load_data_from_disk = AsyncMock()
+        await api.initialize()
+        api._historyStorage.load_data_from_disk.assert_called()

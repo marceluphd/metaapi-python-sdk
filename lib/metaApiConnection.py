@@ -37,7 +37,7 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
         self._lastSynchronizationId = None
         if account.synchronization_mode == 'user':
             self._terminalState = TerminalState()
-            self._historyStorage = history_storage or MemoryHistoryStorage()
+            self._historyStorage = history_storage or MemoryHistoryStorage(account.id)
             self._websocketClient.add_synchronization_listener(account.id, self)
             self._websocketClient.add_synchronization_listener(account.id, self._terminalState)
             self._websocketClient.add_synchronization_listener(account.id, self._historyStorage)
@@ -486,6 +486,11 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
             return await self._websocketClient.synchronize(self._account.id, synchronization_id,
                                                            starting_history_order_time, starting_deal_time)
 
+    async def initialize(self) -> Coroutine:
+        """Initializes meta api connection"""
+        if self._account.synchronization_mode == 'user':
+            await self._historyStorage.load_data_from_disk()
+
     async def subscribe(self) -> Coroutine:
         """Initiates subscription to MetaTrader terminal.
 
@@ -596,6 +601,8 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
             synchronization_id: Synchronization request id.
         """
         self._dealsSynchronized[synchronization_id] = True
+        if self._account.synchronization_mode == 'user':
+            await self._historyStorage.update_disk_storage()
 
     async def on_order_synchronization_finished(self, synchronization_id: str):
         """Invoked when a synchronization of history orders on a MetaTrader account have finished
