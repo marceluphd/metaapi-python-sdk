@@ -13,7 +13,6 @@ api = MetaApi(token)
 async def test_meta_api_synchronization():
     try:
         account = await api.metatrader_account_api.get_account(accountId)
-        print(account)
         #  wait until account is deployed and connected to broker
         print('Deploying account')
         await account.deploy()
