@@ -20,6 +20,11 @@ class RequestOptions(TypedDict):
 class HttpClient:
     """HTTP client library based on requests module."""
     def __init__(self, timeout: float = 60):
+        """Inits HttpClient class instance.
+
+        Args:
+            timeout: Request timeout in seconds.
+        """
         self._timeout = timeout
 
     async def request(self, options: RequestOptions) -> requests.Response:
