@@ -19,6 +19,8 @@ class MetaApi:
         Args:
             token: Authorization token.
             domain: Domain to connect to.
+            request_timeout: Timeout for http requests in seconds.
+            connect_timeout: Timeout for connecting to server in seconds.
         """
         http_client = HttpClient(request_timeout)
         self._metaApiWebsocketClient = MetaApiWebsocketClient(token, domain, request_timeout, connect_timeout)

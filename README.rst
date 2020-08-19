@@ -50,7 +50,7 @@ Account access token grants access to a single account. You can retrieve account
     account_access_token = account.access_token
     print(account_access_token)
 
-Alternatively, you can retrieve account access token via web UI on https://app.metaapi.cloud/accounts page.
+Alternatively, you can retrieve account access token via web UI on https://app.metaapi.cloud/accounts page (see `this video <https://youtu.be/PKYiDns6_xI>`_).
 
 Managing MetaTrader accounts (API servers for MT accounts)
 ==========================================================

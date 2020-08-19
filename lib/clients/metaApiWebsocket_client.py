@@ -31,6 +31,8 @@ class MetaApiWebsocketClient:
         Args:
             token: Authorization token.
             domain: Domain to connect to, default is agiliumtrade.agiliumtrade.ai.
+            request_timeout: Timeout for socket requests in seconds.
+            connect_timeout: Timeout for connecting to server in seconds.
         """
         self._url = f'https://mt-client-api-v1.{domain}'
         self._request_timeout = request_timeout
