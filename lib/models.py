@@ -294,3 +294,29 @@ class TradeOptions(TypedDict):
     """Optional slippage in points. Should be greater or equal to zero. In not set, default value specified in
     account entity will be used. Slippage is ignored if execution mode set to SYMBOL_TRADE_EXECUTION_MARKET in
     symbol specification."""
+
+
+class ValidationDetails(TypedDict):
+    """Object to supply additional information for validation exceptions."""
+    parameter: str
+    """Name of invalid parameter."""
+    value: Optional[str]
+    """Entered invalid value."""
+    message: str
+    """Error message."""
+
+
+class ExceptionMessage(TypedDict):
+    """A REST API response that contains an exception message"""
+    id: int
+    """Error id"""
+    error: str
+    """Error name"""
+    numericCode: Optional[int]
+    """Numeric error code"""
+    stringCode: Optional[str]
+    """String error code"""
+    message: str
+    """Human-readable error message"""
+    details: Optional[List[ValidationDetails]]
+    """Additional information about error. Used to supply validation error details."""

@@ -537,7 +537,11 @@ class MetaApiWebsocketClient:
         self._requestResolves[request_id] = asyncio.Future()
         request['accountId'] = account_id
         await self._socket.emit('request', request)
-        resolve = await asyncio.wait_for(self._requestResolves[request_id], timeout=self._request_timeout)
+        try:
+            resolve = await asyncio.wait_for(self._requestResolves[request_id], timeout=self._request_timeout)
+        except asyncio.TimeoutError:
+            raise TimeoutException(f"MetaApi websocket client request {request['requestId']} of type "
+                                   f"{request['type']} timed out")
         return resolve
 
     def _convert_error(self, data) -> Exception:

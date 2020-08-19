@@ -3,6 +3,8 @@ from .errorHandler import UnauthorizedException, ForbiddenException, ApiExceptio
 import requests
 from typing_extensions import TypedDict
 from typing import Optional
+from ..models import ExceptionMessage
+import json
 
 
 class RequestOptions(TypedDict):
@@ -58,19 +60,25 @@ class HttpClient:
         return s.send(prepped, timeout=self._timeout)
 
     def _convert_error(self, err: requests.HTTPError):
+        try:
+            response: ExceptionMessage or TypedDict = json.loads(err.response.text)
+        except Exception:
+            response = {}
+
+        err_message = response['message'] if 'message' in response else err.response.reason
         status = err.response.status_code
         if status == 400:
-            validation_text = err.response.text['message'] if isinstance(err.response.text, dict) else err.response.text
-            raise ValidationException(err.response.reason, validation_text)
+            details = response['details'] if 'details' in response else []
+            raise ValidationException(err_message, details)
         elif status == 401:
-            raise UnauthorizedException(err.response.reason)
+            raise UnauthorizedException(err_message)
         elif status == 403:
-            raise ForbiddenException(err.response.reason)
+            raise ForbiddenException(err_message)
         elif status == 404:
-            raise NotFoundException(err.response.reason)
+            raise NotFoundException(err_message)
         elif status == 409:
-            raise ConflictException(err.response.reason)
+            raise ConflictException(err_message)
         elif status == 500:
-            raise InternalException(err.response.reason)
+            raise InternalException(err_message)
         else:
-            raise ApiException(err.response.reason, status)
+            raise ApiException(err_message, status)

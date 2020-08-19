@@ -46,7 +46,7 @@ async def run_around_tests():
     fake_server = FakeServer()
     await fake_server.start()
     global client
-    client = MetaApiWebsocketClient('token')
+    client = MetaApiWebsocketClient('token', '', 3)
     client.set_url('http://localhost:8080')
     await client.connect()
     yield
@@ -976,9 +976,9 @@ class TestMetaApiWebsocketClient:
 
         try:
             await client.trade('accountId', trade)
-            Exception('TimeoutError expected')
+            Exception('TimeoutException expected')
         except Exception as err:
-            assert err.__class__.__name__ == 'TimeoutError'
+            assert err.__class__.__name__ == 'TimeoutException'
             await client.close()
 
     @pytest.mark.asyncio
