@@ -61,7 +61,7 @@ class MetatraderAccountDto(TypedDict):
     name: str
     """MetaTrader account human-readable name in the MetaApi app."""
     type: str
-    """Account type, can be cloud or self-hosted."""
+    """Account type, can be cloud, cloud-g1, cloud-g2 or self-hosted. Cloud and cloud-g2 are aliases."""
     login: str
     """MetaTrader account number."""
     server: str
@@ -94,7 +94,9 @@ class NewMetatraderAccountDto(TypedDict):
     name: str
     """MetaTrader account human-readable name in the MetaApi app."""
     type: str
-    """Account type, can be cloud or self-hosted."""
+    """Account type, can be cloud, cloud-g1, cloud-g2 or self-hosted. cloud-g2 and cloud are aliases. When you
+    create MT5 cloud account the type is automatically converted to cloud-g1 because MT5 G2 support is still
+    experimental. You can still create MT5 G2 account by setting type to cloud-g2."""
     login: str
     """MetaTrader account number."""
     password: str

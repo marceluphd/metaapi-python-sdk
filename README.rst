@@ -1,9 +1,14 @@
 metaapi.cloud SDK for Python
 ############################
 
-MetaApi is a powerful forex trading API for MetaTrader 4 and MetaTrader 5 terminals.
+MetaApi is a powerful cloud forex trading API for MetaTrader 4 and MetaTrader 5 terminals.
 
-MetaApi is available in cloud and self-hosted options.
+MetaApi is a paid service, but API access to one MetaTrader account is free of charge.
+
+The `MetaApi pricing <https://metaapi.cloud/#pricing>`_ was developed with the intent to make your charges less or equal to what you would pay
+for hosting your own infrastructure. This is possible because over time we managed to heavily optimize
+our MetaTrader infrastructure. And with MetaApi you can save significantly on application development and
+maintenance costs and time thanks to high-quality API, open-source SDKs and convenience of a cloud service.
 
 Official REST and websocket API documentation: https://metaapi.cloud/docs/client/
 
