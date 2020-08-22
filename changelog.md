@@ -1,3 +1,6 @@
+6.0.2
+  - added code sample download video to readme
+  
 6.0.1
   - update readme.md
 
