@@ -1,3 +1,6 @@
+6.0.1
+  - update readme.md
+
 6.0.0
   - breaking change: moved comment and clientId arguments from MetaApiConnection trade methods to options argument
   - added magic trade option to let you specify distinct magic number (expert advisor id) on each trade
@@ -11,7 +14,7 @@
   - added logic to throw an exception if streaming API is invoked in automatic synchronization mode
   - added code samples for created account
   - save history on disk
-  
+
 4.0.0
   - add fields to trade result to match upcoming MetaApi contract
   - breaking change: throw TradeException in case of trade error
