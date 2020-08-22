@@ -5,7 +5,7 @@ MetaApi is a powerful, fast, cost-efficient, easy to use and standards-driven cl
 
 MetaApi is a paid service, but API access to one MetaTrader account is free of charge.
 
-The `MetaApi pricing <https://metaapi.cloud/#pricing>`_ was developed with the intent to make your charges less or equal to what you would pay
+The `MetaApi pricing <https://metaapi.cloud/#pricing>`_ was developed with the intent to make your charges less or equal to what you would have to pay
 for hosting your own infrastructure. This is possible because over time we managed to heavily optimize
 our MetaTrader infrastructure. And with MetaApi you can save significantly on application development and
 maintenance costs and time thanks to high-quality API, open-source SDKs and convenience of a cloud service.
