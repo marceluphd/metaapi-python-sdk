@@ -1,7 +1,7 @@
 metaapi.cloud SDK for Python
 ############################
 
-MetaApi is a powerful, fast, cost-efficient, easy to use and standards-driven cloud forex trading API for MetaTrader 4 and MetaTrader 5 platform designed for traders, investors and forex application developer to boost forex application development process. MetaApi can be used with any broker and does not require you to be a brokerage.
+MetaApi is a powerful, fast, cost-efficient, easy to use and standards-driven cloud forex trading API for MetaTrader 4 and MetaTrader 5 platform designed for traders, investors and forex application developers to boost forex application development process. MetaApi can be used with any broker and does not require you to be a brokerage.
 
 MetaApi is a paid service, but API access to one MetaTrader account is free of charge.
 
@@ -45,7 +45,7 @@ Supply token to the MetaApi class constructor.
     api = MetaApi(token)
 
 Retrieving account access token
-=====================
+===============================
 Account access token grants access to a single account. You can retrieve account access token via API:
 
 .. code-block:: python
@@ -319,7 +319,7 @@ You can override SynchronizationListener in order to receive synchronization eve
     connection.remove_synchronization_listener(listener)
 
 Retrieve contract specifications and quotes via streaming API
---------------------------------------------
+-------------------------------------------------------------
 .. code-block:: python
 
     connection = await account.connect()
