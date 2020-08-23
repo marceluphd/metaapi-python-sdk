@@ -277,7 +277,7 @@ class MetatraderTradeResponse(TypedDict):
 
 
 class TradeOptions(TypedDict):
-    """Trade options."""
+    """Common trade options."""
 
     comment: Optional[str]
     """Optional order comment. The sum of the line lengths of the comment and the clientId must be less than or equal
@@ -294,12 +294,36 @@ class TradeOptions(TypedDict):
     """Optional slippage in points. Should be greater or equal to zero. In not set, default value specified in
     account entity will be used. Slippage is ignored if execution mode set to SYMBOL_TRADE_EXECUTION_MARKET in
     symbol specification."""
+
+
+class MarketTradeOptions(TradeOptions):
+    """Market trade options."""
+
     fillingModes: Optional[List[str]]
     """Optional allowed filling modes in the order of priority. Default is to allow all filling modes and prefer
     ORDER_FILLING_FOK over ORDER_FILLING_IOC. See
     https://www.mql5.com/en/docs/constants/tradingconstants/orderproperties#enum_order_type_filling for extra
-    explanation. Note that filling modes can be specified for market orders only, i.e. create_market_buy_order,
-    create_market_sell_order, close_position_partially, close_position, close_positions_by_symbol."""
+    explanation."""
+
+
+class ExpirationOptions(TypedDict):
+    """Pending order expiration settings."""
+
+    type: str
+    """Pending order expiration type. See
+    https://www.mql5.com/en/docs/constants/tradingconstants/orderproperties#enum_order_type_time for the list of
+    possible options. MetaTrader4 platform supports only ORDER_TIME_SPECIFIED expiration type. One of ORDER_TIME_GTC,
+    ORDER_TIME_DAY, ORDER_TIME_SPECIFIED, ORDER_TIME_SPECIFIED_DAY."""
+    time: Optional[datetime]
+    """Optional pending order expiration time. Ignored if expiration type is not one of ORDER_TIME_DAY or
+    ORDER_TIME_SPECIFIED."""
+
+
+class PendingTradeOptions(TradeOptions):
+    """Pending order trade options."""
+
+    expiration: Optional[ExpirationOptions]
+    """Optional pending order expiration settings. See Pending order expiration settings section."""
 
 
 class ValidationDetails(TypedDict):
