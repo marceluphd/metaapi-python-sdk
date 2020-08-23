@@ -1,3 +1,6 @@
+6.1.0
+  - added ability to select filling mode when placing a market order, in trade options
+  
 6.0.2
   - added code sample download video to readme
   

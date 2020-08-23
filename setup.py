@@ -13,7 +13,7 @@ tests_require = [
 
 setuptools.setup(
     name="metaapi_cloud_sdk",
-    version="6.0.2",
+    version="6.1.0",
     author="Agilium Labs LLC",
     author_email="agiliumtrade@agiliumtrade.ai",
     description="SDK for MetaApi, a professional cloud forex API which includes MetaTrader REST API "
@@ -22,7 +22,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/x-rst",
     keywords=['metaapi.cloud', 'MetaTrader', 'MetaTrader 5', 'MetaTrader 4', 'MetaTrader5', 'MetaTrader4', 'MT', 'MT4',
-              'MT5', 'forex', 'trading', 'API', 'REST', 'websocket', 'client', 'sdk', 'cloud'],
+              'MT5', 'forex', 'trading', 'API', 'REST', 'websocket', 'client', 'sdk', 'cloud', 'free'],
     url="https://github.com/agiliumtrade-ai/metaapi-python-sdk",
     include_package_data=True,
     package_dir={'metaapi_cloud_sdk': 'lib'},
