@@ -294,6 +294,12 @@ class TradeOptions(TypedDict):
     """Optional slippage in points. Should be greater or equal to zero. In not set, default value specified in
     account entity will be used. Slippage is ignored if execution mode set to SYMBOL_TRADE_EXECUTION_MARKET in
     symbol specification."""
+    fillingModes: Optional[List[str]]
+    """Optional allowed filling modes in the order of priority. Default is to allow all filling modes and prefer
+    ORDER_FILLING_FOK over ORDER_FILLING_IOC. See
+    https://www.mql5.com/en/docs/constants/tradingconstants/orderproperties#enum_order_type_filling for extra
+    explanation. Note that filling modes can be specified for market orders only, i.e. create_market_buy_order,
+    create_market_sell_order, close_position_partially, close_position, close_positions_by_symbol."""
 
 
 class ValidationDetails(TypedDict):
