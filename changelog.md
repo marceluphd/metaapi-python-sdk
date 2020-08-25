@@ -1,6 +1,7 @@
 6.1.0
   - added ability to select filling mode when placing a market order, in trade options
   - added ability to set expiration options when placing a pending order, in trade options
+  - added reason field to position, order and deal
   
 6.0.2
   - added code sample download video to readme
