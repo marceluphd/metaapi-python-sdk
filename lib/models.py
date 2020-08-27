@@ -149,6 +149,9 @@ class MetatraderOrder(TypedDict):
     """Order opening reason. One of ORDER_REASON_CLIENT, ORDER_REASON_MOBILE, ORDER_REASON_WEB,
     ORDER_REASON_EXPERT, ORDER_REASON_SL, ORDER_REASON_TP, ORDER_REASON_SO, ORDER_REASON_UNKNOWN. See
     https://www.mql5.com/en/docs/constants/tradingconstants/orderproperties#enum_order_reason."""
+    fillingMode: str
+    """Order filling mode. One of ORDER_FILLING_FOK, ORDER_FILLING_IOC, ORDER_FILLING_RETURN. See
+    https://www.mql5.com/en/docs/constants/tradingconstants/orderproperties#enum_order_type_filling."""
 
 
 class MetatraderHistoryOrders(TypedDict):
