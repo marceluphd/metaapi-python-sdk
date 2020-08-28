@@ -3,6 +3,7 @@
   - added ability to set expiration options when placing a pending order, in trade options
   - added reason field to position, order and deal
   - added fillingMode field to MetaTraderOrder model
+  - added order expiration time and type
   
 6.0.2
   - added code sample download video to readme
