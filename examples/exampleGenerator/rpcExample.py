@@ -13,9 +13,12 @@ api = MetaApi(token)
 async def test_meta_api_synchronization():
     try:
         account = await api.metatrader_account_api.get_account(accountId)
-        #  wait until account is deployed and connected to broker
-        print('Deploying account')
-        await account.deploy()
+        initialState = account.state
+        deployedStates = ['DEPLOYING', 'DEPLOYED']
+        if initialState not in deployedStates:
+            #  wait until account is deployed and connected to broker
+            print('Deploying account')
+            await account.deploy()
         print('Waiting for API server to connect to broker (may take couple of minutes)')
         await account.wait_connected()
 
@@ -51,10 +54,11 @@ async def test_meta_api_synchronization():
             print('Trade successful, result code is ' + result['stringCode'])
         except TradeException as err:
             print('Trade failed with result code ' + err.stringCode)
+        if initialState not in deployedStates:
+            # undeploy account if it was undeployed
+            print('Undeploying account')
+            await account.undeploy()
 
-        # finally, undeploy account after the test
-        print('Undeploying MT5 account so that it does not consume any unwanted resources')
-        await account.undeploy()
     except Exception as err:
         print(err)
 
