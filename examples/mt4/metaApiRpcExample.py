@@ -40,7 +40,7 @@ async def test_meta_api_synchronization():
         accounts = await api.metatrader_account_api.get_accounts()
         account = None
         for item in accounts:
-            if item.login == login and item.synchronization_mode == 'automatic' and item.type.startswith('cloud'):
+            if item.login == login and item.type.startswith('cloud'):
                 account = item
                 break
         if not account:
