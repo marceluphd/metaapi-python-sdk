@@ -1,18 +1,20 @@
 import os
 import asyncio
 from metaapi_cloud_sdk import MetaApi
-from metaapi_cloud_sdk.clients.synchronizationListener import SynchronizationListener
-from metaapi_cloud_sdk.models import MetatraderSymbolPrice
+from metaapi_cloud_sdk.clients.metaApi.synchronizationListener import SynchronizationListener
+from metaapi_cloud_sdk.metaApi.models import MetatraderSymbolPrice
 
 token = os.getenv('TOKEN') or '<put in your token here>'
 account_id = os.getenv('ACCOUNT_ID') or '<put in your account id here>'
 
 api = MetaApi(token)
 
+
 class EURUSDListener(SynchronizationListener):
     async def on_symbol_price_updated(self, price: MetatraderSymbolPrice):
         if price['symbol'] == 'EURUSD':
             print('EURUSD price updated', price)
+
 
 async def stream_quotes():
     try:
@@ -32,12 +34,12 @@ async def stream_quotes():
 
         # wait until terminal state synchronized to the local state
         print('Waiting for SDK to synchronize to terminal state (may take some time depending on your history size), the price streaming will start once synchronization finishes')
-        await connection.wait_synchronized(None, 1200)
+        await connection.wait_synchronized({'timeoutInSeconds': 1200})
 
         # Add symbol to MarketWatch if not yet added
         await connection.subscribe_to_market_data('EURUSD')
 
-        print('Streaming EURUSD price now...');
+        print('Streaming EURUSD price now...')
 
         while True:
             await asyncio.sleep(1)

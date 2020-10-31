@@ -3,7 +3,7 @@ from .errorHandler import UnauthorizedException, ForbiddenException, ApiExceptio
 import requests
 from typing_extensions import TypedDict
 from typing import Optional
-from ..models import ExceptionMessage
+from ..metaApi.models import ExceptionMessage
 import json
 
 

@@ -1,3 +1,27 @@
+8.0.2
+  - added application setting to MetaApi class to make it possible to launch several 
+  MetaApi applications in parallel on the same account
+  - added time fields in broker timezone to objects
+  - added time fields to MetatraderSymbolPrice model
+  - fix simultaneous multiple file writes by one connection
+  - now only one MetaApiConnection can be created per account at the same time to avoid history storage errors
+  - added quoteStreamingIntervalInSeconds field to account to configure quote streaming interval
+  - fixes to setup keywords
+  - added CopyFactory trade-copying API
+  - added latency and slippage metrics to CopyFactory trade copying API
+  - added CopyFactory configuration client method retrieving active resynchronization tasks
+  - improved description of CopyFactory account resynchronizing in readme
+  - made it possible to use MetaApi class in interaction tests
+  - breaking change: removed the `timeConverter` field from the account, replaced it with `brokerTimezone` and `brokerDSTSwitchTimezone` fields in the provisioning profile instead
+  - added originalComment and clientId fields to MetatraderPosition
+  - fixed occasional fake synchronization timeouts in waitSynchronized method
+  - breaking change: changed API contract of MetaApiConnection.wait_synchronized method
+  - added tags for MetaApi accounts
+  - minor adjustments to equity calculation algorithm
+  - added method to wait for active resynchronization tasks are completed in configuration CopyFactory api
+  - added the ability to set the start time for synchronization, used for tests
+  - resynchronize on lost synchronization packet to ensure local terminal state consistency
+  
 6.1.0
   - added ability to select filling mode when placing a market order, in trade options
   - added ability to set expiration options when placing a pending order, in trade options
