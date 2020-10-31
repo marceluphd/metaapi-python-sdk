@@ -1,7 +1,7 @@
 import os
 import asyncio
 from metaapi_cloud_sdk import MetaApi
-from metaapi_cloud_sdk.clients.tradeException import TradeException
+from metaapi_cloud_sdk.clients.metaApi.tradeException import TradeException
 from datetime import datetime, timedelta
 
 # Note: for information on how to use this example code please read https://metaapi.cloud/docs/client/usingCodeExamples
@@ -26,7 +26,9 @@ async def test_meta_api_synchronization():
             print('Creating account profile')
             profile = await api.provisioning_profile_api.create_provisioning_profile({
                 'name': server_name,
-                'version': 5
+                'version': 5,
+                'brokerTimezone': 'EET',
+                'brokerDSTSwitchTimezone': 'EET'
             })
             await profile.upload_file('servers.dat', server_dat_file)
         if profile and profile.status == 'new':
@@ -50,9 +52,7 @@ async def test_meta_api_synchronization():
                 'login': login,
                 'password': password,
                 'server': server_name,
-                'synchronizationMode': 'automatic',
                 'provisioningProfileId': profile.id,
-                'timeConverter': 'icmarkets',
                 'application': 'MetaApi',
                 'magic': 1000
             })

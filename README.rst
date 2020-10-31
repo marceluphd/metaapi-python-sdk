@@ -3,6 +3,8 @@ metaapi.cloud SDK for Python
 
 MetaApi is a powerful, fast, cost-efficient, easy to use and standards-driven cloud forex trading API for MetaTrader 4 and MetaTrader 5 platform designed for traders, investors and forex application developers to boost forex application development process. MetaApi can be used with any broker and does not require you to be a brokerage.
 
+CopyFactory is a simple yet powerful copy-trading API which is a part of MetaApi. See below for CopyFactory readme section.
+
 MetaApi is a paid service, but API access to one MetaTrader account is free of charge.
 
 The `MetaApi pricing <https://metaapi.cloud/#pricing>`_ was developed with the intent to make your charges less or equal to what you would have to pay
@@ -77,7 +79,9 @@ Creating a provisioning profile via API
     # you should do it before creating an account
     provisioningProfile = await api.provisioning_profile_api.create_provisioning_profile({
         'name': 'My profile',
-        'version': 5
+        'version': 5,
+        'brokerTimezone': 'EET',
+        'brokerDSTSwitchTimezone': 'EET'
     })
     # servers.dat file is required for MT5 profile and can be found inside
     # config directory of your MetaTrader terminal data folder. It contains
@@ -124,32 +128,27 @@ Create a MetaTrader account (API server) via API
       # password can be investor password for read-only access
       'password': 'qwerty',
       'server': 'ICMarketsSC-Demo',
-      # synchronizationMode can be 'automatic' for RPC access or 'user' if you
-      # want to keep track of terminal state in real-time (e.g. if you are
-      # developing a EA or trading strategy)
-      'synchronizationMode': 'automatic',
       'provisioningProfileId': provisioningProfile.id,
-      # algorithm used to parse your broker timezone. Supported values are
-      # icmarkets for America/New_York DST switch and roboforex for EET
-      # DST switch (the values will be changed soon)
-      'timeConverter': 'roboforex',
       'application': 'MetaApi',
-      'magic': 123456
+      'magic': 123456,
+      'quoteStreamingIntervalInSeconds': 2.5 # set to 0 to receive quote per tick
     })
 
 Retrieving existing accounts via API
 ------------------------------------
 .. code-block:: python
 
-    # filter and paginate accounts, see esdoc for full list of filter options available
-    accounts = await api.metatraderAccountApi.getAccounts({
+    # filter and paginate accounts, see doc for full list of filter options available
+    accounts = await api.metatraderAccountApi.get_accounts({
         'limit': 10,
         'offset': 0,
         'query': 'ICMarketsSC-MT5',
         'state': ['DEPLOYED']
     })
     # get accounts without filter (returns 1000 accounts max)
-    accounts = await api.metatraderAccountApi.getAccounts();
+    accounts = await api.metatraderAccountApi.get_accounts();
+
+    account = await api.metatraderAccountApi.get_account('accountId')
 
 Updating an existing account via API
 ------------------------------------
@@ -161,10 +160,7 @@ Updating an existing account via API
         # password can be investor password for read-only access
         'password': 'qwerty',
         'server': 'ICMarketsSC-Demo',
-        # synchronizationMode can be 'automatic' for RPC access or 'user' if you
-        # want to keep track of terminal state in real-time (e.g. if you are
-        # developing a EA or trading strategy)
-        'synchronizationMode': 'automatic'
+        'quoteStreamingIntervalInSeconds': 2.5
     })
 
 Removing an account
@@ -186,9 +182,6 @@ Access MetaTrader account via RPC API
 RPC API let you query the trading terminal state. You should use
 RPC API if you develop trading monitoring apps like myfxbook or other
 simple trading apps.
-
-You should create your account with automatic synchronization mode if
-all you need is RPC API.
 
 Query account information, positions, orders and history via RPC API
 --------------------------------------------------------------------
@@ -242,15 +235,12 @@ Use real-time streaming API
 Real-time streaming API is good for developing trading applications like trade copiers or automated trading strategies.
 The API synchronizes the terminal state locally so that you can query local copy of the terminal state really fast.
 
-In order to use this API you need to create an account with `user` synchronization mode.
-
 Synchronizing and reading terminal state
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. code-block:: python
 
     account = await api.metatrader_account_api.get_account('accountId')
 
-    # account.synchronization_mode must be equal to 'user' at this point
 
     # access local copy of terminal state
     terminalState = connection.terminal_state
@@ -369,6 +359,179 @@ Execute trades (both RPC and streaming APIs)
     result = await connection.create_market_buy_order('GBPUSD', 0.07, 0.9, 2.0, {'comment': 'comment',
                                                                                  'clientId': 'TE_GBPUSD_7hyINWqAl'})
     print('Trade successful, result code is ' + result['stringCode'])
+
+CopyFactory copy trading API (experimental)
+=====================================
+
+CopyFactory is a powerful trade copying API which makes developing forex
+trade copying applications as easy as writing few lines of code.
+
+At this point this feature is experimental and we have not yet defined a final price for it.
+
+Why do we offer CopyFactory API
+-------------------------------------
+
+We found that developing reliable and flexible trade copier is a task
+which requires lots of effort, because developers have to solve a series
+of complex technical tasks to create a product.
+
+We decided to share our product as it allows developers to start with a
+powerful solution in almost no time, save on development and
+infrastructure maintenance costs.
+
+CopyFactory features
+-------------------------------------
+Features supported:
+
+- low latency trade copying
+- connect arbitrary number of strategy providers and subscribers
+- subscribe accounts to multiple strategies at once
+- select arbitrary copy ratio for each subscription
+- apply advanced risk filters on strategy provider side
+- override risk filters on subscriber side
+- provide multiple strategies from a single account based on magic or symbol filters
+- reliable trade copying
+- supports manual trading on subscriber accounts while copying trades
+- synchronize subscriber account with strategy providers
+- monitor trading history
+- calculate trade copying commissions for account managers
+
+Configuring trade copying
+-------------------------------------
+
+In order to configure trade copying you need to:
+
+- add MetaApi MetaTrader accounts with CopyFactory as application field value (see above)
+- create CopyFactory master and slave accounts and connect them to MetaApi accounts via connectionId field
+- create a strategy being copied
+- subscribe slave CopyFactory accounts to the strategy
+
+.. code-block:: python
+
+    from metaapi_cloud_sdk import MetaApi, CopyFactory
+
+    token = '...'
+    metaapi = MetaApi(token)
+    copy_factory = CopyFactory(token)
+
+    # retrieve MetaApi MetaTrader accounts with CopyFactory as application field value
+    master_metaapi_account = await api.metatrader_account_api.get_account('masterMetaapiAccountId')
+    if master_metaapi_account.application != 'CopyFactory'
+        raise Exception('Please specify CopyFactory application field value in your MetaApi account in order to use it in CopyFactory API')
+    slave_metaapi_account = await api.metatrader_account_api.get_account('slaveMetaapiAccountId')
+    if slave_metaapi_account.application != 'CopyFactory'
+        raise Exception('Please specify CopyFactory application field value in your MetaApi account in order to use it in CopyFactory API')
+
+    # create CopyFactory master and slave accounts and connect them to MetaApi accounts via connectionId field
+    configuration_api = copy_factory.configuration_api
+    master_account_id = configuration_api.generate_account_id()
+    slave_account_id = configuration_api.generate_account_id()
+    await configuration_api.update_account(master_account_id, {
+        'name': 'Demo account',
+        'connectionId': master_metaapi_account.id,
+        'subscriptions': []
+    })
+
+    # create a strategy being copied
+    strategy_id = await configuration_api.generate_strategy_id()
+    await configuration_api.update_strategy(strategy_id['id'], {
+        'name': 'Test strategy',
+        'description': 'Some useful description about your strategy',
+        'positionLifecycle': 'hedging',
+        'connectionId': slave_metaapi_account.id,
+        'maxTradeRisk': 0.1,
+        'stopOutRisk': {
+            'value': 0.4,
+            'startTime': '2020-08-24T00:00:00.000Z'
+        },
+        'timeSettings': {
+            'lifetimeInHours': 192,
+            'openingIntervalInMinutes': 5
+        }
+    })
+
+    # subscribe slave CopyFactory accounts to the strategy
+    await configuration_api.update_account(master_account_id, {
+        'name': 'Demo account',
+        'connectionId': master_metaapi_account.id,
+        'subscriptions': [
+            {
+                'strategyId': strategy_id,
+                'multiplier': 1
+            }
+        ]
+    })
+
+See in-code documentation for full definition of possible configuration options.
+
+Retrieving trade copying history
+-------------------------------------
+
+CopyFactory allows you to monitor transactions conducted on trading accounts in real time.
+
+Retrieving trading history on provider side
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: python
+
+    history_api = copy_factory.history_api
+
+    # retrieve list of subscribers
+    print(await history_api.get_subscribers())
+
+    # retrieve list of strategies provided
+    print(await history_api.get_provided_strategies())
+
+    # retrieve trading history, please note that this method support pagination and limits number of records
+    print(await history_api.get_provided_strategies_transactions(datetime.fromisoformat('2020-08-01'), datetime.fromisoformat('2020-09-01')))
+
+
+Retrieving trading history on subscriber side
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: python
+
+    history_api = copy_factory.history_api
+
+    # retrieve list of providers
+    print(await history_api.get_providers())
+
+    # retrieve list of strategies subscribed to
+    print(await history_api.get_strategies_subscribed())
+
+    # retrieve trading history, please note that this method support pagination and limits number of records
+    print(await history_api.get_strategies_subscribed_transactions(datetime.fromisoformat('2020-08-01'), datetime.fromisoformat('2020-09-01')))
+
+Resynchronizing slave accounts to masters
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+There is a configurable time limit during which the trades can be opened. Sometimes trades can not open in time due to broker errors or trading session time discrepancy.
+You can resynchronize a slave account to place such late trades. Please note that positions which were
+closed manually on a slave account will also be reopened during resynchronization.
+
+.. code-block:: python
+
+    account_id = '...' # CopyFactory account id
+
+    # resynchronize all strategies
+    await copy_factory.trading_api.resynchronize(account_id)
+
+    # resynchronize specific strategy
+    await copy_factory.trading_api.resynchronize(account_id, ['ABCD'])
+
+Managing stopouts
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+A subscription to a strategy can be stopped if the strategy have exceeded allowed risk limit.
+
+.. code-block:: python
+
+    trading_api = copy_factory.trading_api
+    account_id = '...' # CopyFactory account id
+
+    # retrieve list of strategy stopouts
+    print(await trading_api.get_stopouts(account_id))
+
+    # reset a stopout so that subscription can continue
+    await trading_api.reset_stopout(account_id, 'daily-equity)
 
 Keywords: MetaTrader API, MetaTrader REST API, MetaTrader websocket API,
 MetaTrader 5 API, MetaTrader 5 REST API, MetaTrader 5 websocket API,

@@ -1,7 +1,7 @@
 import os
 import asyncio
 from metaapi_cloud_sdk import MetaApi
-from metaapi_cloud_sdk.clients.tradeException import TradeException
+from metaapi_cloud_sdk.clients.metaApi.tradeException import TradeException
 
 # Note: for information on how to use this example code please read https://metaapi.cloud/docs/client/usingCodeExamples
 
@@ -12,9 +12,10 @@ api = MetaApi(token)
 async def test_meta_api_synchronization():
     try:
         account = await api.metatrader_account_api.get_account(accountId)
-        initialState = account.state
-        deployedStates = ['DEPLOYING', 'DEPLOYED']
-        if initialState not in deployedStates:
+        initial_state = account.state
+        deployed_states = ['DEPLOYING', 'DEPLOYED']
+
+        if initial_state not in deployed_states:
             #  wait until account is deployed and connected to broker
             print('Deploying account')
             await account.deploy()

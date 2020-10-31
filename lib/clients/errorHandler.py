@@ -1,5 +1,4 @@
 from typing import Tuple, List
-import json
 
 
 class ApiException(Exception):
@@ -99,7 +98,7 @@ class ValidationException(ApiException):
         _details: Validation exception details
     """
 
-    def __init__(self, message: str, details: List[dict]):
+    def __init__(self, message: str, details: List[dict] = None):
         """Inits validation error.
 
         Args:

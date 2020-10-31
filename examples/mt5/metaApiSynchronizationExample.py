@@ -2,7 +2,7 @@ import os
 import asyncio
 from metaapi_cloud_sdk import MetaApi
 
-from metaapi_cloud_sdk.clients.tradeException import TradeException
+from metaapi_cloud_sdk.clients.metaApi.tradeException import TradeException
 # Note: for information on how to use this example code please read https://metaapi.cloud/docs/client/usingCodeExamples
 
 token = os.getenv('TOKEN') or '<put in your token here>'
@@ -26,7 +26,9 @@ async def test_meta_api_synchronization():
             print('Creating account profile')
             profile = await api.provisioning_profile_api.create_provisioning_profile({
                 'name': server_name,
-                'version': 5
+                'version': 5,
+                'brokerTimezone': 'EET',
+                'brokerDSTSwitchTimezone': 'EET'
             })
             await profile.upload_file('servers.dat', server_dat_file)
         if profile and profile.status == 'new':
@@ -50,9 +52,7 @@ async def test_meta_api_synchronization():
                 'login': login,
                 'password': password,
                 'server': server_name,
-                'synchronizationMode': 'user',
                 'provisioningProfileId': profile.id,
-                'timeConverter': 'icmarkets',
                 'application': 'MetaApi',
                 'magic': 1000
             })
@@ -70,7 +70,7 @@ async def test_meta_api_synchronization():
 
         # wait until terminal state synchronized to the local state
         print('Waiting for SDK to synchronize to terminal state (may take some time depending on your history size)')
-        await connection.wait_synchronized()
+        await connection.wait_synchronized({'timeoutInSeconds': 600})
 
         # access local copy of terminal state
         print('Testing terminal state access')

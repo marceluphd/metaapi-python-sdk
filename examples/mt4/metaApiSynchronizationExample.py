@@ -2,7 +2,7 @@ import os
 import asyncio
 from metaapi_cloud_sdk import MetaApi
 
-from metaapi_cloud_sdk.clients.tradeException import TradeException
+from metaapi_cloud_sdk.clients.metaApi.tradeException import TradeException
 # Note: for information on how to use this example code please read https://metaapi.cloud/docs/client/usingCodeExamples
 
 token = os.getenv('TOKEN') or '<put in your token here>'
@@ -11,6 +11,7 @@ password = os.getenv('PASSWORD') or '<put in your MT password here>'
 server_name = os.getenv('SERVER') or '<put in your MT server name here>'
 broker_srv_file = os.getenv('PATH_TO_BROKER_SRV') or '/path/to/your/broker.srv'
 api = MetaApi(token)
+
 
 async def test_meta_api_synchronization():
     try:
@@ -26,7 +27,9 @@ async def test_meta_api_synchronization():
             print('Creating account profile')
             profile = await api.provisioning_profile_api.create_provisioning_profile({
                 'name': server_name,
-                'version': 4
+                'version': 4,
+                'brokerTimezone': 'EET',
+                'brokerDSTSwitchTimezone': 'EET'
             })
             await profile.upload_file('broker.srv', broker_srv_file)
         if profile and profile.status == 'new':
@@ -50,9 +53,7 @@ async def test_meta_api_synchronization():
                 'login': login,
                 'password': password,
                 'server': server_name,
-                'synchronizationMode': 'user',
                 'provisioningProfileId': profile.id,
-                'timeConverter': 'icmarkets',
                 'application': 'MetaApi',
                 'magic': 1000
             })
