@@ -121,6 +121,19 @@ class TerminalState(SynchronizationListener):
         self._status_timer = Timer(60, disconnect)
         self._status_timer.start()
 
+    async def on_synchronization_started(self):
+        """Invoked when MetaTrader terminal state synchronization is started
+
+        Returns:
+            A coroutine which resolves when the asynchronous event is processed.
+        """
+        self._accountInformation = None
+        self._positions = []
+        self._orders = []
+        self._specifications = []
+        self._specificationsBySymbol = {}
+        self._pricesBySymbol = {}
+
     async def on_account_information_updated(self, account_information: MetatraderAccountInformation):
         """Invoked when MetaTrader account information is updated.
 
@@ -128,6 +141,17 @@ class TerminalState(SynchronizationListener):
             account_information: Updated MetaTrader account information.
         """
         self._accountInformation = account_information
+
+    async def on_positions_replaced(self, positions: List[MetatraderPosition]):
+        """Invoked when the positions are replaced as a result of initial terminal state synchronization.
+
+        Args:
+            positions: Updated array of positions.
+
+        Returns:
+            A coroutine which resolves when the asynchronous event is processed.
+        """
+        self._positions = positions
 
     async def on_position_updated(self, position: MetatraderPosition):
         """Invoked when MetaTrader position is updated.
@@ -149,6 +173,17 @@ class TerminalState(SynchronizationListener):
             position_id: Removed MetaTrader position id.
         """
         self._positions = list(filter(lambda position: position['id'] != position_id, self._positions))
+
+    async def on_orders_replaced(self, orders: List[MetatraderOrder]):
+        """Invoked when the orders are replaced as a result of initial terminal state synchronization.
+
+        Args:
+            orders: Updated array of orders.
+
+        Returns:
+            A coroutine which resolves when the asynchronous event is processed.
+        """
+        self._orders = orders
 
     async def on_order_updated(self, order: MetatraderOrder):
         """Invoked when MetaTrader order is updated

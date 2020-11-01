@@ -746,6 +746,17 @@ class TestMetaApiWebsocketClient:
         assert request_received
 
     @pytest.mark.asyncio
+    async def test_process_sync_started(self):
+        """Should process synchronization started event."""
+        listener = MagicMock()
+        listener.on_synchronization_started = FinalMock()
+
+        client.add_synchronization_listener('accountId', listener)
+        await sio.emit('synchronization', {'type': 'synchronizationStarted', 'accountId': 'accountId'})
+        await client._socket.wait()
+        listener.on_synchronization_started.assert_called_with()
+
+    @pytest.mark.asyncio
     async def test_synchronize_account_information(self):
         """Should synchronize account information."""
 
@@ -793,12 +804,12 @@ class TestMetaApiWebsocketClient:
             'realizedProfit': -6.536993168992922e-13
         }]
         listener = MagicMock()
-        listener.on_position_updated = FinalMock()
+        listener.on_positions_replaced = FinalMock()
 
         client.add_synchronization_listener('accountId', listener)
         await sio.emit('synchronization', {'type': 'positions', 'accountId': 'accountId', 'positions': positions})
         await client._socket.wait()
-        listener.on_position_updated.assert_called_with(positions[0])
+        listener.on_positions_replaced.assert_called_with(positions)
 
     @pytest.mark.asyncio
     async def test_synchronize_orders(self):
@@ -819,12 +830,12 @@ class TestMetaApiWebsocketClient:
             'comment': 'COMMENT2'
         }]
         listener = MagicMock()
-        listener.on_order_updated = FinalMock()
+        listener.on_orders_replaced = FinalMock()
 
         client.add_synchronization_listener('accountId', listener)
         await sio.emit('synchronization', {'type': 'orders', 'accountId': 'accountId', 'orders': orders})
         await client._socket.wait()
-        listener.on_order_updated.assert_called_with(orders[0])
+        listener.on_orders_replaced.assert_called_with(orders)
 
     @pytest.mark.asyncio
     async def test_synchronize_history_orders(self):

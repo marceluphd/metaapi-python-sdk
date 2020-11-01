@@ -54,8 +54,10 @@ class MetaApiWebsocketClient:
             received_at: Time the packet was received at.
         """
         print(f'[{datetime.now().isoformat()}] MetaApi websocket client received an out of order packet type ' +
-              f'{packet["type"]} for account id {account_id}. Expected s/n {expected_sequence_number} does ' +
-              f'not match the actual of {actual_sequence_number}')
+              f'{packet["type"]} for account id {account_id}. ' +
+              (f'Expected s/n {expected_sequence_number} does not match the actual of {actual_sequence_number}' if
+               expected_sequence_number != -1 else
+               f'Packet with s/n {actual_sequence_number} has come before initial synchronization packet'))
         self.subscribe(account_id)
 
     def set_url(self, url: str):
@@ -412,8 +414,9 @@ class MetaApiWebsocketClient:
             try:
                 await self._rpc_request(account_id, {'type': 'subscribe'})
             except Exception as err:
-                print(f'[{datetime.now().isoformat()}] MetaApi websocket client failed to receive subscribe response '
-                      f'(this usually does not mean an error)', err)
+                if err.__class__.__name__ != 'TimeoutException':
+                    print(f'[{datetime.now().isoformat()}] MetaApi websocket client failed to receive subscribe ' +
+                          'response', err)
 
         asyncio.create_task(run_subscribe())
 
@@ -656,6 +659,20 @@ class MetaApiWebsocketClient:
                             on_disconnected_tasks.append(asyncio.create_task(run_on_disconnected(listener)))
                     if len(on_disconnected_tasks) > 0:
                         await asyncio.wait(on_disconnected_tasks)
+                elif data['type'] == 'synchronizationStarted':
+                    on_sync_started_tasks: List[asyncio.Task] = []
+
+                    async def run_on_sync_started(listener):
+                        try:
+                            await listener.on_synchronization_started()
+                        except Exception as err:
+                            print('Failed to notify listener about synchronization started event', err)
+
+                    if data['accountId'] in self._synchronizationListeners:
+                        for listener in self._synchronizationListeners[data['accountId']]:
+                            on_sync_started_tasks.append(asyncio.create_task(run_on_sync_started(listener)))
+                    if len(on_sync_started_tasks) > 0:
+                        await asyncio.wait(on_sync_started_tasks)
                 elif data['type'] == 'accountInformation':
                     if data['accountInformation'] and (data['accountId'] in self._synchronizationListeners):
                         on_account_information_updated_tasks: List[asyncio.Task] = []
@@ -688,21 +705,20 @@ class MetaApiWebsocketClient:
                             if len(on_deal_added_tasks) > 0:
                                 await asyncio.wait(on_deal_added_tasks)
                 elif data['type'] == 'orders':
-                    if 'orders' in data:
-                        for order in data['orders']:
-                            on_order_updated_tasks: List[asyncio.Task] = []
+                    on_order_updated_tasks: List[asyncio.Task] = []
 
-                            async def run_on_order_updated(listener):
-                                try:
-                                    await listener.on_order_updated(order)
-                                except Exception as err:
-                                    print('Failed to notify listener about orders event', err)
+                    async def run_on_order_updated(listener):
+                        try:
+                            if 'orders' in data:
+                                await listener.on_orders_replaced(data['orders'])
+                        except Exception as err:
+                            print('Failed to notify listener about orders event', err)
 
-                            if data['accountId'] in self._synchronizationListeners:
-                                for listener in self._synchronizationListeners[data['accountId']]:
-                                    on_order_updated_tasks.append(asyncio.create_task(run_on_order_updated(listener)))
-                            if len(on_order_updated_tasks) > 0:
-                                await asyncio.wait(on_order_updated_tasks)
+                    if data['accountId'] in self._synchronizationListeners:
+                        for listener in self._synchronizationListeners[data['accountId']]:
+                            on_order_updated_tasks.append(asyncio.create_task(run_on_order_updated(listener)))
+                    if len(on_order_updated_tasks) > 0:
+                        await asyncio.wait(on_order_updated_tasks)
                 elif data['type'] == 'historyOrders':
                     if 'historyOrders' in data:
                         for historyOrder in data['historyOrders']:
@@ -721,22 +737,21 @@ class MetaApiWebsocketClient:
                             if len(on_history_order_added_tasks) > 0:
                                 await asyncio.wait(on_history_order_added_tasks)
                 elif data['type'] == 'positions':
-                    if 'positions' in data:
-                        for position in data['positions']:
-                            on_position_updated_tasks: List[asyncio.Task] = []
+                    on_position_updated_tasks: List[asyncio.Task] = []
 
-                            async def run_on_position_updated(listener):
-                                try:
-                                    await listener.on_position_updated(position)
-                                except Exception as err:
-                                    print('Failed to notify listener about positions event', err)
+                    async def run_on_position_updated(listener):
+                        try:
+                            if 'positions' in data:
+                                await listener.on_positions_replaced(data['positions'])
+                        except Exception as err:
+                            print('Failed to notify listener about positions event', err)
 
-                            if data['accountId'] in self._synchronizationListeners:
-                                for listener in self._synchronizationListeners[data['accountId']]:
-                                    on_position_updated_tasks.append(asyncio
-                                                                     .create_task(run_on_position_updated(listener)))
-                            if len(on_position_updated_tasks) > 0:
-                                await asyncio.wait(on_position_updated_tasks)
+                    if data['accountId'] in self._synchronizationListeners:
+                        for listener in self._synchronizationListeners[data['accountId']]:
+                            on_position_updated_tasks.append(asyncio
+                                                             .create_task(run_on_position_updated(listener)))
+                    if len(on_position_updated_tasks) > 0:
+                        await asyncio.wait(on_position_updated_tasks)
                 elif data['type'] == 'update':
                     if 'accountInformation' in data and (data['accountId'] in self._synchronizationListeners):
                         on_account_information_updated_tasks: List[asyncio.Task] = []
