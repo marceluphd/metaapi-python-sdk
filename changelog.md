@@ -1,3 +1,13 @@
+9.0.0
+  - added contractSize field to MetatraderSymbolSpecification model
+  - added quoteSessions and tradeSessions to MetatraderSymbolSpecification model
+  - added more fields to MetatraderSymbolSpecification model
+  - breaking change: add on_positions_replaced and on_order_replaced events into SynchronizationListener and no longer invoke on_position_updated and on_order_updated during initial synchronization
+  - removed excessive log message from subscribe API
+  - breaking change: introduced synchronizationStarted event to increase synchronization stability
+  - fixed wrong expected sequence number of synchronization packet in the log message
+  - added positionId field to CopyFactoryTransaction model
+  
 8.0.2
   - added application setting to MetaApi class to make it possible to launch several 
   MetaApi applications in parallel on the same account

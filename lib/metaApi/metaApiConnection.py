@@ -611,7 +611,8 @@ class MetaApiConnection(SynchronizationListener, ReconnectListener):
         try:
             await self.synchronize()
         except Exception as err:
-            print(f'[{datetime.now().isoformat()}] MetaApi websocket client failed to synchronize', err)
+            print(f'[{datetime.now().isoformat()}] MetaApi websocket client for account {self._account.id} '
+                  'failed to synchronize', err)
 
     async def on_disconnected(self):
         """Invoked when connection to MetaTrader terminal terminated"""

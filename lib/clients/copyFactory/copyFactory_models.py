@@ -305,6 +305,8 @@ class CopyFactoryTransaction(TypedDict):
     """Strategy provider."""
     strategy: CopyFactoryStrategyIdAndName
     """Strategy."""
+    positionId: Optional[str]
+    """Source position id."""
     improvement: float
     """High-water mark strategy balance improvement."""
     providerCommission: float

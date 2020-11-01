@@ -1,6 +1,7 @@
 from ...metaApi.models import MetatraderPosition, MetatraderAccountInformation, MetatraderOrder, \
     MetatraderDeal, MetatraderSymbolSpecification, MetatraderSymbolPrice
 from abc import ABC
+from typing import List
 
 
 class SynchronizationListener(ABC):
@@ -23,10 +24,18 @@ class SynchronizationListener(ABC):
         pass
 
     async def on_broker_connection_status_changed(self, connected: bool):
-        """Invoked when broker connection satus have changed.
+        """Invoked when broker connection status have changed.
 
         Args:
             connected: Is MetaTrader terminal is connected to broker.
+
+        Returns:
+            A coroutine which resolves when the asynchronous event is processed.
+        """
+        pass
+
+    async def on_synchronization_started(self):
+        """Invoked when MetaTrader terminal state synchronization is started.
 
         Returns:
             A coroutine which resolves when the asynchronous event is processed.
@@ -38,6 +47,17 @@ class SynchronizationListener(ABC):
 
         Args:
             account_information: Updated MetaTrader position.
+
+        Returns:
+            A coroutine which resolves when the asynchronous event is processed.
+        """
+        pass
+
+    async def on_positions_replaced(self, positions: List[MetatraderPosition]):
+        """Invoked when the positions are replaced as a result of initial terminal state synchronization.
+
+        Args:
+            positions: Updated array of positions.
 
         Returns:
             A coroutine which resolves when the asynchronous event is processed.
@@ -60,6 +80,17 @@ class SynchronizationListener(ABC):
 
         Args:
             position_id: Removed MetaTrader position id.
+
+        Returns:
+            A coroutine which resolves when the asynchronous event is processed.
+        """
+        pass
+
+    async def on_orders_replaced(self, orders: List[MetatraderOrder]):
+        """Invoked when the orders are replaced as a result of initial terminal state synchronization.
+
+        Args:
+            orders: Updated array of orders.
 
         Returns:
             A coroutine which resolves when the asynchronous event is processed.

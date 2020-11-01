@@ -47,7 +47,7 @@ class PacketOrderer:
         """
         if 'sequenceNumber' not in packet:
             return [packet]
-        if packet['type'] == 'specifications' and 'synchronizationId' in packet:
+        if packet['type'] == 'synchronizationStarted' and 'synchronizationId' in packet:
             # synchronization packet sequence just started
             self._isOutOfOrderEmitted[packet['accountId']] = False
             self._sequenceNumberByAccount[packet['accountId']] = packet['sequenceNumber']
@@ -108,8 +108,8 @@ class PacketOrderer:
                 account_id = wait_list[0]['accountId']
                 if account_id not in self._isOutOfOrderEmitted or not self._isOutOfOrderEmitted[account_id]:
                     self._isOutOfOrderEmitted[account_id] = True
+                    expected_sequence_number = (self._sequenceNumberByAccount[account_id] + 1) \
+                        if account_id in self._sequenceNumberByAccount else -1
                     self._outOfOrderListener.on_out_of_order_packet(
-                        wait_list[0]['accountId'], (self._sequenceNumberByAccount[account_id] if account_id in
-                                                    self._sequenceNumberByAccount else 0) + 1,
-                        wait_list[0]['sequenceNumber'],
+                        wait_list[0]['accountId'], expected_sequence_number, wait_list[0]['sequenceNumber'],
                         wait_list[0]['packet'], wait_list[0]['receivedAt'])

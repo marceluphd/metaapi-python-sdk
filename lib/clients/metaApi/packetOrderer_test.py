@@ -33,7 +33,7 @@ class TestPacketOrderer:
     async def test_restore(self):
         """Should restore packet order starting from packet of specifications type."""
         first_packet = {
-            'type': 'specifications',
+            'type': 'synchronizationStarted',
             'sequenceTimestamp': 1603124267178,
             'sequenceNumber': 13,
             'synchronizationId': 'synchronizationId',
@@ -66,7 +66,7 @@ class TestPacketOrderer:
     async def test_filter_prev_sync_packets_with_specifications(self):
         """Should filter out packets from previous synchronization attempt that includes specifications."""
         previous_specifications = {
-            'type': 'specifications',
+            'type': 'synchronizationStarted',
             'sequenceTimestamp': 1603124267178,
             'sequenceNumber': 13,
             'synchronizationId': 'synchronizationId',
@@ -79,7 +79,7 @@ class TestPacketOrderer:
             'accountId': 'accountId'
         }
         this_specifications = {
-            'type': 'specifications',
+            'type': 'synchronizationStarted',
             'sequenceTimestamp': 1603124267198,
             'sequenceNumber': 1,
             'synchronizationId': 'synchronizationId',
@@ -106,7 +106,7 @@ class TestPacketOrderer:
             'accountId': 'accountId'
         }
         this_specifications = {
-            'type': 'specifications',
+            'type': 'synchronizationStarted',
             'sequenceTimestamp': 1603124267198,
             'sequenceNumber': 1,
             'synchronizationId': 'synchronizationId',
@@ -126,7 +126,7 @@ class TestPacketOrderer:
     async def test_duplicate(self):
         """Should pass through duplicate packets."""
         specifications_packet = {
-            'type': 'specifications',
+            'type': 'synchronizationStarted',
             'sequenceTimestamp': 1603124267198,
             'sequenceNumber': 16,
             'synchronizationId': 'synchronizationId',
@@ -146,7 +146,7 @@ class TestPacketOrderer:
     async def test_return_in_order(self):
         """Should return in-order packets immediately."""
         first_packet = {
-            'type': 'specifications',
+            'type': 'synchronizationStarted',
             'sequenceTimestamp': 1603124267178,
             'sequenceNumber': 13,
             'synchronizationId': 'synchronizationId',
@@ -173,7 +173,7 @@ class TestPacketOrderer:
         """Should call on-out-of-order listener only once per synchronization attempt."""
         out_of_order_listener.on_out_of_order_packet = MagicMock()
         first_packet = {
-            'type': 'specifications',
+            'type': 'synchronizationStarted',
             'sequenceTimestamp': 1603124267178,
             'sequenceNumber': 13,
             'synchronizationId': 'synchronizationId',
@@ -221,7 +221,7 @@ class TestPacketOrderer:
         out_of_order_listener.on_out_of_order_packet.assert_called_once()
         args_list = out_of_order_listener.on_out_of_order_packet.call_args_list[0].args
         assert args_list[0] == 'accountId'
-        assert args_list[1] == 1
+        assert args_list[1] == -1
         assert args_list[2] == 11
         assert args_list[3] == timed_out_packet['packet']
         await asyncio.sleep(1)
@@ -277,7 +277,7 @@ class TestPacketOrderer:
     async def test_count_specification_packets_with_no_sync_id_as_out_of_order(self):
         """Should count specification packets with undefined synchronziationId as out-of-order."""
         specifications_packet = {
-            'type': 'specifications',
+            'type': 'synchronizationStarted',
             'sequenceTimestamp': 1603124267198,
             'sequenceNumber': 16,
             'accountId': 'accountId'

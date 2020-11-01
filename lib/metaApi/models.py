@@ -262,6 +262,34 @@ class MetatraderDeals(TypedDict):
     and thus search results may be incomplete."""
 
 
+MetatraderSession = TypedDict(
+    "MetatraderSession",
+    {
+        "from": str,  # Session start time, in hh.mm.ss.SSS format.
+        "to": str  # Session end time, in hh.mm.ss.SSS format.
+    }
+)
+"""Metatrader trade or quote session"""
+
+
+class MetatraderSessions(TypedDict):
+    """Metatrader trade or quote session container, indexed by weekday."""
+    SUNDAY: Optional[List[MetatraderSession]]
+    """Array of sessions for SUNDAY."""
+    MONDAY: Optional[List[MetatraderSession]]
+    """Array of sessions for MONDAY."""
+    TUESDAY: Optional[List[MetatraderSession]]
+    """Array of sessions for TUESDAY."""
+    WEDNESDAY: Optional[List[MetatraderSession]]
+    """Array of sessions for WEDNESDAY."""
+    THURSDAY: Optional[List[MetatraderSession]]
+    """Array of sessions for THURSDAY."""
+    FRIDAY: Optional[List[MetatraderSession]]
+    """Array of sessions for FRIDAY."""
+    SATURDAY: Optional[List[MetatraderSession]]
+    """Array of sessions for SATURDAY."""
+
+
 class MetatraderSymbolSpecification(TypedDict):
     """MetaTrader symbol specification. Contains symbol specification (see
     https://metaapi.cloud/docs/client/models/metatraderSymbolSpecification/)"""
@@ -285,6 +313,96 @@ class MetatraderSymbolSpecification(TypedDict):
     SYMBOL_TRADE_EXECUTION_MARKET, SYMBOL_TRADE_EXECUTION_EXCHANGE. See
     https://www.mql5.com/en/docs/constants/environment_state/marketinfoconstants#enum_symbol_trade_execution for more
     details."""
+    contractSize: float
+    """Trade contract size."""
+    quoteSessions: MetatraderSessions
+    """Quote sessions, indexed by day of week."""
+    tradeSessions: MetatraderSessions
+    """Trade sessions, indexed by day of week."""
+    tradeMode: Optional[str]
+    """Order execution type. Possible values are SYMBOL_TRADE_MODE_DISABLED, SYMBOL_TRADE_MODE_LONGONLY,
+    SYMBOL_TRADE_MODE_SHORTONLY, SYMBOL_TRADE_MODE_CLOSEONLY, SYMBOL_TRADE_MODE_FULL. See
+    https://www.mql5.com/en/docs/constants/environment_state/marketinfoconstants#enum_symbol_trade_mode for more
+    details."""
+    bondAccruedInterest: Optional[float]
+    """Accrued interest – accumulated coupon interest, i.e. part of the coupon interest calculated in proportion to
+    the number of days since the coupon bond issuance or the last coupon interest payment."""
+    bondFaceValue: Optional[float]
+    """Face value – initial bond value set by the issuer."""
+    optionStrike: Optional[float]
+    """The strike price of an option. The price at which an option buyer can buy (in a Call option) or sell (in a
+    Put option) the underlying asset, and the option seller is obliged to sell or buy the appropriate amount of the
+    underlying asset."""
+    optionPriceSensivity: Optional[float]
+    """Option/warrant sensitivity shows by how many points the price of the option's underlying asset should change so
+    that the price of the option changes by one point."""
+    liquidityRate: Optional[float]
+    """Liquidity Rate is the share of the asset that can be used for the margin."""
+    initialMargin: float
+    """Initial margin means the amount in the margin currency required for opening a position with the volume of one
+    lot. It is used for checking a client's assets when he or she enters the market."""
+    maintenanceMargin: float
+    """The maintenance margin. If it is set, it sets the margin amount in the margin currency of the symbol, charged
+    from one lot. It is used for checking a client's assets when his/her account state changes. If the maintenance
+    margin is equal to 0, the initial margin is used."""
+    hedgedMargin: float
+    """Contract size or margin value per one lot of hedged positions (oppositely directed positions of one symbol).
+    Two margin calculation methods are possible for hedged positions. The calculation method is defined by the broker"""
+    hedgedMarginUsesLargerLeg: Optional[bool]
+    """Calculating hedging margin using the larger leg (Buy or Sell)."""
+    marginCurrency: str
+    """Margin currency."""
+    priceCalculationMode: str
+    """Contract price calculation mode. One of SYMBOL_CALC_MODE_UNKNOWN, SYMBOL_CALC_MODE_FOREX,
+    SYMBOL_CALC_MODE_FOREX_NO_LEVERAGE, SYMBOL_CALC_MODE_FUTURES, SYMBOL_CALC_MODE_CFD, SYMBOL_CALC_MODE_CFDINDEX,
+    SYMBOL_CALC_MODE_CFDLEVERAGE, SYMBOL_CALC_MODE_EXCH_STOCKS, SYMBOL_CALC_MODE_EXCH_FUTURES,
+    SYMBOL_CALC_MODE_EXCH_FUTURES_FORTS, SYMBOL_CALC_MODE_EXCH_BONDS, SYMBOL_CALC_MODE_EXCH_STOCKS_MOEX,
+    SYMBOL_CALC_MODE_EXCH_BONDS_MOEX, SYMBOL_CALC_MODE_SERV_COLLATERAL. See
+    https://www.mql5.com/en/docs/constants/environment_state/marketinfoconstants#enum_symbol_calc_mode for more
+    details."""
+    baseCurrency: str
+    """Base currency."""
+    profitCurrency: Optional[str]
+    """Profit currency."""
+    swapMode: str
+    """Swap calculation model. Allowed values are SYMBOL_SWAP_MODE_DISABLED,
+    SYMBOL_SWAP_MODE_POINTS, SYMBOL_SWAP_MODE_CURRENCY_SYMBOL, SYMBOL_SWAP_MODE_CURRENCY_MARGIN,
+    SYMBOL_SWAP_MODE_CURRENCY_DEPOSIT, SYMBOL_SWAP_MODE_INTEREST_CURRENT, SYMBOL_SWAP_MODE_INTEREST_OPEN,
+    SYMBOL_SWAP_MODE_REOPEN_CURRENT, SYMBOL_SWAP_MODE_REOPEN_BID. See
+    https://www.mql5.com/en/docs/constants/environment_state/marketinfoconstants#enum_symbol_swap_mode for more
+    details."""
+    swapLong: Optional[float]
+    """Long swap value."""
+    swapShort: Optional[float]
+    """Short swap value."""
+    swapRollover3Days: str
+    """Day of week to charge 3 days swap rollover. Allowed values are SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURDAY,
+    FRIDAY, SATURDAY."""
+    allowedExpirationModes: List[str]
+    """Allowed order expiration modes. Allowed values are SYMBOL_EXPIRATION_GTC, SYMBOL_EXPIRATION_DAY,
+    SYMBOL_EXPIRATION_SPECIFIED, SYMBOL_EXPIRATION_SPECIFIED_DAY.
+    See https://www.mql5.com/en/docs/constants/environment_state/marketinfoconstants#symbol_expiration_mode for more
+    details."""
+    allowedOrderTypes: List[str]
+    """Allowed order types. Allowed values are SYMBOL_ORDER_MARKET, SYMBOL_ORDER_LIMIT, SYMBOL_ORDER_STOP,
+    SYMBOL_ORDER_STOP_LIMIT, SYMBOL_ORDER_SL, SYMBOL_ORDER_TP, SYMBOL_ORDER_CLOSEBY. See
+    https://www.mql5.com/en/docs/constants/environment_state/marketinfoconstants#symbol_order_mode for more details."""
+    orderGTCMode: str
+    """If the expirationMode property is set to SYMBOL_EXPIRATION_GTC (good till canceled), the expiration of pending
+    orders, as well as of Stop Loss/Take Profit orders should be additionally set using this enumeration. Allowed
+    values are SYMBOL_ORDERS_GTC, SYMBOL_ORDERS_DAILY, SYMBOL_ORDERS_DAILY_EXCLUDING_STOPS. See
+    https://www.mql5.com/en/docs/constants/environment_state/marketinfoconstants#enum_symbol_order_gtc_mode for more
+    details."""
+    digits: int
+    """Digits after a decimal point."""
+    path: Optional[str]
+    """Path in the symbol tree."""
+    description: str
+    """Symbol description."""
+    startTime: Optional[datetime]
+    """Date of the symbol trade beginning (usually used for futures)."""
+    expirationTime: Optional[datetime]
+    """Date of the symbol trade end (usually used for futures)."""
 
 
 class MetatraderSymbolPrice(TypedDict):
