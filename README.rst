@@ -361,7 +361,7 @@ Execute trades (both RPC and streaming APIs)
     print('Trade successful, result code is ' + result['stringCode'])
 
 CopyFactory copy trading API (experimental)
-=====================================
+===========================================
 
 CopyFactory is a powerful trade copying API which makes developing forex
 trade copying applications as easy as writing few lines of code.
@@ -487,7 +487,7 @@ Retrieving trading history on provider side
 
 
 Retrieving trading history on subscriber side
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: python
 
