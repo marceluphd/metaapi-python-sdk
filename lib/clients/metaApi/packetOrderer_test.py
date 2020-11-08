@@ -31,7 +31,7 @@ class TestPacketOrderer:
 
     @pytest.mark.asyncio
     async def test_restore(self):
-        """Should restore packet order starting from packet of specifications type."""
+        """Should restore packet order."""
         first_packet = {
             'type': 'synchronizationStarted',
             'sequenceTimestamp': 1603124267178,
@@ -64,8 +64,8 @@ class TestPacketOrderer:
 
     @pytest.mark.asyncio
     async def test_filter_prev_sync_packets_with_specifications(self):
-        """Should filter out packets from previous synchronization attempt that includes specifications."""
-        previous_specifications = {
+        """Should filter out packets from previous synchronization attempt that includes synchronization start."""
+        previous_start = {
             'type': 'synchronizationStarted',
             'sequenceTimestamp': 1603124267178,
             'sequenceNumber': 13,
@@ -91,21 +91,21 @@ class TestPacketOrderer:
             'sequenceNumber': 2,
             'accountId': 'accountId'
         }
-        assert packet_orderer.restore_order(previous_specifications) == [previous_specifications]
+        assert packet_orderer.restore_order(previous_start) == [previous_start]
         assert packet_orderer.restore_order(one_of_previous_packets) == []
         assert packet_orderer.restore_order(this_second_packet) == []
         assert packet_orderer.restore_order(this_specifications) == [this_specifications, this_second_packet]
 
     @pytest.mark.asyncio
     async def test_filter_prev_sync_packets_without_specifications(self):
-        """Should filter out packets from previous synchronization attempt that does not includes specifications."""
+        """Should filter out packets from previous synchronization attempt that does not includes the start."""
         one_of_previous_packets = {
             'type': 'positions',
             'sequenceTimestamp': 1603124267188,
             'sequenceNumber': 15,
             'accountId': 'accountId'
         }
-        this_specifications = {
+        this_start = {
             'type': 'synchronizationStarted',
             'sequenceTimestamp': 1603124267198,
             'sequenceNumber': 1,
@@ -120,7 +120,7 @@ class TestPacketOrderer:
         }
         assert packet_orderer.restore_order(one_of_previous_packets) == []
         assert packet_orderer.restore_order(this_second_packet) == []
-        assert packet_orderer.restore_order(this_specifications) == [this_specifications, this_second_packet]
+        assert packet_orderer.restore_order(this_start) == [this_start, this_second_packet]
 
     @pytest.mark.asyncio
     async def test_duplicate(self):
@@ -213,6 +213,7 @@ class TestPacketOrderer:
             'packet': {},
             'receivedAt': datetime.fromtimestamp(10000000000)
         }
+        packet_orderer._sequenceNumberByAccount['accountId'] = 1
         packet_orderer._packetsByAccountId['accountId'] = [
             timed_out_packet,
             not_timed_out_packet
@@ -221,7 +222,7 @@ class TestPacketOrderer:
         out_of_order_listener.on_out_of_order_packet.assert_called_once()
         args_list = out_of_order_listener.on_out_of_order_packet.call_args_list[0].args
         assert args_list[0] == 'accountId'
-        assert args_list[1] == -1
+        assert args_list[1] == 2
         assert args_list[2] == 11
         assert args_list[3] == timed_out_packet['packet']
         await asyncio.sleep(1)
@@ -243,10 +244,30 @@ class TestPacketOrderer:
             'packet': {},
             'receivedAt': datetime.fromtimestamp(10000000000)
         }
+        packet_orderer._sequenceNumberByAccount['accountId'] = 1
         packet_orderer._packetsByAccountId['accountId'] = [
             not_timed_out_packet,
             timed_out_packet
         ]
+        await asyncio.sleep(1)
+        out_of_order_listener.on_out_of_order_packet.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_not_call_out_of_order_if_before_sync_start(self):
+        """Should not call on-out-of-order listener for packets that come before synchronization start."""
+        out_of_order_listener.on_out_of_order_packet = MagicMock()
+        out_of_order_packet = {
+            'accountId': 'accountId',
+            'sequenceNumber': 11,
+            'packet': {},
+            'receivedAt': date
+        }
+
+        # There were no synchronization start packets
+        if 'accountId' in packet_orderer._sequenceNumberByAccount:
+            del packet_orderer._sequenceNumberByAccount['accountId']
+
+        packet_orderer._packetsByAccountId['accountId'] = [out_of_order_packet]
         await asyncio.sleep(1)
         out_of_order_listener.on_out_of_order_packet.assert_not_called()
 
@@ -274,14 +295,14 @@ class TestPacketOrderer:
         assert packet_orderer._packetsByAccountId['accountId'][0]['packet'] == third_packet
 
     @pytest.mark.asyncio
-    async def test_count_specification_packets_with_no_sync_id_as_out_of_order(self):
-        """Should count specification packets with undefined synchronziationId as out-of-order."""
-        specifications_packet = {
+    async def test_count_start_packets_with_no_sync_id_as_out_of_order(self):
+        """Should count start packets with undefined synchronziationId as out-of-order."""
+        start_packet = {
             'type': 'synchronizationStarted',
             'sequenceTimestamp': 1603124267198,
             'sequenceNumber': 16,
             'accountId': 'accountId'
         }
-        assert packet_orderer.restore_order(specifications_packet) == []
+        assert packet_orderer.restore_order(start_packet) == []
         assert len(packet_orderer._packetsByAccountId['accountId']) == 1
-        assert packet_orderer._packetsByAccountId['accountId'][0]['packet'] == specifications_packet
+        assert packet_orderer._packetsByAccountId['accountId'][0]['packet'] == start_packet
