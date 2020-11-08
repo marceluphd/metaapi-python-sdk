@@ -360,6 +360,32 @@ Execute trades (both RPC and streaming APIs)
                                                                                  'clientId': 'TE_GBPUSD_7hyINWqAl'})
     print('Trade successful, result code is ' + result['stringCode'])
 
+Managing MetaTrader demo accounts via API
+===========================================
+Please note that not all MT4/MT5 servers allows you to create demo accounts using the method below.
+
+Create a MetaTrader 4 demo account
+----------------------------------
+.. code-block:: python
+
+    demo_account = await api.metatrader_demo_account_api.create_mt4_demo_account(provisioningProfile.id, {
+        'balance': 100000,
+        'email': 'example@example.com',
+        'leverage': 100,
+        'serverName': 'Exness-Trial4'
+    })
+
+Create a MetaTrader 5 demo account
+----------------------------------
+.. code-block:: python
+
+    demo_account = await api.metatrader_demo_account_api.create_mt5_demo_account(provisioningProfile.id, {
+        'balance': 100000,
+        'email': 'example@example.com',
+        'leverage': 100,
+        'serverName': 'ICMarketsSC-Demo'
+    })
+
 CopyFactory copy trading API (experimental)
 ===========================================
 

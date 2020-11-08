@@ -6,6 +6,8 @@ from ..metaApi.metatraderAccountApi import MetatraderAccountApi
 from ..clients.metaApi.metatraderAccount_client import MetatraderAccountClient
 from ..clients.errorHandler import ValidationException
 from ..metaApi.connectionRegistry import ConnectionRegistry
+from .metatraderDemoAccountApi import MetatraderDemoAccountApi
+from ..clients.metaApi.metatraderDemoAccount_client import MetatraderDemoAccountClient
 import re
 
 
@@ -33,6 +35,8 @@ class MetaApi:
         self._connectionRegistry = ConnectionRegistry(self._metaApiWebsocketClient, application)
         self._metatraderAccountApi = MetatraderAccountApi(MetatraderAccountClient(http_client, token, domain),
                                                           self._metaApiWebsocketClient, self._connectionRegistry)
+        self._metatraderDemoAccountApi = MetatraderDemoAccountApi(MetatraderDemoAccountClient(http_client, token,
+                                                                                              domain))
 
     @property
     def provisioning_profile_api(self) -> ProvisioningProfileApi:
@@ -51,6 +55,15 @@ class MetaApi:
             MetaTrader account API.
         """
         return self._metatraderAccountApi
+
+    @property
+    def metatrader_demo_account_api(self) -> MetatraderDemoAccountApi:
+        """Returns MetaTrader demo account API.
+
+        Returns:
+            MetaTrader demo account API.
+        """
+        return self._metatraderDemoAccountApi
 
     def close(self):
         """Closes all clients and connections"""

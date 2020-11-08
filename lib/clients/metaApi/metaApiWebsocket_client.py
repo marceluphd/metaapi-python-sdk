@@ -54,10 +54,8 @@ class MetaApiWebsocketClient:
             received_at: Time the packet was received at.
         """
         print(f'[{datetime.now().isoformat()}] MetaApi websocket client received an out of order packet type ' +
-              f'{packet["type"]} for account id {account_id}. ' +
-              (f'Expected s/n {expected_sequence_number} does not match the actual of {actual_sequence_number}' if
-               expected_sequence_number != -1 else
-               f'Packet with s/n {actual_sequence_number} has come before initial synchronization packet'))
+              f'{packet["type"]} for account id {account_id}. Expected s/n {expected_sequence_number} does not ' +
+              f'match the actual of {actual_sequence_number}')
         self.subscribe(account_id)
 
     def set_url(self, url: str):

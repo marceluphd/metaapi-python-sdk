@@ -1,3 +1,7 @@
+9.1.0
+  - added API to register MetaTrader demo accounts
+  - fixed packet orderer to do not cause unnecessary resynchronization
+
 9.0.0
   - added contractSize field to MetatraderSymbolSpecification model
   - added quoteSessions and tradeSessions to MetatraderSymbolSpecification model
